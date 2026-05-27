@@ -12,12 +12,13 @@ package "Resources Management Context: Domain Layer" {
                 -name: String
                 -description: String
                 -unitPrice: Money
+                -content: SupplyContent
                 -unitMeasurement: UnitMeasurement
                 -minimumStock: MinimumStock
                 -imageUrl: ImageUrl
                 -supply: Supply
                 -accountId: AccountId
-                +update(MinimumStock minimumStock, Money unitPrice, String description, UnitMeasurement unitMeasurement): CustomSupply
+                +update(MinimumStock minimumStock, Money unitPrice, String description, SupplyContent content, UnitMeasurement unitMeasurement): CustomSupply
             }
 
             class Branch {
@@ -87,16 +88,17 @@ package "Resources Management Context: Domain Layer" {
                 ACTIVE, INACTIVE
             }
 
+            enum InventoryStates {
+                OUTOFSTOCK, WITHSTOCK, LOWSTOCK
+            }
+
             enum SupplyNames {
                 POTATO, ONION, CARROT, LETTUCE, TOMATO
             }
 
-            record BranchAddress {
-                -address: String
-                -city: String
-                -regionOrState: String
-                -country: String
-                +getFullAddress(): String
+            record SupplyContent {
+                -content: Double
+                +getContent(): Double
             }
 
             record MinimumStock {
@@ -130,6 +132,14 @@ package "Shared" {
         +getUrl(): String
     }
 
+    record Address {
+        -address: String
+        -city: String
+        -regionOrState: String
+        -country: String
+        +getFullAddress(): String
+    }
+
     record AccountId {
         -accountId: String
         +getAccountId(): String
@@ -156,6 +166,7 @@ CustomSupply "1" --> "1" Money : has
 CustomSupply "1" --> "1" ImageUrl : has
 CustomSupply "1" *-- "1" MinimumStock : has
 CustomSupply "1" *-- "1" UnitMeasurement : has
+CustomSupply "1" *-- "1" SupplyContent : has
 
 Supply "1" --> "1" ImageUrl : has
 Supply "1" *-- "1" SupplyNames : has
