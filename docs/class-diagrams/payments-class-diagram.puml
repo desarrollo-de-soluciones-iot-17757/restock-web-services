@@ -1,0 +1,161 @@
+@startuml
+
+top to bottom direction
+
+package "Communications Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Subscription {
+                -id: String
+                -snapshot: EmbeddedPlanSnapshot
+                -status: SubscriptionStatus
+                -startedAt: LocalDateTime
+                -expiresAt: LocalDateTime
+                -endedAt: LocalDateTime
+                -plan: Plan
+                -account: Account
+                +activate(): void
+                +expire(): void
+                +cancel(): void
+                +upgradeTo(Plan plan): void
+            }
+
+            class Account {
+                -id: String
+                -status: AccountStatus
+                -resourceUsage: ResourceUsage
+                -configuredLimits: PlanLimits
+                -subscription: Subscription
+                -ownerUserId: UserId
+                +activate(): void
+                +suspend(): void
+                +close(): void
+                +updateResourceUsage(ResourceUsage usage): void
+                +canCreateBranch(): Boolean
+                +canAddWorker(): Boolean
+                +canRegisterDevice(): Boolean
+                +canRegisterCustomSupply(): Boolean
+            }
+        }
+
+        package "entities" {
+            class Payment {
+                -id: String
+                -provider: PaymentProvider
+                -amount: Money
+                -status: PaymentStatus
+                -paymentDueDate: LocalDateTime
+                -processedAt: LocalDateTime
+                -stripePaymentId: String
+                -subscription: Subscription
+                -account: Account
+                +accept(): void
+                +reject(): void
+            }
+
+            class Plan {
+                -id: String
+                -name: String
+                -price: Money
+                -billingCycle: BillingCycle
+                -limits: PlanLimits
+                -features: List<String>
+                +isActive(): Boolean
+                +getLimits(): PlanLimits
+            }
+
+            record EmbeddedPlanSnapshot {
+                -id: String
+                -name: String
+                -price: Money
+                -limits: PlanLimits
+            }
+        }
+
+        package "value objects" {
+            enum BillingCycle {
+                MONTHLY
+                ANNUALLY
+            }
+
+            enum SubscriptionStatus {
+                PENDING
+                ACTIVE
+                EXPIRED
+                CANCELLED
+            }
+
+            enum AccountStatus {
+                ACTIVE
+                SUSPENDED
+                CLOSED
+            }
+
+            enum PaymentProvider {
+                STRIPE
+            }
+
+            enum PaymentStatus {
+                PENDING
+                ACCEPTED
+                REJECTED
+            }
+
+            record PlanLimits {
+                -maxBranches: Integer
+                -maxWorkers: Integer
+                -maxDevices: Integer
+                -maxSupplies: Integer
+            }
+
+            record ResourceUsage {
+                -branchesCreated: Integer
+                -workersRegistered: Integer
+                -devicesRegistered: Integer
+                -suppliesRegistered: Integer
+            }
+        }
+    }
+}
+
+package "Shared" {
+    record UserId {
+        -userId: String
+        +getUserId(): String
+    }
+
+    record Money {
+        -amount: BigDecimal
+        -currency: String
+        +validate(): boolean
+        +getAmount(): BigDecimal
+        +getCurrency(): String
+        +add(Money other): Money
+        +subtract(Money other): Money
+    }
+}
+
+Account "1" *-- "1" ResourceUsage : has
+Account "1" *-- "1" PlanLimits : has
+Account "1" --> "1" AccountStatus : has
+Account "1" --> "1" UserId : belongs to
+
+Subscription "1" *-- "1" EmbeddedPlanSnapshot : has
+Subscription "1" --> "1" SubscriptionStatus : has
+Subscription "1" --> "1" Plan : has
+Subscription "1" --> "1" Account : enables
+Subscription "1" --> "0..*" Payment : enables
+
+Plan "1" *-- "1" PlanLimits : has
+Plan "1" --> "1" BillingCycle : has
+Plan "1" --> "1" Money : has
+
+Payment "1" --> "1" PaymentProvider : has
+Payment "1" --> "1" PaymentStatus : has
+
+EmbeddedPlanSnapshot "1" --> "1" Money : has
+EmbeddedPlanSnapshot "1" --> "1" PlanLimits : has
+
+@enduml
