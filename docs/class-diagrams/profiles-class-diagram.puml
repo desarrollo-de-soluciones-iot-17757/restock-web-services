@@ -1,0 +1,76 @@
+@startuml
+
+top to bottom direction
+
+package "Profiles and Preferences Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class UserProfile {
+                -phoneNumber: PhoneNumber
+                -gender: String
+                -birthDate: LocalDate
+                -userId: UserId
+                +edit(PhoneNumber phoneNumber): Profile
+            }
+
+            class BusinessProfile {
+                -ruc: String
+                -mainLocation: Address
+                -ownerUserId: UserId
+                +edit(Address mainLocation): Business
+            }
+        }
+
+        package "entities" {
+            class Profile {
+                -id: String
+                -profilePicture: ImageUrl
+                -displayName: String
+                +updatePicture(ImageUrl imageUrl): void
+            }
+        }
+
+        package "value objects" {
+            record PhoneNumber {
+                -number: String
+                +validate(): boolean
+                +getNumber(): String
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record ImageUrl {
+        -url: String
+        +validate(): boolean
+        +getUrl(): String
+    }
+
+    record Address {
+        -address: String
+        -city: String
+        -regionOrState: String
+        -country: String
+        +getFullAddress(): String
+    }
+
+    record UserId {
+        -userId: String
+        +getUserId(): String
+    }
+}
+
+Profile <|-- UserProfile : inherits
+Profile <|-- BusinessProfile : inherits
+Profile o-- ImageUrl : has a
+
+UserProfile o-- PhoneNumber : has a
+
+BusinessProfile --> UserId : owned by
+BusinessProfile --> Address : has a
+
+@enduml
