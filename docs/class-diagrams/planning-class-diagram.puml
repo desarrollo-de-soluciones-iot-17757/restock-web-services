@@ -1,0 +1,96 @@
+@startuml
+
+top to bottom direction
+
+package "Design and Planning Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Kit {
+                -activeUntil: LocalDate
+            }
+
+            class Recipe {
+                -preparationTime: PreparationTime
+            }
+        }
+
+        package "entities" {
+            class Service {
+                -id: String
+                -name: String
+                -category: ServiceCategory
+                -requirements: List<SupplyRequirement>
+                -setupPrice: Money
+                -combinedPrice: Money
+                -imageUrl: ImageUrl
+                -isActive: Boolean
+                -timesSold: Integer
+                -accountId: AccountId
+                +updateComposition(List<SupplyRequirement> requirements): void
+                +updatePricing(Money totalPrice): void
+                +updateDetails(String name, ServiceCategory category, ImageUrl imageUrl): void
+                +sell(): void
+                +deactivate(): void
+                +activate(): void
+            }
+
+            class SupplyRequirement {
+                -id: String
+                -customSupplyId: CustomSupplyId
+                -quantity: Double
+                +updateQuantity(Double quantity): void
+            }
+        }
+
+        package "value objects" {
+            enum ServiceCategory {
+                MAIN_COURSE
+                DESSERT
+                DRINK
+                RETAIL_PROMO
+                SEASONAL_KIT
+            }
+
+            record PreparationTime {
+                -duration: Double
+                -unit: String
+                -isUnitValid(): boolean
+                +getDuration(): String
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record ImageUrl {
+        -url: String
+        +validate(): boolean
+        +getUrl(): String
+    }
+
+    record CustomSupplyId {
+        -customSupplyId: String
+        +getCustomSupplyId(): String
+    }
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+Service <|-- Kit : inherits
+Service <|-- Recipe : inherits
+Service "1" --> "1" ImageUrl : has a
+Service "1" --> "1" AccountId : belongs to
+Service "1" *-- "1..*" SupplyRequirement : has
+Service "1" --> "1" ServiceCategory : has
+
+Recipe "1" o-- "1" PreparationTime : has
+
+SupplyRequirement "1" --> "1" CustomSupplyId : owned by
+
+@enduml
