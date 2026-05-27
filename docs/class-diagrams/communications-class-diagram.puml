@@ -1,0 +1,84 @@
+@startuml
+
+top to bottom direction
+
+package "Communications Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Notification {
+                -id: String
+                -type: NotificationType
+                -title: String
+                -message: String
+                -priority: NotificationPriority
+                -status: NotificationStatus
+                -isRead: Boolean
+                -sentAt: LocalDateTime
+                -situationDate: SituationData
+                -accountId: AccountId
+                +markAsRead(): void
+                +markAsFailed(): void
+                +isRead(): boolean
+            }
+        }
+
+        package "entities" {
+            class SituationData {
+                -id: String
+                -resourceId: String
+                -branchId: BranchId
+                -eventType: String
+                -timestamp: LocalDateTime
+            }
+        }
+
+        package "value objects" {
+            enum NotificationStatus {
+                NOT_READ
+                FAILED
+                READ
+            }
+
+            enum NotificationPriority {
+                LOW
+                MEDIUM
+                CRITICAL
+            }
+
+            enum NotificationType {
+                LOW_STOCK
+                ZERO_STOCK
+                OVERSTOCK
+                STOCK_DISCREPANCY
+                SALE_REGISTERED
+                DEVICE_FAILURE
+                DEVICE_ANOMALY
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record BranchId {
+        -branchId: String
+        +getBranchId(): String
+    }
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+Notification "1" --> "1" SituationData : has a
+Notification "1" --> "1" AccountId : owned by
+Notification "1" --> "1" NotificationType : categorized as
+Notification "1" --> "1" NotificationPriority : prioritized as
+Notification "1" --> "1" NotificationStatus : current status
+
+SituationData "1" --> "1" BranchId : associated to
+
+@enduml
