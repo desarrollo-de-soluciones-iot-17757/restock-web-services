@@ -17,6 +17,7 @@ package "Communications Context: Domain Layer" {
                 -isRead: Boolean
                 -sentAt: LocalDateTime
                 -situationDate: SituationData
+                -source: SourceType
                 -accountId: AccountId
                 +markAsRead(): void
                 +markAsFailed(): void
@@ -35,6 +36,11 @@ package "Communications Context: Domain Layer" {
         }
 
         package "value objects" {
+            enum SourceType {
+                CLOUD_SERVER
+                IOT_SERVER
+            }
+
             enum NotificationStatus {
                 NOT_READ
                 FAILED
@@ -78,6 +84,7 @@ Notification "1" --> "1" AccountId : owned by
 Notification "1" --> "1" NotificationType : categorized as
 Notification "1" --> "1" NotificationPriority : prioritized as
 Notification "1" --> "1" NotificationStatus : current status
+Notification "1" --> "1" SourceType : has
 
 SituationData "1" --> "1" BranchId : associated to
 
