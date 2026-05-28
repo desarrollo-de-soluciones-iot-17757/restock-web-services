@@ -113,13 +113,6 @@ package "Resources Management Context: Domain Layer" {
                 +subtractStock(int quantity): Stock
                 +getStock(): int
             }
-
-            record UnitMeasurement {
-                -unitName: String
-                -abbreviation: String
-                +getUnitName(): String
-                +getAbbreviation(): String
-            }
         }
     }
 }
@@ -153,6 +146,13 @@ package "Shared" {
         +getCurrency(): String
         +add(Money other): Money
         +subtract(Money other): Money
+    }
+
+    record UnitMeasurement {
+        -unitName: String
+        -abbreviation: String
+        +getUnitName(): String
+        +getAbbreviation(): String
     }
 }
 
