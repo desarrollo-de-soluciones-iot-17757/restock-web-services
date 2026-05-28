@@ -1,0 +1,171 @@
+@startuml
+
+top to bottom direction
+
+package "Tracking Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class TelemetryReading {
+                -id: String
+                -timestamp: DateTime
+                -physicalStock: StockRecord
+                -temperature: TemperatureRecord
+                -humidity: HumidityRecord
+                -deviceId: DeviceId
+            }
+
+            class StockComparisonTask {
+                -physicalStock: StockRecord
+                -systemStock: StockRecord
+                -result: TaskResult
+                -deviceId: DeviceId
+                +detectAnomaly(): void
+                +markAsMatchingStock(): void
+                +markAsMismatchingStock(): void
+            }
+
+            class ConciliationTask {
+                -reason: String
+                -discrepancy: Discrepancy
+                -resultingStock: StockRecord
+                -resolvedAt: DateTime
+                +isPending(): Boolean
+                +start(): void
+            }
+
+            class DeviceHealthCheck {
+                -id: String
+                -signalStrengthInDbm: SignalStrength
+                -hardwareTemperature: TemperatureRecord
+                -issueType: IssueType
+                -timestamp: DateTime
+                -detectedAt: DateTime
+                -severity: SeverityType
+                -needsMaintenance: Boolean
+                -deviceId: DeviceId
+                +evaluateHealth(): void
+                +isCriticalIssue(): Boolean
+            }
+        }
+
+        package "entities" {
+            abstract Task {
+                -id: String
+                -status: TaskStatus
+                -createdAt: DateTime
+                -deviceId: DeviceId
+                +complete(): void
+                +cancel(): void
+                +fail(): void
+            }
+
+            class Discrepancy {
+                -id: String
+                -level: DiscrepancyLevel
+                -physicalStock: StockRecord
+                -systemStock: StockRecord
+                -deviceId: DeviceId
+                +calculateDiscrepancyDifference(): void
+            }
+        }
+
+        package "value objects" {
+            enum SeverityType {
+                LOW
+                MEDIUM
+                CRITICAL
+            }
+
+            enum IssueType {
+                ROUTINE_CHECK
+                WEAK_SIGNAL
+                TELEMETRY_DELAY
+                SENSOR_MALFUNCTION
+                READING_ANOMALY
+            }
+
+            enum DiscrepancyLevel {
+                LOW
+                MEDIUM
+                HIGH
+            }
+
+            enum TaskResult {
+                MATCH
+                MISMATCH
+            }
+
+            enum TaskStatus {
+                PENDING
+                IN_PROGRESS
+                COMPLETED
+                CANCELLED
+                FAILED
+            }
+
+            ' Measures in RSSI (dBm)
+            record SignalStrength {
+                -strength: Integer
+                -isSignalStrengthValid(): boolean
+                +getSignalStrength(): Integer
+            }
+
+            record HumidityRecord {
+                -humidity: Double
+                -isHumidityValid(): boolean
+                +getHumidity(): Double
+            }
+
+            record TemperatureRecord {
+                -temperature: Double
+                -isTemperatureValid(): boolean
+                +getTemperature(): Double
+            }
+
+            record StockRecord {
+                -stock: Integer
+                -isPhysicalStockValid(): boolean
+                +subtrack(StockRecord other): StockRecord
+                +getPhysicalStock(): Integer
+            }
+        }
+    }
+}
+
+package "Shared" {
+    record DeviceId {
+        -deviceId: String
+        +getDeviceId(): String
+    }
+}
+
+Task "1" *-- "1" TaskStatus : has
+Task <|-- ConciliationTask : inherits
+Task <|-- StockComparisonTask : inherits
+Task "1" --> "1" DeviceId : associated with
+
+DeviceHealthCheck "1" --> "1" DeviceId : associated with
+DeviceHealthCheck "1" --> "1" IssueType : identifies
+DeviceHealthCheck "1" --> "1" SeverityType : indicates
+DeviceHealthCheck "1" --> "1" SignalStrength : uses
+DeviceHealthCheck "1" --> "1" TemperatureRecord : uses
+
+TelemetryReading "1" --> "1" DeviceId : uses
+TelemetryReading "1" --> "1" StockComparisonTask : generates
+TelemetryReading "1" --> "1" StockRecord : uses
+TelemetryReading "1" --> "1" TemperatureRecord : uses
+TelemetryReading "1" --> "1" HumidityRecord : uses
+
+ConciliationTask "1" --> "1" StockRecord : uses
+
+Discrepancy "1" --> "1" ConciliationTask : resolved by
+Discrepancy "1" --> "1" DiscrepancyLevel : identified by
+Discrepancy "1" --> "1" StockRecord : uses
+Discrepancy "1" --> "1" DeviceId : associated with
+
+StockComparisonTask "1" *-- "1" TaskResult : has
+StockComparisonTask "1" --> "0..1" Discrepancy : may identify
+
+@enduml
