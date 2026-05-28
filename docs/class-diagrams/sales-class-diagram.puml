@@ -1,8 +1,16 @@
 @startuml
 
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Sales Management Context
+
 top to bottom direction
 
-package "Communications Context: Domain Layer" {
+package "Sales Management Context: Domain Layer" {
 
     package "model" {
 

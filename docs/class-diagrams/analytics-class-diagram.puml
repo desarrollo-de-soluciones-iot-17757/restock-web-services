@@ -1,5 +1,13 @@
 @startuml
 
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Analytics Context
+
 top to bottom direction
 
 package "Analytics Context: Domain Layer" {
