@@ -79,10 +79,24 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
      * @param minimumStock the new minimum stock of the custom supply
      */
     public void update(@NotNull String description, Money unitPrice, SupplyContent supplyContent, UnitMeasurement unitMeasurement, MinimumStock minimumStock) {
-        this.description = description;
-        this.unitPrice = unitPrice;
-        this.supplyContent = supplyContent;
-        this.unitMeasurement = unitMeasurement;
-        this.minimumStock = minimumStock;
+        if (description != null) {
+            this.description = description;
+        }
+
+        if (unitPrice != null) {
+            this.unitPrice = unitPrice;
+        }
+
+        if (supplyContent != null) {
+            this.supplyContent = supplyContent;
+        }
+
+        if (unitMeasurement != null) {
+            this.unitMeasurement = unitMeasurement;
+        }
+
+        if (minimumStock != null) {
+            this.minimumStock = minimumStock;
+        }
     }
 }
