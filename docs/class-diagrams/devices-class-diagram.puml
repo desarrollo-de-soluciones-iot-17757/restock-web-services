@@ -1,0 +1,136 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Devices Management Context
+
+top to bottom direction
+
+package "Devices Management Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Device {
+                -id: String
+                -alias: String
+                -macAddress: MacAddress
+                -status: DeviceStatus
+                -model: DeviceModel
+                -configuration: DeviceConfiguration
+                -thresholds: DeviceThresholds
+                -associatedInventoryId: InventoryId
+                -associatedAccountId: AccountId
+                +register(String alias, AccountId accountId): void
+                +startConfiguration(): void
+                +configure(DeviceConfiguration configuration, List<Double> thresholds): void
+                +assignToInventory(InventoryId inventoryId, List<Double> stockThresholds): void
+                +deactivate(): void
+            }
+        }
+
+        package "entities" {
+            class DeviceModel {
+                -id: String
+                -modelType: ModelType
+                -manufacturer: String
+                -price: Money
+                -hardwareSpecifications: HardwareSpecifications
+            }
+        }
+
+        package "value objects" {
+            enum ModelType {
+                RESTOCK_3000
+                RESTOCK_2000
+            }
+
+            enum DeviceStatus {
+                NOT_REGISTERED
+                NOT_ASSIGNED
+                CONFIGURING
+                TRACKING
+                DEACTIVATED
+            }
+
+            record DeviceConfiguration {
+                -unitMeasurement: UnitMeasurement
+                -supplyContent: Double
+                -tareWeight: Double
+                -reportingInterval: Integer
+            }
+
+            record DeviceThresholds {
+                -minSupplyLevel: Double
+                -maxSupplyLevel: Double
+                -minTemperature: Double
+                -maxTemperature: Double
+                -minHumidity: Double
+                -maxHumidity: Double
+            }
+
+            record HardwareSpecifications {
+                -serialNumber: String
+                -firmwareVersion: String
+                -batteryCapacity: String
+                -weight: String
+                -dimensions: String
+            }
+
+            record MacAddress {
+                -macAddress: String
+                -isValid(): Boolean
+                +getMacAddress(): String
+            }
+        }
+    }
+}
+
+package "Shared" {
+    record Money {
+        -amount: BigDecimal
+        -currency: String
+        +validate(): boolean
+        +getAmount(): BigDecimal
+        +getCurrency(): String
+        +add(Money other): Money
+        +subtract(Money other): Money
+    }
+
+    record UnitMeasurement {
+        -unitName: String
+        -abbreviation: String
+        +getUnitName(): String
+        +getAbbreviation(): String
+    }
+
+    record InventoryId {
+        -inventoryId: String
+        +getInventoryId(): String
+    }
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+Device "1" --> "1" AccountId : associated with
+Device "1" --> "1" MacAddress : has
+Device "1" --> "1" InventoryId : associated with
+Device "1" --> "1" DeviceStatus : has
+Device "1" --> "1" DeviceModel : has
+Device "1" --> "1" DeviceConfiguration : has
+Device "1" --> "1" DeviceThresholds : has
+
+DeviceModel "1" --> "1" HardwareSpecifications : has
+DeviceModel "1" --> "1" ModelType : has
+DeviceModel "1" --> "1" Money : has
+
+DeviceConfiguration "1" --> "1" UnitMeasurement : has
+
+@enduml

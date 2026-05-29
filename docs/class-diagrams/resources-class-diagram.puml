@@ -1,0 +1,197 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Resources Management Context
+
+top to bottom direction
+
+package "Resources Management Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class CustomSupply {
+                -id: String
+                -name: String
+                -description: String
+                -unitPrice: Money
+                -content: SupplyContent
+                -unitMeasurement: UnitMeasurement
+                -minimumStock: MinimumStock
+                -imageUrl: ImageUrl
+                -supply: Supply
+                -accountId: AccountId
+                +update(MinimumStock minimumStock, Money unitPrice, String description, SupplyContent content, UnitMeasurement unitMeasurement): CustomSupply
+            }
+
+            class Branch {
+                -id: String
+                -name: String
+                -description: String
+                -imageUrl: ImageUrl
+                -location: BranchAddress
+                -status: BranchStates
+                -accountId: AccountId
+                +update(BranchAddress location, String description, String name): Branch
+                +deactivate(): void
+                +activate(): void
+            }
+
+            class Batch {
+                -id: String
+                -code: String
+                -initialStock: Stock
+                -currentStock: Stock
+                -unitPurchaseCost: Money
+                -fabricationDate?: LocalDate
+                -expirationDate?: LocalDate
+                -entryDate?: LocalDate
+                -customSupply: CustomSupply
+                -receivingBranch: Branch
+                -accountId: AccountId
+                +updateStock(int quantity): Batch
+            }
+        }
+
+        package "entities" {
+            class Inventory {
+                -id: String
+                -batch: Batch
+                -branch: Branch
+                -currentStock: Stock
+                +addStock(int quantity): Inventory
+                +subtractStock(int quantity): Inventory
+            }
+
+            class Supply {
+                -name: String
+                -description: String
+                -perishable: Boolean
+                -category: SupplyNames
+            }
+
+            class InventoryDeduction {
+                -id: String
+                -inventory: Inventory
+                -quantityDeducted: int
+                -deductionDate: LocalDate
+            }
+
+            class InventoryTransfer {
+                -id: String
+                -originInventory: Inventory
+                -destinationBranch: Branch
+                -quantityTransferred: int
+                -transferDate: LocalDate
+            }
+        }
+
+        package "value objects" {
+            enum BranchStates {
+                ACTIVE, INACTIVE
+            }
+
+            enum InventoryStates {
+                OUTOFSTOCK, WITHSTOCK, LOWSTOCK
+            }
+
+            enum SupplyNames {
+                POTATO, ONION, CARROT, LETTUCE, TOMATO
+            }
+
+            record SupplyContent {
+                -content: Double
+                +getContent(): Double
+            }
+
+            record MinimumStock {
+                -minimumStock: int
+                +isStockBelowMinimum(int stock): boolean
+                +getMinimumStock(): int
+            }
+
+            record Stock {
+                -stock: int
+                +addStock(int quantity): Stock
+                +subtractStock(int quantity): Stock
+                +getStock(): int
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record ImageUrl {
+        -url: String
+        +validate(): boolean
+        +getUrl(): String
+    }
+
+    record Address {
+        -address: String
+        -city: String
+        -regionOrState: String
+        -country: String
+        +getFullAddress(): String
+    }
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+
+    record Money {
+        -amount: BigDecimal
+        -currency: String
+        +validate(): boolean
+        +getAmount(): BigDecimal
+        +getCurrency(): String
+        +add(Money other): Money
+        +subtract(Money other): Money
+    }
+
+    record UnitMeasurement {
+        -unitName: String
+        -abbreviation: String
+        +getUnitName(): String
+        +getAbbreviation(): String
+    }
+}
+
+Batch "1" -[thickness=3]-> "1" CustomSupply : has
+Batch "1" -[thickness=3]-> "1..*" Inventory : tracks
+Batch "1" --> "1" AccountId : belongs to
+
+CustomSupply "1" -[thickness=3]-> "1" Supply : represents
+CustomSupply "1" --> "1" AccountId : belongs to
+CustomSupply "1" --> "1" Money : has
+CustomSupply "1" --> "1" ImageUrl : has
+CustomSupply "1" *-- "1" MinimumStock : has
+CustomSupply "1" *-- "1" UnitMeasurement : has
+CustomSupply "1" *-- "1" SupplyContent : has
+
+Supply "1" --> "1" ImageUrl : has
+Supply "1" *-- "1" SupplyNames : has
+
+Branch "1" --> "1" AccountId : belongs to
+Branch "1" -[thickness=3]-> "0..*" Inventory : stores
+Branch "1" --> "1" ImageUrl : has
+Branch "1" *-- "1" BranchAddress : has
+Branch "1" *-- "1" BranchStates : has
+
+Inventory "1" *-- "1" Stock : has
+
+InventoryDeduction "1" .[thickness=3].> "1" Inventory : affects
+InventoryDeduction "1" *-- "1" Stock : has
+
+InventoryTransfer "1" .[thickness=3].> "1" Inventory : originates from
+InventoryTransfer "1" -[thickness=3]-> "1" Branch : transfers to
+InventoryTransfer "1" *-- "1" Stock : has
+
+@enduml

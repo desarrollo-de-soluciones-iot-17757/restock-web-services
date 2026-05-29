@@ -1,0 +1,105 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Sales Management Context
+
+top to bottom direction
+
+package "Sales Management Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class SalesOrder {
+                -id: String
+                -customerName: CustomerName
+                -items: List<SalesOrderItem>
+                -additionalItems: List<SalesOrderItem>
+                -pricing: SalesOrderPricing
+                -status: SalesOrderStatus
+                -registeredAt: LocalDateTime
+                -cancelledAt?: LocalDateTime
+                -registeredBy: UserId
+                -branchId: BranchId
+                +add(SalesOrderItem item): void
+                +remove(String itemId): void
+                +complete(): void
+                +cancel(): void
+                +calculateTotal(): void
+            }
+        }
+
+        package "entities" {
+            class SalesOrderItem {
+                -id: String
+                -itemId: String
+                -nameSnapshot: String
+                -unitPrice: Money
+                -quantity: int
+                +calculateSubtotal(): Money
+            }
+        }
+
+        package "value objects" {
+            enum SalesOrderStatus {
+                PENDING
+                COMPLETED
+                CANCELLED
+            }
+
+            record SalesOrderPricing {
+                -subtotal: Money
+                -taxes: Money
+                -total: Money
+                +getSubtotal(): Money
+                +getTaxes(): Money
+                +getTotal(): Money
+            }
+
+            record CustomerName {
+                -customerName: String
+                +getCustomerName(): String
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record BranchId {
+        -branchId: String
+        +getBranchId(): String
+    }
+
+    record UserId {
+        -userId: String
+        +getUserId(): String
+    }
+
+    record Money {
+        -amount: BigDecimal
+        -currency: String
+        +validate(): boolean
+        +getAmount(): BigDecimal
+        +getCurrency(): String
+        +add(Money other): Money
+        +subtract(Money other): Money
+    }
+}
+
+SalesOrder "1" *-- "1..*" SalesOrderItem : has
+SalesOrder "1" --> "1" Money : uses
+SalesOrder "1" --> "1" SalesOrderPricing : has
+SalesOrder "1" --> "1" CustomerName : has
+SalesOrder "1" --> "1" UserId : registered by
+SalesOrder "1" --> "1" BranchId : belongs to
+SalesOrder "1" --> "1" SalesOrderStatus : has
+
+SalesOrderItem "1" --> "1" Money : uses
+
+@enduml
