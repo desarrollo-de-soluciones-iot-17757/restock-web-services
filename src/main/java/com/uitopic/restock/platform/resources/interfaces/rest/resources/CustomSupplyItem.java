@@ -3,7 +3,7 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response resource representing a custom supply.
+ * Response resource representing a custom supply item for the wrapper.
  *
  * @param id Unique identifier of the custom supply
  * @param name Name of the custom supply
@@ -15,10 +15,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @param unitMeasurement Unit of measurement for the supply content
  * @param minimumStock Minimum stock level for the custom supply
  * @param pictureUrl URL of the custom supply's picture
- * @param accountId Unique identifier of the account associated with the custom supply
  */
-@Schema(description = "Response resource representing a custom supply")
-public record CustomSupplyResource(
+@Schema(description = "Response resource representing a custom supply item for the wrapper")
+public record CustomSupplyItem(
         @Schema(description = "Unique identifier of the custom supply", example = "123e4567-e89b-12d3-a456-426614174000")
         String id,
         @Schema(description = "Name of the custom supply", example = "Premium Coffee Beans")
@@ -38,8 +37,6 @@ public record CustomSupplyResource(
         @Schema(description = "Minimum stock level for the custom supply", example = "10")
         int minimumStock,
         @Schema(description = "URL of the custom supply's picture", example = "https://example.com/images/premium-coffee-beans.jpg")
-        String pictureUrl,
-        @Schema(description = "Unique identifier of the account associated with the custom supply", example = "123e4567-e89b-12d3-a456-426614174000")
-        String accountId
+        String pictureUrl
 ) {
 }

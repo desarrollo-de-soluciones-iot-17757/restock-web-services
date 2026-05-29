@@ -57,7 +57,7 @@ public record Money(
      *
      * @return the currency code (e.g., "USD", "EUR", "GBP", "PEN", "CNY")
      */
-    public String currencyCode() {
+    public String getCurrencyCode() {
         return currencyCode;
     }
 
