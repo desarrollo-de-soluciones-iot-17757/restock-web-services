@@ -1,7 +1,9 @@
 package com.uitopic.restock.platform.shared.interfaces.rest.transform;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
 import jakarta.validation.constraints.NotBlank;
 
 import java.math.BigDecimal;
@@ -20,6 +22,26 @@ public class SharedValueObjectFromStringAssembler {
      */
     public static AccountId toAccountIdFromString(@NotBlank String accountId) {
         return new AccountId(accountId);
+    }
+
+    /**
+     * Converts a string representation of a unit measurement into a UnitMeasurement value object.
+     *
+     * @param unitMeasurement the string representation of the unit measurement (e.g., "pieces", "boxes", "liters", etc.)
+     * @return a UnitMeasurement value object constructed from the provided string
+     */
+    public static UnitMeasurement toUnitMeasurementFromString(@NotBlank String unitMeasurement) {
+        return new UnitMeasurement(unitMeasurement);
+    }
+
+    /**
+     * Converts a string representation of an image URL into an ImageURL value object.
+     *
+     * @param imageURL the string representation of the image URL
+     * @return an ImageURL value object constructed from the provided string
+     */
+    public static ImageURL toImageURLFromString(@NotBlank String imageURL) {
+        return new ImageURL(imageURL);
     }
 
     /**
