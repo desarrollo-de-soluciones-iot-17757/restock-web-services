@@ -28,12 +28,15 @@ public class BranchCommandServiceImpl implements BranchCommandService {
 
     @Override
     public Branch handle(CreateBranchCommand command) {
-        ImageURL imageUrl = null;
-        if (command.imageUrl() != null && !command.imageUrl().isBlank()) {
-            imageUrl = new ImageURL(command.imageUrl());
-        }
+        var accountId = new AccountId(command.accountId());
+        if (repository.existsByNameAndAccountId(command.name(), accountId))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Branch name already exists for this account");
+
+        ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
+                ? new ImageURL(command.imageUrl()) : null;
+
         Branch branch = Branch.builder()
-                .accountId(new AccountId(command.accountId()))
+                .accountId(accountId)
                 .name(command.name())
                 .address(command.address())
                 .city(command.city())
@@ -48,11 +51,12 @@ public class BranchCommandServiceImpl implements BranchCommandService {
     @Override
     public Optional<Branch> handle(UpdateBranchInfoCommand command) {
         return repository.findById(command.branchId()).map(branch -> {
-            branch.setName(command.name());
-            branch.setAddress(command.address());
-            branch.setCity(command.city());
-            branch.setCountry(command.country());
-            branch.setDescription(command.description());
+            // Check name uniqueness only when the name is actually changing
+            if (command.name() != null && !command.name().equals(branch.getName())) {
+                if (repository.existsByNameAndAccountId(command.name(), branch.getAccountId()))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Branch name already exists for this account");
+            }
+            branch.update(command.address(), command.city(), command.country(), command.description(), command.name());
             return repository.save(branch);
         });
     }
@@ -71,9 +75,10 @@ public class BranchCommandServiceImpl implements BranchCommandService {
 
     @Override
     public void delete(String branchId) {
-        repository.findById(branchId).ifPresentOrElse(branch -> {
-            repository.deleteById(branchId);
-            eventPublisher.publishEvent(new BranchDeletedEvent(branchId, branch.getAccountId().getAccountId()));
-        }, () -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found: " + branchId); });
+        var branch = repository.findById(branchId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found: " + branchId));
+        branch.deactivate();
+        repository.save(branch);
+        eventPublisher.publishEvent(new BranchDeletedEvent(branchId, branch.getAccountId().getAccountId()));
     }
 }

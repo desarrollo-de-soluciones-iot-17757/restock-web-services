@@ -11,4 +11,5 @@ public interface BranchRepository {
     Optional<Branch> findById(String id);
     List<Branch> findByAccountId(AccountId accountId);
     void deleteById(String id);
+    boolean existsByNameAndAccountId(String name, AccountId accountId);
 }

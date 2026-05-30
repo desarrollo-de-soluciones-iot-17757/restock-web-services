@@ -22,4 +22,5 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override public Optional<Branch> findById(String id) { return mongo.findById(id); }
     @Override public List<Branch> findByAccountId(AccountId accountId) { return mongo.findByAccountId(accountId); }
     @Override public void deleteById(String id) { mongo.deleteById(id); }
+    @Override public boolean existsByNameAndAccountId(String name, AccountId accountId) { return mongo.existsByNameAndAccountId(name, accountId); }
 }
