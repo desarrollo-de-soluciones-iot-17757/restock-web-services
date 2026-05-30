@@ -52,7 +52,7 @@ public class AccountBranchesController {
     public ResponseEntity<BranchResource> createBranch(@PathVariable @NotNull String accountId,
                                                         @Valid @RequestBody CreateBranchResource resource) {
         var command = new CreateBranchCommand(accountId, resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.imageUrl(), resource.description());
+                resource.city(), resource.stateOrRegion(), resource.country(), resource.imageUrl(), resource.description());
         var branch = branchCommandService.handle(command);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(branch));
@@ -64,7 +64,7 @@ public class AccountBranchesController {
                                                         @PathVariable @NotNull String branchId,
                                                         @Valid @RequestBody UpdateBranchInfoResource resource) {
         var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.description());
+                resource.city(), resource.regionOrState(), resource.country(), resource.description());
         return branchCommandService.handle(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());

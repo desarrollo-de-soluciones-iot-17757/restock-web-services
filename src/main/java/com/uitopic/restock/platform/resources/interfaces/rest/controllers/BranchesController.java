@@ -37,7 +37,7 @@ public class BranchesController {
     @PostMapping
     public ResponseEntity<BranchResource> create(@Valid @RequestBody CreateBranchResource resource) {
         var command = new CreateBranchCommand(resource.accountId(), resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.imageUrl(), resource.description());
+                resource.city(),resource.stateOrRegion(), resource.country(), resource.imageUrl(), resource.description());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(commandService.handle(command)));
     }
@@ -55,7 +55,7 @@ public class BranchesController {
     public ResponseEntity<BranchResource> updateInfo(@PathVariable String branchId,
                                                       @Valid @RequestBody UpdateBranchInfoResource resource) {
         var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.description());
+                resource.city(), resource.regionOrState(), resource.country(), resource.description());
         return commandService.handle(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());

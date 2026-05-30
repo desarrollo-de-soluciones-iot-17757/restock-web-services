@@ -9,6 +9,7 @@ public record BranchResource(
         @Schema(description = "Branch name") String name,
         @Schema(description = "Branch address") String address,
         @Schema(description = "City where the branch is located") String city,
+        @Schema(description = "State or Region where the branch is located") String stateOrRegion,
         @Schema(description = "Country where the branch is located") String country,
         @Schema(description = "URL of the branch image") String imageUrl,
         @Schema(description = "Status of the branch", example = "active") String status,

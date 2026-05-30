@@ -10,11 +10,12 @@ public class BranchResourceFromEntityAssembler {
                 entity.getId(),
                 entity.getAccountId().getAccountId(),
                 entity.getName(),
-                entity.getAddress(),
-                entity.getCity(),
-                entity.getCountry(),
+                entity.getLocation().address(),
+                entity.getLocation().city(),
+                entity.getLocation().regionOrState(),
+                entity.getLocation().country(),
                 entity.getImageUrl() != null ? entity.getImageUrl().getUrl() : null,
-                entity.getStatus(),
+                entity.getStatus().name().toLowerCase(),
                 entity.getDescription(),
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
         );
