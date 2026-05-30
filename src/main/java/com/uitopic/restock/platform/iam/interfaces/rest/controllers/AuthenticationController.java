@@ -7,6 +7,7 @@ import com.uitopic.restock.platform.iam.domain.services.UserCommandService;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.AuthenticatedUserResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignInResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignUpResource;
+import com.uitopic.restock.platform.iam.interfaces.rest.resources.UserResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,43 +23,62 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+/**
+ * Controller class for authentication operations in the IAM context.
+ * Exposes endpoints for user registration (sign-up) and user authentication (sign-in).
+ */
 @RestController
 @RequestMapping(value = "/api/v1/auth", produces = APPLICATION_JSON_VALUE)
 @Tag(name = "Authentication", description = "Authentication endpoints.")
 public class AuthenticationController {
 
-    private final UserCommandService userCommandService;
-    private final TokenService tokenService;
+        private final UserCommandService userCommandService;
+        private final TokenService tokenService;
 
-    public AuthenticationController(UserCommandService userCommandService, TokenService tokenService) {
-        this.userCommandService = userCommandService;
-        this.tokenService = tokenService;
-    }
+        public AuthenticationController(UserCommandService userCommandService, TokenService tokenService) {
+                this.userCommandService = userCommandService;
+                this.tokenService = tokenService;
+        }
 
-    @Operation(summary = "Sign in")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Authenticated"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
-    @PostMapping("/sign-in")
-    public ResponseEntity<AuthenticatedUserResource> signIn(@Valid @RequestBody SignInResource resource) {
-        return userCommandService.handle(new SignInCommand(resource.email(), resource.password()))
-                .map(user -> ResponseEntity.ok(
-                        UserResourceFromEntityAssembler.toResourceFromEntity(user, tokenService.generateToken(user))))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-    }
+        /**
+         * Authenticates a user with the provided credentials.
+         *
+         * @param resource the sign-in details including email and password
+         * @return a response entity containing the authenticated user's details and generated authorization token,
+         *         or HTTP 401 Unauthorized if authentication fails
+         */
+        @Operation(summary = "Sign in")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Authenticated"),
+                        @ApiResponse(responseCode = "401", description = "Invalid credentials")
+        })
+        @PostMapping("/sign-in")
+        public ResponseEntity<AuthenticatedUserResource> signIn(@Valid @RequestBody SignInResource resource) {
+                return userCommandService.handle(new SignInCommand(resource.email(), resource.password()))
+                                .map(user -> ResponseEntity.ok(
+                                                 UserResourceFromEntityAssembler.toResourceFromEntity(user,
+                                                                 tokenService.generateToken(user))))
+                                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
 
-    @Operation(summary = "Sign up")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User registered"),
-            @ApiResponse(responseCode = "409", description = "Email already registered"),
-            @ApiResponse(responseCode = "400", description = "Missing or invalid fields")
-    })
-    @PostMapping("/sign-up")
-    public ResponseEntity<AuthenticatedUserResource> signUp(@Valid @RequestBody SignUpResource resource) {
-        var user = userCommandService.handle(
-                new SignUpCommand(resource.businessName(), resource.email(), resource.password(), resource.role()));
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(UserResourceFromEntityAssembler.toResourceFromEntity(user, tokenService.generateToken(user)));
-    }
+        /**
+         * Registers a new user account with the requested credentials and role.
+         *
+         * @param resource the sign-up details containing company name, email, password, and role
+         * @return a response entity containing the registered user details, with HTTP 201 Created on success
+         */
+        @Operation(summary = "Sign up")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "User registered"),
+                        @ApiResponse(responseCode = "409", description = "Email already registered"),
+                        @ApiResponse(responseCode = "400", description = "Missing or invalid fields")
+        })
+        @PostMapping("/sign-up")
+        public ResponseEntity<UserResource> signUp(@Valid @RequestBody SignUpResource resource) {
+                var user = userCommandService.handle(
+                                new SignUpCommand(resource.businessName(), resource.email(), resource.password(),
+                                                resource.role()));
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(UserResourceFromEntityAssembler.toResourceFromEntity(user));
+        }
 }

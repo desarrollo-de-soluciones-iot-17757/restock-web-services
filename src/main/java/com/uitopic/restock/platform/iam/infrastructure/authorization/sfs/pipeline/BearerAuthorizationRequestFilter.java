@@ -14,6 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filter that intercepts incoming HTTP requests to extract and validate a Bearer JWT token
+ * from the Authorization header, establishing the Spring Security authentication context if valid.
+ */
 @Slf4j
 @Component
 public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
@@ -26,6 +30,16 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Intercepts the request and filters it to authenticate bearer token credentials.
+     * Extracts token, resolves username, validates token freshness, and updates SecurityContext.
+     *
+     * @param request the HTTP servlet request to filter
+     * @param response the HTTP servlet response
+     * @param filterChain the filter chain to execute next
+     * @throws ServletException if an error occurs during filtering
+     * @throws IOException if an I/O error occurs during filtering
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -42,7 +56,6 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Invalid token — let Spring Security return 401 downstream
             log.debug("JWT validation failed: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
