@@ -1,24 +1,23 @@
 package com.uitopic.restock.platform.iam.domain.services;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
-import com.uitopic.restock.platform.iam.domain.model.queries.GetUserByAccountIdQuery;
+import com.uitopic.restock.platform.iam.domain.model.queries.GetAllUsersByAccountIdQuery;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
  * Service interface for handling user-related queries.
- * Defines operations for retrieving user information based on specific
- * criteria.
+ * Defines operations for retrieving user information based on specific criteria.
  */
 public interface UserQueryService {
 
     /**
-     * Handles the {@link GetUserByAccountIdQuery} to retrieve a user by their
-     * account ID.
-     * 
+     * Handles the {@link GetAllUsersByAccountIdQuery} to retrieve all users
+     * associated with a given account ID.
+     * Designed to support accounts with multiple worker users.
+     *
      * @param query the query containing the account ID
-     * @return an {@link Optional} containing the {@link User} if found, otherwise
-     *         empty
+     * @return a {@link List} of {@link User} aggregates for that account
      */
-    Optional<User> handle(GetUserByAccountIdQuery query);
+    List<User> handle(GetAllUsersByAccountIdQuery query);
 }

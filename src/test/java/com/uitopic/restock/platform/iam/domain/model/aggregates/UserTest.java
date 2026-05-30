@@ -1,7 +1,6 @@
 package com.uitopic.restock.platform.iam.domain.model.aggregates;
 
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
-import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
 import org.junit.jupiter.api.Test;
 
@@ -10,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserTest {
 
     @Test
-    void handle_validFields_buildsUserCorrectly() {
-        Email email = new Email("test@example.com");
+    void constructor_validFields_buildsUserCorrectly() {
         Role role = new Role(RoleType.ADMIN);
-        User user = new User(email, "hashed_password", role, null);
+        User user = new User("test@example.com", "hashed_password", role, null);
 
         assertNotNull(user);
-        assertEquals(email, user.getEmail());
+        assertEquals("test@example.com", user.getEmail());
         assertEquals("hashed_password", user.getPasswordHash());
         assertEquals(role, user.getRole());
         assertNull(user.getAccountId());
@@ -24,56 +22,38 @@ class UserTest {
 
     @Test
     void update_newPasswordHash_changesOnlyPasswordHash() {
-        Email email = new Email("test@example.com");
         Role role = new Role(RoleType.ADMIN);
-        User user = new User(email, "old_hash", role, null);
+        User user = new User("test@example.com", "old_hash", role, null);
 
         user.update("new_hash");
 
         assertEquals("new_hash", user.getPasswordHash());
-        assertEquals(email, user.getEmail());
+        assertEquals("test@example.com", user.getEmail());
         assertEquals(role, user.getRole());
     }
 
     @Test
     void update_newEmail_changesOnlyEmail() {
-        Email email1 = new Email("test1@example.com");
-        Email email2 = new Email("test2@example.com");
         Role role = new Role(RoleType.ADMIN);
-        User user = new User(email1, "hash", role, null);
+        User user = new User("test1@example.com", "hash", role, null);
 
-        user.update(email2);
+        user.update("test2@example.com");
 
-        assertEquals(email2, user.getEmail());
+        assertEquals("test2@example.com", user.getEmail());
         assertEquals("hash", user.getPasswordHash());
         assertEquals(role, user.getRole());
     }
 
     @Test
     void update_newRole_changesOnlyRole() {
-        Email email = new Email("test@example.com");
         Role role1 = new Role(RoleType.ADMIN);
         Role role2 = new Role(RoleType.CASHIER);
-        User user = new User(email, "hash", role1, null);
+        User user = new User("test@example.com", "hash", role1, null);
 
         user.update(role2);
 
         assertEquals(role2, user.getRole());
-        assertEquals(email, user.getEmail());
+        assertEquals("test@example.com", user.getEmail());
         assertEquals("hash", user.getPasswordHash());
-    }
-
-    @Test
-    void emailConstructor_invalidFormat_throwsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> new Email("invalid-email"));
-        assertThrows(IllegalArgumentException.class, () -> new Email(null));
-    }
-
-    @Test
-    void emailConstructor_validFormat_createsEmail() {
-        Email email = new Email("valid@example.com");
-        assertNotNull(email);
-        assertEquals("valid@example.com", email.email());
-        assertEquals("valid@example.com", email.getEmail());
     }
 }

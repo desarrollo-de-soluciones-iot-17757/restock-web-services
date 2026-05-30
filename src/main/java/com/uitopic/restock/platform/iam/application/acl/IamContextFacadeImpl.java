@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.iam.application.acl;
 
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,16 +10,12 @@ import org.springframework.stereotype.Service;
  * Delegates to the domain repository to answer queries from external bounded contexts.
  * Does not expose internal domain objects — returns primitive types only.
  */
+@Slf4j
 @Service
 public class IamContextFacadeImpl implements IamContextFacade {
 
     private final UserRepository userRepository;
 
-    /**
-     * Constructs the facade with the required user repository.
-     *
-     * @param userRepository port for user persistence operations
-     */
     public IamContextFacadeImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -31,21 +28,26 @@ public class IamContextFacadeImpl implements IamContextFacade {
      */
     @Override
     public boolean existsUserByEmail(String email) {
-        return userRepository.existsByEmailValue(email);
+        log.debug("Checking existence of user with email: {}", email);
+        boolean exists = userRepository.existsByEmail(email);
+        log.debug("User with email {} exists: {}", email, exists);
+        return exists;
     }
 
     /**
      * Retrieves the account ID associated with the given user ID.
      * Returns an empty string if the user does not exist or has no account assigned.
-     * accountId is null until Account bounded context integration is complete.
      *
      * @param userId the ID of the user
      * @return the account ID as a string, or empty string if not found
      */
     @Override
     public String fetchAccountIdByUserId(String userId) {
-        return userRepository.findById(userId)
+        log.debug("Fetching account ID for user ID: {}", userId);
+        String accountId = userRepository.findById(userId)
                 .map(user -> user.getAccountId() != null ? user.getAccountId().getAccountId() : "")
                 .orElse("");
+        log.debug("Account ID for user ID {}: '{}'", userId, accountId);
+        return accountId;
     }
 }

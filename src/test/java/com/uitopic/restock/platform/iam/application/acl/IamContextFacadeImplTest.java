@@ -2,7 +2,6 @@ package com.uitopic.restock.platform.iam.application.acl;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
-import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -29,30 +28,30 @@ class IamContextFacadeImplTest {
     @Test
     void existsUserByEmail_registeredEmail_returnsTrue() {
         String email = "registered@example.com";
-        when(userRepository.existsByEmailValue(email)).thenReturn(true);
+        when(userRepository.existsByEmail(email)).thenReturn(true);
 
         boolean result = iamContextFacade.existsUserByEmail(email);
 
         assertTrue(result);
-        verify(userRepository).existsByEmailValue(email);
+        verify(userRepository).existsByEmail(email);
     }
 
     @Test
     void existsUserByEmail_unknownEmail_returnsFalse() {
         String email = "unknown@example.com";
-        when(userRepository.existsByEmailValue(email)).thenReturn(false);
+        when(userRepository.existsByEmail(email)).thenReturn(false);
 
         boolean result = iamContextFacade.existsUserByEmail(email);
 
         assertFalse(result);
-        verify(userRepository).existsByEmailValue(email);
+        verify(userRepository).existsByEmail(email);
     }
 
     @Test
     void fetchAccountIdByUserId_existingUserWithAccount_returnsAccountId() {
         String userId = "user123";
         AccountId accountId = new AccountId("acc456");
-        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.ADMIN), accountId);
+        User user = new User("test@example.com", "hashed_password", new Role(RoleType.ADMIN), accountId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
@@ -65,7 +64,7 @@ class IamContextFacadeImplTest {
     @Test
     void fetchAccountIdByUserId_existingUserWithoutAccount_returnsEmptyString() {
         String userId = "user123";
-        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.ADMIN), null);
+        User user = new User("test@example.com", "hashed_password", new Role(RoleType.ADMIN), null);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 

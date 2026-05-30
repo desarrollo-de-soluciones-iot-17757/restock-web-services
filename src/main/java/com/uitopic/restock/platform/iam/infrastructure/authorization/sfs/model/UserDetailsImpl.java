@@ -36,7 +36,7 @@ public class UserDetailsImpl implements UserDetails {
      */
     @Override
     public String getUsername() {
-        return user.getEmail().email();
+        return user.getEmail();
     }
 
     /**

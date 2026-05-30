@@ -14,16 +14,17 @@ public interface UserCommandService {
 
     /**
      * Handles the {@link SignInCommand} to authenticate a user.
-     * 
+     * Token generation is performed inside the application layer.
+     *
      * @param command the sign-in command containing credentials
-     * @return an {@link Optional} containing the {@link User} if authentication is
-     *         successful, otherwise empty
+     * @return an {@link Optional} containing a String array
+     *         [id, email, role, token] if authentication is successful, otherwise empty
      */
-    Optional<User> handle(SignInCommand command);
+    Optional<String[]> handle(SignInCommand command);
 
     /**
      * Handles the {@link SignUpCommand} to register a new user.
-     * 
+     *
      * @param command the sign-up command containing user registration details
      * @return the newly created {@link User} aggregate
      */

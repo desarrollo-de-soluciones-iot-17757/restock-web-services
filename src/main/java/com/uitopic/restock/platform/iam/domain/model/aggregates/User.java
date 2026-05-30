@@ -1,6 +1,5 @@
 package com.uitopic.restock.platform.iam.domain.model.aggregates;
 
-import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -13,6 +12,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * Represents the User aggregate root for the IAM bounded context.
  * Stores authentication credentials and role assignment for a given account.
+ *
+ * <p>The {@code email} field is persisted as a plain string value in MongoDB
+ * (not as an embedded document) to keep queries simple and avoid nested-field lookups.
  */
 @Getter
 @NoArgsConstructor
@@ -21,10 +23,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User extends AuditableAbstractAggregateRoot {
 
     /**
-     * The email address of the user, which serves as their unique identifier.
+     * The email address of the user, stored as a primitive string and used as
+     * their unique identifier.
      */
     @Indexed(unique = true)
-    private Email email;
+    private String email;
 
     /**
      * The BCrypt-hashed password used to authenticate the user.
@@ -41,6 +44,11 @@ public class User extends AuditableAbstractAggregateRoot {
      */
     private AccountId accountId;
 
+    /**
+     * Updates the user's hashed password.
+     *
+     * @param passwordHash the new BCrypt-hashed password
+     */
     public void update(String passwordHash) {
         this.passwordHash = passwordHash;
     }
@@ -50,7 +58,7 @@ public class User extends AuditableAbstractAggregateRoot {
      *
      * @param email the new email address to set
      */
-    public void update(Email email) {
+    public void update(String email) {
         this.email = email;
     }
 

@@ -27,21 +27,21 @@ public class UserResourceFromEntityAssembler {
     public static AuthenticatedUserResource toResourceFromEntity(User user, String token) {
         return new AuthenticatedUserResource(
                 user.getId(),
-                user.getEmail().email(),
+                user.getEmail(),
                 user.getRole().getType().name(),
                 token);
     }
 
     /**
      * Converts a {@link User} entity into a {@link UserResource}.
-     * 
+     *
      * @param user the {@link User} aggregate to convert
      * @return a {@link UserResource} representing the user
      */
     public static UserResource toResourceFromEntity(User user) {
         return new UserResource(
                 user.getId(),
-                user.getEmail().email(),
+                user.getEmail(),
                 user.getRole().getType().name());
     }
 }
