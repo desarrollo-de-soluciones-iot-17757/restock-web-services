@@ -6,29 +6,19 @@ import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Implementation of the SupplyRepository interface that interacts with the MongoDB database to perform CRUD operations on Supply entities.
- * This class serves as the bridge between the domain layer and the data access layer, allowing for separation of concerns and adherence to the repository pattern.
- */
 @Repository
 public class SupplyRepositoryImpl implements SupplyRepository {
 
-    // Dependency on the SupplyMongoRepository to perform database operations
     private final SupplyMongoRepository supplyMongoRepository;
 
-    // Constructor to initialize the SupplyMongoRepository dependency
     public SupplyRepositoryImpl(SupplyMongoRepository supplyMongoRepository) {
         this.supplyMongoRepository = supplyMongoRepository;
     }
 
-    /**
-     * Retrieves all Supply entities from the data source.
-     *
-     * @return a list of all Supply entities available in the data source
-     */
-    @Override
-    public List<Supply> findAll() {
-        return supplyMongoRepository.findAll();
-    }
+    @Override public List<Supply> findAll() { return supplyMongoRepository.findAll(); }
+    @Override public Optional<Supply> findById(String id) { return supplyMongoRepository.findById(id); }
+    @Override public Supply save(Supply supply) { return supplyMongoRepository.save(supply); }
+    @Override public void deleteById(String id) { supplyMongoRepository.deleteById(id); }
 }
