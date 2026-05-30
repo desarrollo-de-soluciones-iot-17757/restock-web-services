@@ -10,6 +10,7 @@ import com.uitopic.restock.platform.resources.domain.model.entities.InventoryTra
 import com.uitopic.restock.platform.resources.domain.model.events.StockIncreasedEvent;
 import com.uitopic.restock.platform.resources.domain.model.events.StockSubtractedEvent;
 import com.uitopic.restock.platform.resources.domain.model.events.StockTransferredEvent;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
 import com.uitopic.restock.platform.resources.domain.repositories.InventoryDeductionRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,23 +51,27 @@ public class BatchCommandServiceImpl implements BatchCommandService {
     }
 
     @Override
-    public Batch handle(CreateBatchCommand command) {
+    public Optional<Batch> handle(CreateBatchCommand command) {
         Batch batch = Batch.builder()
-                .accountId(new AccountId(command.accountId()))
-                .branchId(command.branchId())
+                .code(command.code())
+                .initialStock(command.initialStock())
+                .currentStock(command.initialStock())
+                .unitPurchaseCost(command.unitPurchaseCost())
                 .customSupplyId(command.customSupplyId())
-                .currentQuantity(command.currentQuantity())
-                .unit(new UnitMeasurement(command.unit()))
-                .expirationDate(command.expirationDate())
+                .receivingBranchId(command.receivingBranchId())
+                .accountId(command.accountId())
+                .expirationDate(Optional.ofNullable(command.expirationDate().orElse(null)))
+                .manufacturingDate(Optional.ofNullable(command.manufacturingDate().orElse(null)))
+                .entryDate(Optional.ofNullable(command.entryDate().orElse(null)))
                 .build();
         Batch saved = batchRepository.save(batch);
         eventPublisher.publishEvent(new StockIncreasedEvent(
-                saved.getId(), command.branchId(), command.customSupplyId(), command.currentQuantity()));
-        return saved;
+                saved.getId(), command.receivingBranchId(), command.customSupplyId(), command.initialStock().getValue()));
+        return Optional.of(saved);
     }
 
     @Override
-    public InventoryTransfer handle(TransferInventoryCommand command) {
+    public Optional<InventoryTransfer> handle(TransferInventoryCommand command) {
         Branch fromBranch = branchRepository.findById(command.fromBranchId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "From branch not found"));
         Branch toBranch = branchRepository.findById(command.toBranchId())
@@ -85,10 +91,9 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         UnitMeasurement unit = new UnitMeasurement(command.unit());
         batchRepository.save(Batch.builder()
                 .accountId(fromBranch.getAccountId())
-                .branchId(command.toBranchId())
+                .receivingBranchId(command.toBranchId())
                 .customSupplyId(command.customSupplyId())
-                .currentQuantity(command.quantity())
-                .unit(unit)
+                .currentStock(new Stock(command.quantity()))
                 .build());
 
         InventoryTransfer transfer = InventoryTransfer.builder()
@@ -104,11 +109,11 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         InventoryTransfer saved = transferRepository.save(transfer);
         eventPublisher.publishEvent(new StockTransferredEvent(saved.getId(),
                 command.fromBranchId(), command.toBranchId(), command.customSupplyId(), command.quantity()));
-        return saved;
+        return Optional.of(saved);
     }
 
     @Override
-    public InventoryDeduction handle(SubtractInventoryCommand command) {
+    public Optional<InventoryDeduction> handle(SubtractInventoryCommand command) {
         List<Batch> batches = activeBatches(command.branchId(), command.customSupplyId());
         double available = totalQuantity(batches);
         if (available < command.quantity()) {
@@ -132,11 +137,11 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         InventoryDeduction saved = deductionRepository.save(deduction);
         eventPublisher.publishEvent(new StockSubtractedEvent(
                 saved.getId(), command.branchId(), command.customSupplyId(), command.quantity(), remainingStock));
-        return saved;
+        return Optional.of(saved);
     }
 
     @Override
-    public double subtractStock(String branchId, String customSupplyId, double quantity) {
+    public double subtractStock(String branchId, String customSupplyId, Integer quantity) {
         List<Batch> batches = activeBatches(branchId, customSupplyId);
         double available = totalQuantity(batches);
         if (available < quantity) {
@@ -148,54 +153,53 @@ public class BatchCommandServiceImpl implements BatchCommandService {
     }
 
     @Override
-    public void addStockBack(String branchId, String customSupplyId, double quantity, String unit) {
+    public void addStockBack(String branchId, String customSupplyId, Integer quantity, String unit) {
         AccountId accountId = branchRepository.findById(branchId).map(Branch::getAccountId).orElse(null);
         batchRepository.save(Batch.builder()
                 .accountId(accountId)
-                .branchId(branchId)
+                .receivingBranchId(branchId)
                 .customSupplyId(customSupplyId)
-                .currentQuantity(quantity)
-                .unit(new UnitMeasurement(unit != null ? unit : "unit"))
+                .currentStock(new Stock(quantity))
                 .build());
     }
 
     @Override
-    public void adjustStock(String branchId, String customSupplyId, double adjustedQuantity, String unit) {
+    public void adjustStock(String branchId, String customSupplyId, Integer adjustedQuantity, String unit) {
         batchRepository.findByBranchIdAndCustomSupplyId(branchId, customSupplyId)
-                .stream().filter(b -> b.getCurrentQuantity() > 0)
+                .stream().filter(b -> b.getCurrentStock().getValue() > 0)
                 .forEach(b -> {
-                    b.setCurrentQuantity(0);
+                    b.setCurrentStock(new Stock(0));
                     batchRepository.save(b);
                 });
         if (adjustedQuantity > 0) {
             AccountId accountId = branchRepository.findById(branchId).map(Branch::getAccountId).orElse(null);
             batchRepository.save(Batch.builder()
                     .accountId(accountId)
-                    .branchId(branchId)
+                    .receivingBranchId(branchId)
                     .customSupplyId(customSupplyId)
-                    .currentQuantity(adjustedQuantity)
-                    .unit(new UnitMeasurement(unit != null ? unit : "unit"))
+                    .currentStock(new Stock(adjustedQuantity))
                     .build());
         }
     }
 
     private List<Batch> activeBatches(String branchId, String customSupplyId) {
         return batchRepository.findByBranchIdAndCustomSupplyId(branchId, customSupplyId)
-                .stream().filter(b -> b.getCurrentQuantity() > 0)
+                .stream().filter(b -> b.getCurrentStock().getValue() > 0)
                 .sorted(Comparator.comparing(Batch::getCreatedAt))
                 .collect(Collectors.toList());
     }
 
     private double totalQuantity(List<Batch> batches) {
-        return batches.stream().mapToDouble(Batch::getCurrentQuantity).sum();
+        return batches.stream().mapToInt(b -> b.getCurrentStock().getValue()).sum();
     }
 
-    private void deductFifo(List<Batch> batches, double toDeduct) {
+    private void deductFifo(List<Batch> batches, Integer toDeduct) {
         double remaining = toDeduct;
         for (Batch batch : batches) {
             if (remaining <= 0) break;
-            double take = Math.min(batch.getCurrentQuantity(), remaining);
-            batch.setCurrentQuantity(batch.getCurrentQuantity() - take);
+            double take = Math.min(batch.getCurrentStock().getValue(), remaining);
+            Integer valueToTake = (int) Math.round(take);
+            batch.setCurrentStock(new Stock(batch.getCurrentStock().getValue() - valueToTake));
             batchRepository.save(batch);
             remaining -= take;
         }

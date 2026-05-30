@@ -3,10 +3,13 @@ package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.SubtractInventoryCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.TransferInventoryCommand;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.resources.domain.services.BatchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BatchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.*;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BatchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -15,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,8 +41,17 @@ public class BatchesController {
     @Operation(summary = "Create a batch (add stock)")
     @PostMapping
     public ResponseEntity<BatchResource> create(@Valid @RequestBody CreateBatchResource resource) {
-        var command = new CreateBatchCommand(resource.accountId(), resource.branchId(),
-                resource.customSupplyId(), resource.currentQuantity(), resource.unit(), resource.expirationDate());
+        var command = new CreateBatchCommand(
+                resource.code(),
+                new Stock(resource.initialStock()),
+                new Money(new BigDecimal(resource.unitPurchaseCostAmount()), resource.unitPurchaseCostCurrency()),
+                resource.customSupplyId(),
+                resource.receivingBranchId(),
+                new AccountId(resource.accountId()),
+                resource.manufacturingDate(),
+                resource.expirationDate(),
+                resource.entryDate()
+        );
         var batch = commandService.handle(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(BatchResourceFromEntityAssembler.toResourceFromEntity(batch));
     }

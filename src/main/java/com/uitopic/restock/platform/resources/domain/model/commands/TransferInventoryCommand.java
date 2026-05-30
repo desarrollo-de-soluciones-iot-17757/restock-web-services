@@ -4,7 +4,7 @@ public record TransferInventoryCommand(
         String fromBranchId,
         String toBranchId,
         String customSupplyId,
-        double quantity,
+        Integer quantity,
         String unit,
         String reason
 ) {}

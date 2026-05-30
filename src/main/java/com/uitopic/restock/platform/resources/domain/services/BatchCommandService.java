@@ -7,11 +7,13 @@ import com.uitopic.restock.platform.resources.domain.model.commands.TransferInve
 import com.uitopic.restock.platform.resources.domain.model.entities.InventoryDeduction;
 import com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer;
 
+import java.util.Optional;
+
 public interface BatchCommandService {
-    Batch handle(CreateBatchCommand command);
-    InventoryTransfer handle(TransferInventoryCommand command);
-    InventoryDeduction handle(SubtractInventoryCommand command);
-    double subtractStock(String branchId, String customSupplyId, double quantity);
-    void addStockBack(String branchId, String customSupplyId, double quantity, String unit);
-    void adjustStock(String branchId, String customSupplyId, double adjustedQuantity, String unit);
+    Optional<Batch> handle(CreateBatchCommand command);
+    Optional<InventoryTransfer> handle(TransferInventoryCommand command);
+    Optional<InventoryDeduction> handle(SubtractInventoryCommand command);
+    double subtractStock(String branchId, String customSupplyId, Integer quantity);
+    void addStockBack(String branchId, String customSupplyId, Integer quantity, String unit);
+    void adjustStock(String branchId, String customSupplyId, Integer adjustedQuantity, String unit);
 }
