@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface BranchMongoRepository extends MongoRepository<Branch, String> {
     List<Branch> findByAccountId(AccountId accountId);
+    boolean existsByNameAndAccountId(String name, AccountId accountId);
 }
