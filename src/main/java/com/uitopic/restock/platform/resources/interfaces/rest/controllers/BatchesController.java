@@ -21,13 +21,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * BatchesController.java
- *
  * This controller manages batch and inventory operations. It provides endpoints to:
  * - Create a new batch (add stock).
  * - Get batch details by ID.
  * - Transfer inventory between branches.
  * - Subtract inventory stock.
- *
  * The controller uses BatchCommandService for handling commands related to batch and inventory operations and BatchQueryService for fetching batch data. It includes logging for debugging purposes and is annotated for OpenAPI documentation. The endpoints are designed to be RESTful and return appropriate HTTP status codes based on the outcome of the operations.
  */
 @Slf4j

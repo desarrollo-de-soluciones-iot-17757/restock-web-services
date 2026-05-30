@@ -4,7 +4,6 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.BranchMongoRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

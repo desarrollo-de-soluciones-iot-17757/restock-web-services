@@ -23,11 +23,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * AccountBranchesController.java
- *
  * This controller manages branches within the context of a specific account. It provides endpoints to:
  * - Retrieve all branches associated with an account.
  * - Create a new branch under an account.
- *
  * The controller uses BranchCommandService for handling commands related to branch creation and BranchQueryService for fetching branch data.
  * It also includes logging for debugging purposes and is annotated for OpenAPI documentation.
  * The endpoints are designed to be RESTful and return appropriate HTTP status codes based on the outcome of the operations.

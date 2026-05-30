@@ -2,7 +2,6 @@ package com.uitopic.restock.platform.resources.domain.repositories;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
 
 import java.util.List;
 import java.util.Optional;
