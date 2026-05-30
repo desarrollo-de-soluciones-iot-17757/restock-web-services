@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.iam.domain.model.aggregates;
 
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
+import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import lombok.AllArgsConstructor;
@@ -13,8 +14,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Represents the User aggregate root for the IAM bounded context.
  * Stores authentication credentials and role assignment for a given account.
  *
- * <p>The {@code email} field is persisted as a plain string value in MongoDB
- * (not as an embedded document) to keep queries simple and avoid nested-field lookups.
+ * <p>The {@code email} field is of type {@link Email} in the domain model.
+ * A MongoDB converter handles serialization to/from a plain string value,
+ * so it is stored as a primitive in the database — not as an embedded document.
  */
 @Getter
 @NoArgsConstructor
@@ -23,11 +25,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User extends AuditableAbstractAggregateRoot {
 
     /**
-     * The email address of the user, stored as a primitive string and used as
-     * their unique identifier.
+     * The email address of the user, which serves as their unique identifier.
+     * Stored as a plain string in MongoDB via a registered converter.
      */
     @Indexed(unique = true)
-    private String email;
+    private Email email;
 
     /**
      * The BCrypt-hashed password used to authenticate the user.
@@ -56,9 +58,9 @@ public class User extends AuditableAbstractAggregateRoot {
     /**
      * Updates the user's email address.
      *
-     * @param email the new email address to set
+     * @param email the new email value object to set
      */
-    public void update(String email) {
+    public void update(Email email) {
         this.email = email;
     }
 

@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repo
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,29 +12,33 @@ import java.util.Optional;
 /**
  * MongoDB repository for {@link User} aggregates.
  *
- * <p>Email is stored as a plain string field (not as an embedded document),
- * so Spring Data derives the query directly from the field name {@code email}
- * without any custom {@code @Query} annotation.
+ * <p>The {@code email} field is stored as a primitive string value in MongoDB
+ * via the registered {@link com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter}.
+ * Queries use {@code String} parameters with explicit {@link Query} annotations to target
+ * the stored primitive field directly — Spring Data query derivation does not apply
+ * custom converters to query parameters, so the value object must be unwrapped here.
  */
 @Repository
 public interface UserMongoRepository extends MongoRepository<User, String> {
 
     /**
      * Finds a user by their email address.
-     * Relies on the {@code email} field being stored as a primitive string value.
+     * Uses an explicit query to match against the primitive {@code email} string field.
      *
-     * @param email the email address to search for
+     * @param email the raw email string to search for
      * @return an {@link Optional} containing the {@link User} if found, otherwise empty
      */
+    @Query("{ 'email' : ?0 }")
     Optional<User> findByEmail(String email);
 
     /**
      * Checks if a user with the given email address exists.
-     * Relies on the {@code email} field being stored as a primitive string value.
+     * Uses an explicit query to match against the primitive {@code email} string field.
      *
-     * @param email the email address to check for existence
+     * @param email the raw email string to check
      * @return {@code true} if a user with the specified email exists, {@code false} otherwise
      */
+    @Query(value = "{ 'email' : ?0 }", exists = true)
     boolean existsByEmail(String email);
 
     /**

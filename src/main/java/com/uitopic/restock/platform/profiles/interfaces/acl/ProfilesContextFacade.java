@@ -13,7 +13,9 @@ public interface ProfilesContextFacade {
      * @param userId       the ID of the newly created user
      * @param businessName the business name provided during sign-up
      * @param email        the email address of the user
+     * @param phone        the phone number of the user
+     * @param country      the country of the user
      * @return the ID of the created profile, or empty string if creation failed
      */
-    String createProfile(String userId, String businessName, String email);
+    String createProfile(String userId, String businessName, String email, String phone, String country);
 }

@@ -7,7 +7,7 @@ import com.uitopic.restock.platform.iam.interfaces.rest.resources.AuthenticatedU
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignInResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignUpResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.UserResource;
-import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
+import com.uitopic.restock.platform.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,12 +37,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AuthenticationController {
 
     private final UserCommandService userCommandService;
-    private final ProfilesContextFacade profilesContextFacade;
 
-    public AuthenticationController(UserCommandService userCommandService,
-                                    ProfilesContextFacade profilesContextFacade) {
+    public AuthenticationController(UserCommandService userCommandService) {
         this.userCommandService = userCommandService;
-        this.profilesContextFacade = profilesContextFacade;
     }
 
     /**
@@ -61,9 +58,10 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticatedUserResource> signIn(@Valid @RequestBody SignInResource resource) {
         log.info("POST /sign-in — email: {}", resource.email());
         return userCommandService.handle(new SignInCommand(resource.email(), resource.password()))
-                .map(data -> {
-                    log.info("Sign-in successful for user ID: {}", data[0]);
-                    return ResponseEntity.ok(new AuthenticatedUserResource(data[0], data[1], data[2], data[3]));
+                .map(entry -> {
+                    log.info("Sign-in successful for user ID: {}", entry.getKey().getId());
+                    return ResponseEntity.ok(
+                            UserResourceFromEntityAssembler.toResourceFromEntity(entry.getKey(), entry.getValue()));
                 })
                 .orElseGet(() -> {
                     log.warn("Sign-in failed for email: {}", resource.email());
@@ -72,8 +70,7 @@ public class AuthenticationController {
     }
 
     /**
-     * Registers a new user account and creates the associated profile via the
-     * Profiles bounded context ACL.
+     * Registers a new user account and creates the associated profile.
      *
      * @param resource the sign-up details including credentials and profile data
      * @return 201 Created with the registered user resource
@@ -89,13 +86,18 @@ public class AuthenticationController {
         log.info("POST /sign-up — email: {}, role: {}", resource.email(), resource.role());
 
         var user = userCommandService.handle(
-                new SignUpCommand(resource.businessName(), resource.email(), resource.password(), resource.role()));
+                new SignUpCommand(
+                        resource.businessName(),
+                        resource.email(),
+                        resource.password(),
+                        resource.role(),
+                        resource.phone(),
+                        resource.country()
+                )
+        );
 
-        log.info("User created with ID: {} — creating profile via ACL", user.getId());
-        String profileId = profilesContextFacade.createProfile(user.getId(), resource.businessName(), resource.email());
-        log.info("Profile created with ID: {} for user ID: {}", profileId, user.getId());
-
+        log.info("User registered successfully — ID: {}, email: {}", user.getId(), user.getEmail().email());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new UserResource(user.getId(), user.getEmail(), user.getRole().getType().name()));
+                .body(UserResourceFromEntityAssembler.toResourceFromEntity(user));
     }
 }

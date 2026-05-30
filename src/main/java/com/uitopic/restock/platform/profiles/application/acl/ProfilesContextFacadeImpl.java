@@ -22,11 +22,14 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
      * @param userId       the ID of the newly created user
      * @param businessName the business name provided during sign-up
      * @param email        the email address of the user
+     * @param phone        the phone number of the user
+     * @param country      the country of the user
      * @return the ID of the created profile, or empty string if creation failed
      */
     @Override
-    public String createProfile(String userId, String businessName, String email) {
-        log.info("Creating profile for user ID: {}, businessName: {}, email: {}", userId, businessName, email);
+    public String createProfile(String userId, String businessName, String email, String phone, String country) {
+        log.info("Creating profile for user ID: {}, businessName: {}, email: {}, phone: {}, country: {}",
+                userId, businessName, email, phone, country);
         // TODO: delegate to ProfileCommandService once domain is complete
         log.warn("ProfileCommandService not yet implemented — profile creation skipped for user ID: {}", userId);
         return "";

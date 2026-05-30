@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.iam.application.acl;
 
+import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
     @Override
     public boolean existsUserByEmail(String email) {
         log.debug("Checking existence of user with email: {}", email);
-        boolean exists = userRepository.existsByEmail(email);
+        boolean exists = userRepository.existsByEmail(new Email(email));
         log.debug("User with email {} exists: {}", email, exists);
         return exists;
     }

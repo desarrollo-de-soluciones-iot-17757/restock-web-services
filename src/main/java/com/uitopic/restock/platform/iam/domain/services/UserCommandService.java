@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
 import com.uitopic.restock.platform.iam.domain.model.commands.SignInCommand;
 import com.uitopic.restock.platform.iam.domain.model.commands.SignUpCommand;
 
+import java.util.AbstractMap;
 import java.util.Optional;
 
 /**
@@ -17,10 +18,10 @@ public interface UserCommandService {
      * Token generation is performed inside the application layer.
      *
      * @param command the sign-in command containing credentials
-     * @return an {@link Optional} containing a String array
-     *         [id, email, role, token] if authentication is successful, otherwise empty
+     * @return an {@link Optional} containing a pair of the authenticated {@link User}
+     *         and the generated JWT token, or empty if credentials are invalid
      */
-    Optional<String[]> handle(SignInCommand command);
+    Optional<AbstractMap.SimpleEntry<User, String>> handle(SignInCommand command);
 
     /**
      * Handles the {@link SignUpCommand} to register a new user.

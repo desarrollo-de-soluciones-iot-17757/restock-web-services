@@ -27,7 +27,7 @@ public class UserResourceFromEntityAssembler {
     public static AuthenticatedUserResource toResourceFromEntity(User user, String token) {
         return new AuthenticatedUserResource(
                 user.getId(),
-                user.getEmail(),
+                user.getEmail().email(),
                 user.getRole().getType().name(),
                 token);
     }
@@ -41,7 +41,7 @@ public class UserResourceFromEntityAssembler {
     public static UserResource toResourceFromEntity(User user) {
         return new UserResource(
                 user.getId(),
-                user.getEmail(),
+                user.getEmail().email(),
                 user.getRole().getType().name());
     }
 }

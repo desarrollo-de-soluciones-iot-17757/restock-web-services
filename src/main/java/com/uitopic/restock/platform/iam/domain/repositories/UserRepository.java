@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.iam.domain.repositories;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
+import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 
 import java.util.List;
@@ -8,25 +9,24 @@ import java.util.Optional;
 
 /**
  * Interface defining data access operations for {@link User} aggregates.
- * This repository provides standard CRUD and query methods for user entities.
  */
 public interface UserRepository {
 
     /**
      * Retrieves a user by their email address.
      *
-     * @param email the email address to search for
+     * @param email the Email value object to search for
      * @return an {@link Optional} containing the {@link User} if found, otherwise empty
      */
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(Email email);
 
     /**
      * Checks if a user with the given email address already exists.
      *
-     * @param email the email address to check
+     * @param email the Email value object to check
      * @return {@code true} if a user with the specified email exists, {@code false} otherwise
      */
-    boolean existsByEmail(String email);
+    boolean existsByEmail(Email email);
 
     /**
      * Saves a user aggregate to the data store.

@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.iam.infrastructure.repositories;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
+import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories.UserMongoRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -25,13 +26,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return mongoRepository.findByEmail(email);
+    public Optional<User> findByEmail(Email email) {
+        return mongoRepository.findByEmail(email.email());
     }
 
     @Override
-    public boolean existsByEmail(String email) {
-        return mongoRepository.existsByEmail(email);
+    public boolean existsByEmail(Email email) {
+        return mongoRepository.existsByEmail(email.email());
     }
 
     @Override

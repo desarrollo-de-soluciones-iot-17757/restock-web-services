@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.iam.infrastructure.authorization.sfs.services;
 
+import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,8 +31,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-                .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return userRepository.findByEmail(new Email(email))
+                 .map(UserDetailsImpl::new)
+                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 }

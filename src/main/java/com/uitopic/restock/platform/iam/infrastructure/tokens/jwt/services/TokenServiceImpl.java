@@ -46,7 +46,7 @@ public class TokenServiceImpl implements BearerTokenService {
     public String generateToken(User user) {
         long expirationMs = (long) expirationDays * 24 * 60 * 60 * 1000;
         return Jwts.builder()
-                .subject(user.getEmail())
+                .subject(user.getEmail().email())
                 .claim("role", user.getRole().getType().name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
