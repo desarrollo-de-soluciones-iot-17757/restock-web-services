@@ -1,4 +1,4 @@
 package com.uitopic.restock.platform.iam.domain.model.queries;
 
-public record GetUserByIdQuery() {
+public record GetUserByIdQuery(String userId) {
 }
