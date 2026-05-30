@@ -4,6 +4,8 @@ import com.uitopic.restock.platform.iam.infrastructure.authorization.sfs.pipelin
 import com.uitopic.restock.platform.iam.infrastructure.authorization.sfs.pipeline.UnauthorizedRequestHandlerEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,20 +21,22 @@ public class WebSecurityConfiguration {
     private final UnauthorizedRequestHandlerEntryPoint unauthorizedEntryPoint;
 
     public WebSecurityConfiguration(BearerAuthorizationRequestFilter bearerFilter,
-                                     UnauthorizedRequestHandlerEntryPoint unauthorizedEntryPoint) {
+            UnauthorizedRequestHandlerEntryPoint unauthorizedEntryPoint) {
         this.bearerFilter = bearerFilter;
         this.unauthorizedEntryPoint = unauthorizedEntryPoint;
     }
-
-    @Bean
+    @Bean   
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedEntryPoint))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(bearerFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
