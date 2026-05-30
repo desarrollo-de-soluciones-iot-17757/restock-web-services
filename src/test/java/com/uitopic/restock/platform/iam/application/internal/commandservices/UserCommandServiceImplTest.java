@@ -100,12 +100,13 @@ class UserCommandServiceImplTest {
         when(hashingService.matches("correct_password", "hashed_password")).thenReturn(true);
         when(tokenService.generateToken(user)).thenReturn("jwt.token.here");
 
-        Optional<String[]> result = userCommandService.handle(command);
+        var result = userCommandService.handle(command);
 
         assertTrue(result.isPresent());
-        assertEquals("user@example.com", result.get()[1]);
-        assertEquals("ADMIN", result.get()[2]);
-        assertEquals("jwt.token.here", result.get()[3]);
+        assertEquals(user, result.get().getKey());
+        assertEquals("jwt.token.here", result.get().getValue());
+        assertEquals("user@example.com", result.get().getKey().getEmail().email());
+        assertEquals("ADMIN", result.get().getKey().getRole().getType().name());
     }
 
     @Test
@@ -116,7 +117,7 @@ class UserCommandServiceImplTest {
         when(userRepository.findByEmail(any(Email.class))).thenReturn(Optional.of(user));
         when(hashingService.matches("wrong_password", "hashed_password")).thenReturn(false);
 
-        Optional<String[]> result = userCommandService.handle(command);
+        var result = userCommandService.handle(command);
 
         assertFalse(result.isPresent());
     }
@@ -127,7 +128,7 @@ class UserCommandServiceImplTest {
 
         when(userRepository.findByEmail(any(Email.class))).thenReturn(Optional.empty());
 
-        Optional<String[]> result = userCommandService.handle(command);
+        var result = userCommandService.handle(command);
 
         assertFalse(result.isPresent());
     }
