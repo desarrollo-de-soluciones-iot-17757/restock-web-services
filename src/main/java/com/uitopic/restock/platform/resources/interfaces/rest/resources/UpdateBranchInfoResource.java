@@ -7,6 +7,7 @@ public record UpdateBranchInfoResource(
         @Schema(description = "Branch name") String name,
         @Schema(description = "Branch address") String address,
         @Schema(description = "City") String city,
+        @Schema(description = "State or Region") String regionOrState,
         @Schema(description = "Country") String country,
         @Schema(description = "Branch description") String description
 ) {}

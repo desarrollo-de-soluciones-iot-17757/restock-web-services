@@ -6,6 +6,7 @@ import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbst
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "users")
 public class User extends AuditableAbstractAggregateRoot {
 
+    @Indexed(unique = true)
     private Email email;
     private String passwordHash;
     private Role role;

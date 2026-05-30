@@ -25,7 +25,8 @@ public class CollectionInitializer {
             "supplies",
             "kits",
             "sales",
-            "notifications"
+            "notifications",
+            "branches"
     );
 
     /**

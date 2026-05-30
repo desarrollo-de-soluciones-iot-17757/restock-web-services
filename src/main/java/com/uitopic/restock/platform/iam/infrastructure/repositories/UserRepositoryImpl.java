@@ -17,8 +17,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return mongoRepository.findByEmail(email);
+    public Optional<User> findByEmailValue(String email) {
+        return mongoRepository.findByEmailValue(email);
+    }
+
+    @Override
+    public boolean existsByEmailValue(String email) {
+        return mongoRepository.existsByEmailValue(email);
     }
 
     @Override
