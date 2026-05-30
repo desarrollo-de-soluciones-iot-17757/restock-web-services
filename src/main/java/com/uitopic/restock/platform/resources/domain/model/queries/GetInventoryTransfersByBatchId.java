@@ -1,4 +1,3 @@
 package com.uitopic.restock.platform.resources.domain.model.queries;
 
-public record GetInventoryTransfersByBatchId() {
-}
+public record GetInventoryTransfersByBatchId(String branchId) {}
