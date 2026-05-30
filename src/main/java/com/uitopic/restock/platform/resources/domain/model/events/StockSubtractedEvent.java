@@ -1,4 +1,3 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
-public class StockSubtractedEvent {
-}
+public record StockSubtractedEvent(String deductionId, String branchId, String supplyId, double quantity, double remainingStock) {}

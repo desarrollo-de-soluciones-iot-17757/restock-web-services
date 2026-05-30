@@ -1,4 +1,3 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
-public class StockIncreasedEvent {
-}
+public record StockIncreasedEvent(String batchId, String branchId, String supplyId, double quantity) {}

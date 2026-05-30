@@ -7,30 +7,20 @@ import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Implementation of the CustomSupplyRepository interface that interacts with the MongoDB database to perform operations related to CustomSupply aggregates.
- * This class uses the CustomSupplyMongoRepository to fetch data from the database and convert it into domain aggregates.
- */
 @Repository
 public class CustomSupplyRepositoryImpl implements CustomSupplyRepository {
 
-    // Reference to the CustomSupplyMongoRepository for database operations
     private final CustomSupplyMongoRepository customSupplyMongoRepository;
 
-    // Constructor injection of the CustomSupplyMongoRepository
     public CustomSupplyRepositoryImpl(CustomSupplyMongoRepository customSupplyMongoRepository) {
         this.customSupplyMongoRepository = customSupplyMongoRepository;
     }
 
-    /**
-     * Finds a list of CustomSupply aggregates by the given account ID.
-     *
-     * @param accountId the account ID for which to fetch the custom supplies
-     * @return a list of CustomSupply aggregates that are associated with the specified account ID
-     */
-    @Override
-    public List<CustomSupply> findByAccountId(AccountId accountId) {
-        return customSupplyMongoRepository.findByAccountId(accountId);
-    }
+    @Override public List<CustomSupply> findByAccountId(AccountId accountId) { return customSupplyMongoRepository.findByAccountId(accountId); }
+    @Override public Optional<CustomSupply> findById(String id) { return customSupplyMongoRepository.findById(id); }
+    @Override public Boolean existsByAccountIdAndName(AccountId accountId, String name) { return customSupplyMongoRepository.existsByAccountIdAndName(accountId, name); }
+    @Override public CustomSupply save(CustomSupply cs) { return customSupplyMongoRepository.save(cs); }
+    @Override public void deleteById(String id) { customSupplyMongoRepository.deleteById(id); }
 }
