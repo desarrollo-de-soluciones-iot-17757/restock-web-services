@@ -8,7 +8,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>com.uitopic.restock</groupId>
@@ -18,17 +18,10 @@
     <description>Restock IoT Inventory Management RESTful API - Modular Monolith + DDD</description>
 
     <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
+    <licenses><license/></licenses>
+    <developers><developer/></developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection/><developerConnection/><tag/><url/>
     </scm>
 
     <properties>
@@ -66,27 +59,23 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
+        <!-- MVC -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <!-- MQTT (Eclipse Paho) -->
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>${paho.version}</version>
         </dependency>
-
-        <!-- Model - View - Controller -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
-        </dependency>
-
         <!-- OpenAPI / Swagger UI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>3.0.2</version>
         </dependency>
-
         <!-- Spring DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -94,7 +83,6 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -109,7 +97,6 @@
             <artifactId>jjwt-api</artifactId>
             <version>0.12.6</version>
         </dependency>
-
         <!-- JWT Implementation -->
         <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl -->
         <dependency>
@@ -127,7 +114,6 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
-
         <!-- Junit for Unit Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -157,13 +143,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Security Testing -->
+        <!-- Spring Boot Test (MockMvc, @SpringBootTest, etc.) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security-test</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!-- Security Testing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Validation Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -220,9 +212,7 @@
                     <execution>
                         <id>default-compile</id>
                         <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
+                        <goals><goal>compile</goal></goals>
                         <configuration>
                             <annotationProcessorPaths>
                                 <path>
@@ -235,9 +225,7 @@
                     <execution>
                         <id>default-testCompile</id>
                         <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
+                        <goals><goal>testCompile</goal></goals>
                         <configuration>
                             <annotationProcessorPaths>
                                 <path>

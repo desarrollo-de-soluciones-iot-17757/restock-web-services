@@ -13,6 +13,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Web security configuration class for the IAM bounded context.
+ * Sets up CORS, CSRF disablement, stateless sessions, unauthorized access endpoints, and filter chains.
+ */
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfiguration {
@@ -25,6 +29,16 @@ public class WebSecurityConfiguration {
         this.bearerFilter = bearerFilter;
         this.unauthorizedEntryPoint = unauthorizedEntryPoint;
     }
+
+    /**
+     * Configures the main HTTP security filter chain.
+     * Specifies public endpoints (like auth, swagger, error, and OPTIONS preflights) and enforces
+     * authentication on all other endpoints, incorporating the JWT Bearer filter.
+     *
+     * @param http the HttpSecurity builder to configure
+     * @return the built SecurityFilterChain
+     * @throws Exception if an error occurs during building the security filter chain
+     */
     @Bean   
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http

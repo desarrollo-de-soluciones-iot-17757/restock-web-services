@@ -1,14 +1,22 @@
 package com.uitopic.restock.platform.iam.application.internal.queryservices;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
-import com.uitopic.restock.platform.iam.domain.model.queries.GetUserByIdQuery;
+import com.uitopic.restock.platform.iam.domain.model.queries.GetAllUsersByAccountIdQuery;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.domain.services.UserQueryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
+/**
+ * Query service implementation for {@link User} aggregates.
+ * Handles queries related to user retrieval by account ID.
+ */
+@Slf4j
 @Service
+@Transactional(readOnly = true)
 public class UserQueryServiceImpl implements UserQueryService {
 
     private final UserRepository userRepository;
@@ -17,8 +25,18 @@ public class UserQueryServiceImpl implements UserQueryService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Handles the {@link GetAllUsersByAccountIdQuery} to retrieve all users
+     * associated with a given account ID.
+     *
+     * @param query the query containing the account ID
+     * @return a {@link List} of {@link User} aggregates for that account
+     */
     @Override
-    public Optional<User> handle(GetUserByIdQuery query) {
-        return userRepository.findById(query.userId());
+    public List<User> handle(GetAllUsersByAccountIdQuery query) {
+        log.debug("Querying all users for account ID: {}", query.accountId());
+        var results = userRepository.findAllByAccountId(query.accountId());
+        log.debug("Found {} user(s) for account ID: {}", results.size(), query.accountId());
+        return results;
     }
 }
