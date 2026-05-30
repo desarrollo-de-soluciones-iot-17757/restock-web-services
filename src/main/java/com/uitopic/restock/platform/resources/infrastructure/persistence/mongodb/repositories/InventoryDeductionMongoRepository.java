@@ -1,4 +1,12 @@
 package com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories;
 
-public interface InventoryDeductionMongoRepository {
+import com.uitopic.restock.platform.resources.domain.model.entities.InventoryDeduction;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface InventoryDeductionMongoRepository extends MongoRepository<InventoryDeduction, String> {
+    List<InventoryDeduction> findByBranchId(String branchId);
 }
