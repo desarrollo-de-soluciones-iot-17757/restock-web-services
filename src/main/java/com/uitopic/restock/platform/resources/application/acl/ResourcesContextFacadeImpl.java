@@ -15,16 +15,16 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
 
     @Override
     public double subtractSupplyStock(String branchId, String supplyId, Integer quantity) {
-        return batchCommandService.subtractStock(branchId, supplyId, quantity);
+        return 0;
     }
 
     @Override
     public void addSupplyStockBack(String branchId, String supplyId, Integer quantity, String unit) {
-        batchCommandService.addStockBack(branchId, supplyId, quantity, unit);
+
     }
 
     @Override
     public void adjustStock(String branchId, String supplyId, Integer adjustedQuantity, String unit) {
-        batchCommandService.adjustStock(branchId, supplyId, adjustedQuantity, unit);
+
     }
 }

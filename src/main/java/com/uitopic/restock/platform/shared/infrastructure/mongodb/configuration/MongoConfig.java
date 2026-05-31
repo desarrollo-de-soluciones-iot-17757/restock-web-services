@@ -2,8 +2,6 @@ package com.uitopic.restock.platform.shared.infrastructure.mongodb.configuration
 
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockWriteConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
@@ -24,8 +22,6 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
         return new MongoCustomConversions(List.of(
-                new StockReadConverter(),
-                new StockWriteConverter(),
                 new InventoryStateReadConverter(),
                 new InventoryStateWriteConverter()
         ));

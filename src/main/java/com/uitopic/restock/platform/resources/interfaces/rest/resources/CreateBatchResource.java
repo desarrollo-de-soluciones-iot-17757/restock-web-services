@@ -9,7 +9,9 @@ public record CreateBatchResource(
         @NotBlank @Schema(description = "Batch code")
         String code,
         @Min(0) @Schema(description = "Current quantity")
-        Integer initialStock,
+        Double initialStock,
+        @NotBlank @Schema(description = "Unit of measurement (e.g., 'kg', 'liters', 'units')")
+        String unitMeasurement,
         @NotBlank @Schema(description = "Unit purchase cost amount")
         String unitPurchaseCostAmount,
         @NotBlank @Schema(description = "Unit purchase cost currency")

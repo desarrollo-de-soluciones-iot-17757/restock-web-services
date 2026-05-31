@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -43,17 +44,20 @@ public class BatchesController {
     public ResponseEntity<BatchResource> create(@Valid @RequestBody CreateBatchResource resource) {
         var command = new CreateBatchCommand(
                 resource.code(),
-                new Stock(resource.initialStock()),
+                new Stock(resource.initialStock(), resource.unitMeasurement()),
                 new Money(new BigDecimal(resource.unitPurchaseCostAmount()), resource.unitPurchaseCostCurrency()),
                 resource.customSupplyId(),
                 resource.receivingBranchId(),
                 new AccountId(resource.accountId()),
-                resource.manufacturingDate(),
-                resource.expirationDate(),
-                resource.entryDate()
+                resource.manufacturingDate() != null ? Optional.of(LocalDate.parse(resource.manufacturingDate())) : null,
+                resource.expirationDate() != null ? Optional.of(LocalDate.parse(resource.expirationDate())) : null,
+                resource.entryDate() != null ? Optional.of(LocalDate.parse(resource.entryDate())) : null
         );
         var batch = commandService.handle(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(BatchResourceFromEntityAssembler.toResourceFromEntity(batch));
+        return batch.map(value -> ResponseEntity.status(HttpStatus.CREATED).body(
+                BatchResourceFromEntityAssembler
+                        .toResourceFromEntity(value)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     @Operation(summary = "Get batch by ID")
@@ -62,32 +66,6 @@ public class BatchesController {
         return queryService.findById(batchId)
                 .map(b -> ResponseEntity.ok(BatchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Transfer inventory between branches")
-    @PostMapping("/transfer")
-    public ResponseEntity<?> transfer(@Valid @RequestBody CreateInventoryTransferResource resource) {
-        var command = new TransferInventoryCommand(resource.fromBranchId(), resource.toBranchId(),
-                resource.customSupplyId(), resource.quantity(), resource.unit(), resource.reason());
-        var transfer = commandService.handle(command);
-        return ResponseEntity.ok(Map.of(
-                "transferId", transfer.getId(),
-                "status", transfer.getStatus(),
-                "completedAt", transfer.getCompletedAt()
-        ));
-    }
-
-    @Operation(summary = "Subtract inventory stock")
-    @PostMapping("/subtract")
-    public ResponseEntity<?> subtract(@Valid @RequestBody CreateInventorySubtractResource resource) {
-        var command = new SubtractInventoryCommand(resource.branchId(), resource.customSupplyId(),
-                resource.quantity(), resource.unit(), resource.reason(), resource.timestamp());
-        var deduction = commandService.handle(command);
-        return ResponseEntity.ok(Map.of(
-                "deductionId", deduction.getId(),
-                "remainingStock", deduction.getRemainingStock(),
-                "timestamp", deduction.getTimestamp()
-        ));
     }
 
 }

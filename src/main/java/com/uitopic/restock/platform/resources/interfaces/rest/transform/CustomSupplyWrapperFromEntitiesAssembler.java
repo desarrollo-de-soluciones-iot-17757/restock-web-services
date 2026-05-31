@@ -30,7 +30,6 @@ public class CustomSupplyWrapperFromEntitiesAssembler {
                 entity.getUnitPrice().getCurrencyCode(),
                 entity.getSupplyContent().getContent(),
                 entity.getUnitMeasurement().getUnitName(),
-                entity.getMinimumStock().getMinimumStock(),
                 entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null
         );
     }
