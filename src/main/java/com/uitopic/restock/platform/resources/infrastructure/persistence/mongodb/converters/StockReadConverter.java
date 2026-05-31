@@ -14,17 +14,17 @@ import org.springframework.data.convert.ReadingConverter;
  * @see StockWriteConverter
  */
 @ReadingConverter
-public class StockReadConverter implements Converter<Integer, Stock> {
+public class StockReadConverter implements Converter<Double, Stock> {
 
     /**
-     * Converts the given integer from MongoDB into a {@link Stock} value object.
+     * Converts the given double from MongoDB into a {@link Stock} value object.
      *
-     * @param source the raw integer value read from MongoDB, may be {@code null}
+     * @param source the raw double value read from MongoDB, may be {@code null}
      * @return a new {@link Stock} wrapping the source value, or {@code null} if source is {@code null}
      */
     @Override
-    public Stock convert(Integer source) {
+    public Stock convert(Double source) {
         if (source == null) return null;
-        return new Stock(source);
+        return new Stock(source, "units");
     }
 }

@@ -2,12 +2,9 @@ package com.uitopic.restock.platform.shared.infrastructure.mongodb.configuration
 
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.AddressReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.AddressWriteConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.ImageURLReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.ImageURLWriteConverter;
-//import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
-//import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
 import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,24 +68,17 @@ public class MongoConfig {
     public MongoCustomConversions mongoCustomConversions() {
         return new MongoCustomConversions(List.of(
                 new InventoryStateReadConverter(),
-                new InventoryStateWriteConverter()
-
+                new InventoryStateWriteConverter(),
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
                 new AccountIdReadConverter(),
-<<<<<<< HEAD
-                new AccountIdWriteConverter()
-=======
                 new AccountIdWriteConverter(),
                 new AddressWriteConverter(),
                 new AddressReadConverter(),
                 new ImageURLWriteConverter(),
                 new ImageURLReadConverter()
                 //new StockWriteConverter(),
-                //new StockReadConverter(),
-                //new InventoryStateWriteConverter(),
-                //new InventoryStateReadConverter()
->>>>>>> origin/develop
+                //new StockReadConverter()
         ));
     }
 }
