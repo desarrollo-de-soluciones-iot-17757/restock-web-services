@@ -18,17 +18,14 @@ public class UpdateBranchImageCommandFromResourceAssembler {
      */
     public static UpdateBranchImageCommand ToCommandFromResource(UpdateBranchImageResource resource, String branchId) {
         try {
-            boolean shouldRemoveImage = resource.shouldRemoveImage();
-
             if (!resource.hasImage()) {
-                return new UpdateBranchImageCommand(branchId, null, null, shouldRemoveImage);
+                return new UpdateBranchImageCommand(branchId, null, null);
             }
 
             return new UpdateBranchImageCommand(
                     branchId,
                     resource.image().getBytes(),
-                    resource.image().getOriginalFilename(),
-                    false
+                    resource.image().getOriginalFilename()
             );
         } catch (Exception e) {
             throw new RuntimeException("Failed to convert UpdateBranchImageResource to UpdateBranchImageCommand", e);

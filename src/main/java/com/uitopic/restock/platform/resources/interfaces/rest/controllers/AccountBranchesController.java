@@ -53,16 +53,6 @@ public class AccountBranchesController {
         this.branchQueryService = branchQueryService;
     }
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(MultipartFile.class, new PropertyEditorSupport() {
-            @Override
-            public void setAsText(String text) {
-                setValue(null);
-            }
-        });
-    }
-
 /**
  * REST controller handling account-scoped branch operations within the resources bounded context.
  *
@@ -102,79 +92,5 @@ public class AccountBranchesController {
         log.info("Branch created — ID: {}", branch.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(branch));
-    }
-
-    /**
-     * Fully updates the information of a branch belonging to the specified account.
-     * Accepts multipart/form-data to support optional image upload.
-     *
-     * @param accountId the unique identifier of the account that owns the branch
-     * @param branchId  the unique identifier of the branch to update
-     * @param resource  the multipart form data containing the updated branch data
-     * @return 200 with the updated {@link BranchResource}, or 404 if not found or not owned by the account
-     */
-    @Operation(summary = "Update branch info for an account")
-    @PutMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BranchResource> updateBranch(@PathVariable @NotNull String accountId,
-                                                       @PathVariable @NotNull String branchId,
-                                                       @ModelAttribute UpdateBranchInfoResource resource) {
-        log.info("PUT /api/v1/accounts/{}/branches/{}", accountId, branchId);
-        var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
-        var updated = branchCommandService.handle(command);
-        return updated
-                .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))
-                .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    /**
-     * Partially updates the information of a branch belonging to the specified account.
-     * Only non-null fields in the request body are applied.
-     * Accepts multipart/form-data to support optional image upload.
-     *
-     * @param accountId the unique identifier of the account that owns the branch
-     * @param branchId  the unique identifier of the branch to patch
-     * @param resource  the multipart form data containing the fields to update
-     * @return 200 with the updated {@link BranchResource}, or 404 if not found or not owned by the account
-     */
-    @Operation(summary = "Patch branch info for an account (partial update)")
-    @PatchMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BranchResource> patchBranch(@PathVariable @NotNull String accountId,
-                                                      @PathVariable @NotNull String branchId,
-                                                      @ModelAttribute UpdateBranchInfoResource resource) {
-        log.info("PATCH /api/v1/accounts/{}/branches/{}", accountId, branchId);
-        var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
-        var updated = branchCommandService.handle(command);
-        return updated
-                .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))
-                .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    /**
-     * Logically deletes a branch belonging to the specified account.
-     * Verifies account ownership before delegating to the command service.
-     *
-     * @param accountId the unique identifier of the account that owns the branch
-     * @param branchId  the unique identifier of the branch to delete
-     * @return 204 No Content on success, or 404 if not found or not owned by the account
-     */
-    @Operation(summary = "Delete a branch (logical) under an account")
-    @DeleteMapping("/{branchId}")
-    public ResponseEntity<Void> deleteBranch(@PathVariable @NotNull String accountId,
-                                             @PathVariable @NotNull String branchId) {
-        log.info("DELETE /api/v1/accounts/{}/branches/{}", accountId, branchId);
-        var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var branchOpt = branchQueryService.findById(branchId);
-        if (branchOpt.isEmpty() || branchOpt.get().getAccountId() == null
-                || !branchOpt.get().getAccountId().equals(expectedAccountId)) {
-            log.warn("Branch {} not found or does not belong to account {}", branchId, accountId);
-            return ResponseEntity.notFound().build();
-        }
-        branchCommandService.delete(branchId);
-        log.info("Branch {} deleted (logical) for account {}", branchId, accountId);
-        return ResponseEntity.noContent().build();
     }
 }

@@ -6,13 +6,11 @@ package com.uitopic.restock.platform.resources.domain.model.commands;
  * @param branchId           the ID of the branch to be updated
  * @param image              a byte array representing the new image of the branch
  * @param photoFileName      the name of the new photo file
- * @param shouldRemoveImage  whether to remove the current image
  */
 public record UpdateBranchImageCommand(
         String branchId,
         byte[] image,
-        String photoFileName,
-        boolean shouldRemoveImage
+        String photoFileName
 ) {
 
     /** Checks if the command contains a valid image. This method returns true if the image and photoFileName are not null, indicating that there is a new image to update.

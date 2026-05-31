@@ -7,7 +7,6 @@ import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBr
 /**
  * Assembler to convert {@link com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource}
  * to {@link com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand}
- * within the resources bounded context.
  */
 public class UpdateBranchInfoCommandFromResourceAssembler {
 
@@ -19,7 +18,6 @@ public class UpdateBranchInfoCommandFromResourceAssembler {
      */
     public static UpdateBranchInfoCommand ToCommandFromResource(UpdateBranchInfoResource resource, String branchId) {
        try {
-           boolean shouldRemoveImage = resource.shouldRemoveImage();
            
            if (!resource.hasImage()) {
                return new UpdateBranchInfoCommand(
@@ -31,8 +29,7 @@ public class UpdateBranchInfoCommandFromResourceAssembler {
                        resource.country(),
                        resource.description(),
                        null,
-                       null,
-                       shouldRemoveImage
+                       null
                );
            }
 
@@ -45,8 +42,7 @@ public class UpdateBranchInfoCommandFromResourceAssembler {
                    resource.country(),
                    resource.description(),
                    resource.image().getBytes(),
-                   resource.image().getOriginalFilename(),
-                   false
+                   resource.image().getOriginalFilename()
            );
 
        } catch (Exception e) {

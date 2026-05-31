@@ -10,8 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Schema(description = "Request resource for updating branch image")
 public record UpdateBranchImageResource(
-        @Schema(description = "Image") MultipartFile image,
-        @Schema(description = "Whether to remove the current image", example = "false") Boolean removeImage
+        @Schema(description = "Image") MultipartFile image
 ) {
     /** Helper method to check if an image file is provided in the request.
      *
@@ -22,13 +21,5 @@ public record UpdateBranchImageResource(
                 && !this.image.isEmpty()
                 && this.image.getOriginalFilename() != null
                 && !this.image.getOriginalFilename().isBlank();
-    }
-
-    /** Helper method to check if the image should be removed.
-     *
-     * @return true if removeImage flag is explicitly set to true, false otherwise
-     */
-    public boolean shouldRemoveImage() {
-        return this.removeImage != null && this.removeImage;
     }
 }

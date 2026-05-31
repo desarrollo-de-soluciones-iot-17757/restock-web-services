@@ -22,8 +22,7 @@ public record UpdateBranchInfoResource(
         @Schema(description = "State or Region") String regionOrState,
         @Schema(description = "Country") String country,
         @Schema(description = "Branch description") String description,
-        @Schema(description = "New photo file name") MultipartFile image,
-        @Schema(description = "Whether to remove the current image", example = "false") Boolean removeImage
+        @Schema(description = "New photo file name") MultipartFile image
         ) {
     /** Helper method to check if an image file is provided in the request.
      *
@@ -34,13 +33,5 @@ public record UpdateBranchInfoResource(
                 && !this.image.isEmpty()
                 && this.image.getOriginalFilename() != null
                 && !this.image.getOriginalFilename().isBlank();
-    }
-
-    /** Helper method to check if the image should be removed.
-     *
-     * @return true if removeImage flag is explicitly set to true, false otherwise
-     */
-    public boolean shouldRemoveImage() {
-        return this.removeImage != null && this.removeImage;
     }
 }

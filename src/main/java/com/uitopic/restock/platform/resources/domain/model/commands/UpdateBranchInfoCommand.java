@@ -20,8 +20,7 @@ public record UpdateBranchInfoCommand(
         String country,
         String description,
         byte[] image,
-        String photoFileName,
-        boolean shouldRemoveImage
+        String photoFileName
 ) {
     /** Method to check if the command includes a new photo for the branch. This method returns true if both the image and photoFileName fields are not null, indicating that a new photo is included in the update. */
     public boolean hasNewPhoto() {

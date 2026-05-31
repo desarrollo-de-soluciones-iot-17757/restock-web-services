@@ -48,18 +48,61 @@ public class Branch extends AuditableAbstractAggregateRoot {
     private static final String DEFAULT_IMAGE_URL = "https://res.cloudinary.com/deuy1pr9e/image/upload/v1780190808/restock_deafult_branch_image.jpg";
     private static final String DEFAULT_PUBLIC_ID = "restock_deafult_branch_image";
 
+
     /**
-     * Applies a partial update to the branch, only overwriting fields that are non-null.
-     * Passing {@code null} for any parameter leaves the corresponding field unchanged.
+     * Constructs a new Branch instance with the specified details. If the provided image URL is null or blank,
+     * the default placeholder image will be used.
      *
-     * @param location    the new location, or {@code null} to keep the existing one
-     * @param description the new description, or {@code null} to keep the existing one
-     * @param name        the new name, or {@code null} to keep the existing one
+     * @param name        the name of the branch
+     * @param address     the street address of the branch
+     * @param city        the city where the branch is located
+     * @param regionOrState the region or state where the branch is located
+     * @param country     the country where the branch is located
+     * @param description a brief description of the branch
+     * @param accountId   the identifier of the account that owns this branch
+     * @param imageUrl    the URL of the branch's image, or {@code null} to use the default
+     * @param publicId    the Cloudinary public ID of the image
      */
-    public void update(Address location, String description, String name) {
-        if (name != null && !name.isBlank()) this.name = name;
-        if (location != null) this.location = location;
-        if (description != null) this.description = description;
+    public Branch(String name, String address, String city, String regionOrState, String country, String description, String accountId, String imageUrl, String publicId) {
+        this.name = name;
+        this.location = new Address(address, city, regionOrState, country);
+        this.description = description;
+        this.accountId = new AccountId(accountId);
+        applyImage(imageUrl, publicId);
+        this.status = BranchStates.ACTIVE;
+    }
+
+    /**
+     * Updates the branch's details, including name, description, location, and image.
+     *
+     * @param name        the new name of the branch
+     * @param description the new description of the branch
+     * @param address     the new street address of the branch
+     * @param city        the new city of the branch
+     * @param regionOrState the new region or state of the branch
+     * @param country     the new country of the branch
+     * @param imageUrl    the new URL of the branch's image, or {@code null} to use the default
+     * @param publicId    the Cloudinary public ID of the new image
+     * @return the updated Branch instance (for method chaining)
+     */
+    public Branch updateBranch(String name, String description,String address, String city, String regionOrState, String country, String imageUrl, String publicId) {
+        this.name = name;
+        this.description = description;
+        this.location = new Address(address, city, regionOrState, country);
+        applyImage(imageUrl, publicId);
+        return this;
+    }
+
+    /**
+     * Updates only the branch's image. If the provided URL is null or blank, the default placeholder image will be used.
+     *
+     * @param imageUrl the new URL of the branch's image, or {@code null} to use the default
+     * @param publicId the Cloudinary public ID of the new image
+     * @return the updated Branch instance (for method chaining)
+     */
+    public Branch updateBranchImage(String imageUrl, String publicId) {
+        applyImage(imageUrl, publicId);
+        return this;
     }
 
     /**
