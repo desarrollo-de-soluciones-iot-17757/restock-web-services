@@ -1,6 +1,6 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.queries.GetBatchesByBranchIdQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetBatchesByCustomSupplyIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.BatchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BatchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BatchResourceFromEntityAssembler;
@@ -35,7 +35,7 @@ public class BranchBatchesController {
             @PathVariable String branchId,
             @RequestParam(required = false) String customSupplyId) {
         log.debug("GET /api/v1/branches/{}/batches", branchId);
-        var batches = batchQueryService.handle(new GetBatchesByBranchIdQuery(branchId, customSupplyId));
+        var batches = batchQueryService.handle(new GetBatchesByCustomSupplyIdQuery(customSupplyId));
         var resources = batches.stream().map(BatchResourceFromEntityAssembler::toResourceFromEntity).toList();
         return ResponseEntity.ok(resources);
     }

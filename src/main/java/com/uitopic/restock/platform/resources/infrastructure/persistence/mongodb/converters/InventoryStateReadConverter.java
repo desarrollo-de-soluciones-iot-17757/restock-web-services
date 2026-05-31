@@ -2,11 +2,13 @@ package com.uitopic.restock.platform.resources.infrastructure.persistence.mongod
 
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.InventoryState;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.ReadingConverter;
 
 /**
  * Converts a String from MongoDB to InventoryState when reading from the database.
  * Uses InventoryState.valueOf(...) by default (expects the stored string to match enum name).
  */
+@ReadingConverter
 public class InventoryStateReadConverter implements Converter<String, InventoryState> {
 
     @Override
