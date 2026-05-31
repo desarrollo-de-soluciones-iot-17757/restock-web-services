@@ -1,7 +1,19 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Request resource for updating branch information, including optional fields for name, address, city, region/state, country, description, and image.
+ *
+ * @param name           the new name of the branch
+ * @param address        the new street address of the branch
+ * @param city           the new city where the branch is located
+ * @param regionOrState  the new region or state where the branch is located
+ * @param country        the new country where the branch is located
+ * @param description    (optional) a new description of the branch
+ * @param image          (optional) a new image file for the branch
+ */
 @Schema(description = "Request resource for updating branch info")
 public record UpdateBranchInfoResource(
         @Schema(description = "Branch name") String name,
@@ -9,5 +21,17 @@ public record UpdateBranchInfoResource(
         @Schema(description = "City") String city,
         @Schema(description = "State or Region") String regionOrState,
         @Schema(description = "Country") String country,
-        @Schema(description = "Branch description") String description
-) {}
+        @Schema(description = "Branch description") String description,
+        @Schema(description = "New photo file name")MultipartFile image
+        ) {
+    /** Helper method to check if an image file is provided in the request.
+     *
+     * @return true if an image file is provided and not empty, false otherwise
+     */
+    public boolean hasImage() {
+        return this.image != null
+                && !this.image.isEmpty()
+                && this.image.getOriginalFilename() != null
+                && !this.image.getOriginalFilename().isBlank();
+    }
+}

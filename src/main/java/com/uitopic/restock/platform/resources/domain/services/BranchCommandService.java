@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 
 import java.util.Optional;
@@ -36,13 +37,13 @@ public interface BranchCommandService {
     Optional<Branch> handle(UpdateBranchInfoCommand command);
 
     /**
-     * Updates the image URL of an existing branch.
+     * Updates the image of an existing branch by uploading the new image via the storage service,
+     * updating the branch's image URL and public ID, and persisting the changes.
      *
-     * @param branchId the unique identifier of the branch to update
-     * @param imageUrl the new image URL, or {@code null} to clear the existing image
+     * @param command the command containing the branch ID and the new image data
      * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
      */
-    Optional<Branch> updateImage(String branchId, String imageUrl);
+    Optional<Branch> updateImage(UpdateBranchImageCommand command);
 
     /**
      * Performs a logical deletion of a branch by transitioning its status to

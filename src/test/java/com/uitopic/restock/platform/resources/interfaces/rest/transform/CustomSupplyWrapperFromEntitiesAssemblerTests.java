@@ -31,7 +31,7 @@ public class CustomSupplyWrapperFromEntitiesAssemblerTests {
                     .supplyContent(ResourcesValueObjectFromStringAssembler.toSupplyContentFromString("500.00"))
                     .unitMeasurement(SharedValueObjectFromStringAssembler.toUnitMeasurementFromString("litters"))
                     .minimumStock(ResourcesValueObjectFromStringAssembler.toMinimumStockFromString("100"))
-                    .pictureUrl(SharedValueObjectFromStringAssembler.toImageURLFromString("http://example.com/image" + i + ".jpg"))
+                    .pictureUrl(SharedValueObjectFromStringAssembler.toImageURLFromString("http://example.com/image" + i + ".jpg", "image/jpeg"))
                     .accountId(SharedValueObjectFromStringAssembler.toAccountIdFromString("account-123"))
                     .build());
         }

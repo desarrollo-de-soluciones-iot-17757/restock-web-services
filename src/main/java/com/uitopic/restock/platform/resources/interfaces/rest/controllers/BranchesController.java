@@ -1,16 +1,17 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchImageResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchImageCommandFromResourceAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchInfoCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * REST controller for branch operations not scoped to an account path.
  *
  * <p>Exposes endpoints under {@code /api/v1/branches} for retrieving a branch by ID,
- * partially updating branch info, updating the branch image, and logically deleting a branch.
+ * updating branch info, updating the branch image, and logically deleting a branch.
  * This controller complements {@link AccountBranchesController}, which handles account-scoped
  * branch creation and listing.
  *
@@ -64,37 +65,38 @@ public class BranchesController {
     }
 
     /**
-     * Partially updates the information of a branch. Only non-null fields in the request body are applied.
+     * Updates the information of a branch. Accepts multipart/form-data to support
+     * optional image upload alongside info fields.
      *
      * @param branchId the unique identifier of the branch to update
-     * @param resource the request body containing the fields to update
+     * @param resource the multipart form data containing the fields to update
      * @return 200 with the updated {@link BranchResource}, or 404 if not found
      */
     @Operation(summary = "Update branch info")
-    @PatchMapping("/{branchId}")
-    public ResponseEntity<BranchResource> updateInfo(@PathVariable String branchId,
-                                                     @Valid @RequestBody UpdateBranchInfoResource resource) {
-        log.info("PATCH /api/v1/branches/{}", branchId);
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.regionOrState(), resource.country(), resource.description());
+    @PutMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BranchResource> updateBranchInfo(@PathVariable String branchId,
+                                                           @ModelAttribute UpdateBranchInfoResource resource) {
+        log.info("PUT /api/v1/branches/{}", branchId);
+        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
         return commandService.handle(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Updates the image URL of a branch.
+     * Updates the image of a branch. Accepts multipart/form-data to support file upload.
      *
      * @param branchId the unique identifier of the branch
-     * @param resource the request body containing the new image URL
+     * @param resource the multipart form data containing the new image file
      * @return 200 with the updated {@link BranchResource}, or 404 if not found
      */
     @Operation(summary = "Update branch image")
-    @PatchMapping("/{branchId}/image")
+    @PatchMapping(value = "/{branchId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> updateImage(@PathVariable String branchId,
-                                                      @RequestBody UpdateBranchImageResource resource) {
+                                                      @ModelAttribute UpdateBranchImageResource resource) {
         log.info("PATCH /api/v1/branches/{}/image", branchId);
-        return commandService.updateImage(branchId, resource.imageUrl())
+        var command = UpdateBranchImageCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
+        return commandService.updateImage(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -45,6 +45,9 @@ public class Branch extends AuditableAbstractAggregateRoot {
     /** The identifier of the account that owns this branch. */
     private AccountId accountId;
 
+    private static final String DEFAULT_IMAGE_URL = "https://res.cloudinary.com/deuy1pr9e/image/upload/v1780190808/restock_deafult_branch_image.jpg";
+    private static final String DEFAULT_PUBLIC_ID = "restock_deafult_branch_image";
+
     /**
      * Applies a partial update to the branch, only overwriting fields that are non-null.
      * Passing {@code null} for any parameter leaves the corresponding field unchanged.
@@ -73,5 +76,27 @@ public class Branch extends AuditableAbstractAggregateRoot {
      */
     public void activate() {
         this.status = BranchStates.ACTIVE;
+    }
+
+    /**
+     * Returns whether the branch is currently using the default placeholder image.
+     */
+    public boolean hasDefaultImage() {
+        return this.imageUrl != null && DEFAULT_PUBLIC_ID.equals(this.imageUrl.publicId());
+    }
+
+    /**
+     * Applies an image to the branch. If the provided URL is null or blank,
+     * the default placeholder image is used instead.
+     *
+     * @param imageUrl the URL of the new image, or {@code null} to use the default
+     * @param publicId the Cloudinary public ID of the new image
+     */
+    public void applyImage(String imageUrl, String publicId) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            this.imageUrl = new ImageURL(DEFAULT_IMAGE_URL, DEFAULT_PUBLIC_ID);
+        } else {
+            this.imageUrl = new ImageURL(imageUrl, publicId);
+        }
     }
 }

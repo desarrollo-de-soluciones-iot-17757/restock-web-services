@@ -1,14 +1,14 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetBranchesByAccountIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.CreateBranchCommandFromResourceAssembler;
 import com.uitopic.restock.platform.shared.interfaces.rest.transform.SharedValueObjectFromStringAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,43 +57,35 @@ public class AccountBranchesController {
     }
 
     /**
-     * Retrieves all branches for the specified account, with optional state filtering and pagination.
+     * Retrieves all branches for the specified account.
      *
      * @param accountId the unique identifier of the account
-     * @param state     optional status filter (e.g., {@code "ACTIVE"} or {@code "INACTIVE"})
-     * @param page      zero-based page index (default 0)
-     * @param size      maximum number of results per page (default 20)
      * @return 200 with a list of {@link BranchResource} DTOs
      */
-    @Operation(summary = "Get branches for an account with optional filters and pagination")
+    @Operation(summary = "Get all branches for an account")
     @GetMapping
-    public ResponseEntity<List<BranchResource>> getBranchesByAccountId(@PathVariable @NotNull String accountId,
-                                                                       @RequestParam(required = false) String state,
-                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "20") int size) {
-        log.debug("GET /api/v1/accounts/{}/branches state={} page={} size={}", accountId, state, page, size);
+    public ResponseEntity<List<BranchResource>> getBranchesByAccountId(@PathVariable @NotNull String accountId) {
+        log.debug("GET /api/v1/accounts/{}/branches", accountId);
         var id = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var branches = branchQueryService.handle(new GetBranchesByAccountIdQuery(id), state, page, size);
+        var branches = branchQueryService.handle(new GetBranchesByAccountIdQuery(id));
         var resources = branches.stream().map(BranchResourceFromEntityAssembler::toResourceFromEntity).toList();
         return ResponseEntity.ok(resources);
     }
 
     /**
      * Creates a new branch under the specified account.
+     * Accepts multipart/form-data to support optional image upload.
      *
      * @param accountId the unique identifier of the account that will own the branch
-     * @param resource  the request body containing the branch creation data
+     * @param resource  the multipart form data containing the branch creation data
      * @return 201 Created with the newly created {@link BranchResource}
      */
     @Operation(summary = "Create a branch for an account")
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> createBranch(@PathVariable @NotNull String accountId,
-                                                        @Valid @RequestBody CreateBranchResource resource) {
-        log.info("POST /api/v1/accounts/{}/branches — name: {}", accountId, resource.name());
-        var command = new CreateBranchCommand(accountId, resource.name(), resource.address(),
-                resource.city(), resource.stateOrRegion(), resource.country(), resource.imageUrl(), resource.description());
-        var branch = branchCommandService.handle(command);
-        log.info("Branch created — ID: {}", branch.getId());
+                                                        @Valid @ModelAttribute CreateBranchResource resource) {
+        var createBranchCommand = CreateBranchCommandFromResourceAssembler.ToCommandFromResource(resource, accountId);
+        var branch = branchCommandService.handle(createBranchCommand);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(branch));
     }
@@ -112,7 +105,8 @@ public class AccountBranchesController {
                                                        @Valid @RequestBody UpdateBranchInfoResource resource) {
         log.info("PUT /api/v1/accounts/{}/branches/{}", accountId, branchId);
         var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(), resource.city(), resource.regionOrState(), resource.country(), resource.description());
+        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
+                resource.city(), resource.regionOrState(), resource.country(), resource.description());
         var updated = branchCommandService.handle(command);
         return updated
                 .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))
@@ -136,7 +130,8 @@ public class AccountBranchesController {
                                                       @RequestBody UpdateBranchInfoResource resource) {
         log.info("PATCH /api/v1/accounts/{}/branches/{}", accountId, branchId);
         var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(), resource.city(), resource.regionOrState(), resource.country(), resource.description());
+        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
+                resource.city(), resource.regionOrState(), resource.country(), resource.description());
         var updated = branchCommandService.handle(command);
         return updated
                 .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))
@@ -159,7 +154,8 @@ public class AccountBranchesController {
         log.info("DELETE /api/v1/accounts/{}/branches/{}", accountId, branchId);
         var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
         var branchOpt = branchQueryService.findById(branchId);
-        if (branchOpt.isEmpty() || branchOpt.get().getAccountId() == null || !branchOpt.get().getAccountId().equals(expectedAccountId)) {
+        if (branchOpt.isEmpty() || branchOpt.get().getAccountId() == null
+                || !branchOpt.get().getAccountId().equals(expectedAccountId)) {
             log.warn("Branch {} not found or does not belong to account {}", branchId, accountId);
             return ResponseEntity.notFound().build();
         }

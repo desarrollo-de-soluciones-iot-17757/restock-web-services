@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.shared.infrastructure.filestorage.cloudinar
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.uitopic.restock.platform.shared.infrastructure.filestorage.cloudinary.CloudinaryStorageService;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
  * In a real implementation, these methods would interact with the Cloudinary API
  * to perform the necessary operations.
  */
+@Service
 public class CloudinaryStorageServiceImpl implements CloudinaryStorageService {
 
     /**
