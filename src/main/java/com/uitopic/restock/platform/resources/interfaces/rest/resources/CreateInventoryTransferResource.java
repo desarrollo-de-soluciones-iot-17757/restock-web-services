@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 public record CreateInventoryTransferResource(
         @NotBlank @Schema(description = "Source branch ID") String fromBranchId,
         @NotBlank @Schema(description = "Destination branch ID") String toBranchId,
-        @NotBlank @Schema(description = "Custom supply ID") String customSupplyId,
+        @NotBlank @Schema(description = "Batch ID") String batchId,
         @Min(0) @Schema(description = "Quantity to transfer") double quantity,
         @NotBlank @Schema(description = "Unit of measurement") String unit,
         @Schema(description = "Reason for transfer") String reason

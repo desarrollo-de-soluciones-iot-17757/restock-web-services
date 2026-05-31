@@ -3,10 +3,13 @@ package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.SubtractInventoryCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.TransferInventoryCommand;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.resources.domain.services.BatchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BatchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.*;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BatchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -15,7 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -54,13 +60,22 @@ public class BatchesController {
     @Operation(summary = "Create a batch (add stock)")
     @PostMapping
     public ResponseEntity<BatchResource> create(@Valid @RequestBody CreateBatchResource resource) {
-        log.info("POST /api/v1/batches — branch ID: {}, supply ID: {}, quantity: {}",
-                resource.branchId(), resource.customSupplyId(), resource.currentQuantity());
-        var command = new CreateBatchCommand(resource.accountId(), resource.branchId(),
-                resource.customSupplyId(), resource.currentQuantity(), resource.unit(), resource.expirationDate());
+        var command = new CreateBatchCommand(
+                resource.code(),
+                new Stock(resource.initialStock(), resource.unitMeasurement()),
+                new Money(new BigDecimal(resource.unitPurchaseCostAmount()), resource.unitPurchaseCostCurrency()),
+                resource.customSupplyId(),
+                resource.receivingBranchId(),
+                new AccountId(resource.accountId()),
+                resource.manufacturingDate() != null ? Optional.of(LocalDate.parse(resource.manufacturingDate())) : null,
+                resource.expirationDate() != null ? Optional.of(LocalDate.parse(resource.expirationDate())) : null,
+                resource.entryDate() != null ? Optional.of(LocalDate.parse(resource.entryDate())) : null
+        );
         var batch = commandService.handle(command);
-        log.info("Batch created successfully — ID: {}", batch.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(BatchResourceFromEntityAssembler.toResourceFromEntity(batch));
+        return batch.map(value -> ResponseEntity.status(HttpStatus.CREATED).body(
+                        BatchResourceFromEntityAssembler
+                                .toResourceFromEntity(value)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**
@@ -71,50 +86,8 @@ public class BatchesController {
     @Operation(summary = "Get batch by ID")
     @GetMapping("/{batchId}")
     public ResponseEntity<BatchResource> getById(@PathVariable String batchId) {
-        log.debug("GET /api/v1/batches/{}", batchId);
         return queryService.findById(batchId)
-                .map(b -> {
-                    log.debug("Batch found — ID: {}", batchId);
-                    return ResponseEntity.ok(BatchResourceFromEntityAssembler.toResourceFromEntity(b));
-                })
-                .orElseGet(() -> {
-                    log.warn("Batch not found — ID: {}", batchId);
-                    return ResponseEntity.notFound().build();
-                });
+                .map(b -> ResponseEntity.ok(BatchResourceFromEntityAssembler.toResourceFromEntity(b)))
+                .orElse(ResponseEntity.notFound().build());
     }
-
-
-    @Operation(summary = "Transfer inventory between branches")
-    @PostMapping("/transfer")
-    public ResponseEntity<?> transfer(@Valid @RequestBody CreateInventoryTransferResource resource) {
-        log.info("POST /api/v1/batches/transfer — from: {}, to: {}, supply ID: {}, quantity: {}",
-                resource.fromBranchId(), resource.toBranchId(), resource.customSupplyId(), resource.quantity());
-        var command = new TransferInventoryCommand(resource.fromBranchId(), resource.toBranchId(),
-                resource.customSupplyId(), resource.quantity(), resource.unit(), resource.reason());
-        var transfer = commandService.handle(command);
-        log.info("Inventory transferred successfully — transfer ID: {}", transfer.getId());
-        return ResponseEntity.ok(Map.of(
-                "transferId", transfer.getId(),
-                "status", "completed",
-                "completedAt", transfer.getTransferDate() != null ? transfer.getTransferDate().toString() : java.time.LocalDate.now().toString()
-        ));
-    }
-
-    @Operation(summary = "Subtract inventory stock")
-    @PostMapping("/subtract")
-    public ResponseEntity<?> subtract(@Valid @RequestBody CreateInventorySubtractResource resource) {
-        log.info("POST /api/v1/batches/subtract — branch ID: {}, supply ID: {}, quantity: {}",
-                resource.branchId(), resource.customSupplyId(), resource.quantity());
-        var command = new SubtractInventoryCommand(resource.branchId(), resource.customSupplyId(),
-                resource.quantity(), resource.unit(), resource.reason(), resource.timestamp());
-        var deduction = commandService.handle(command);
-        log.info("Inventory deducted successfully — deduction ID: {}", deduction.getId());
-        return ResponseEntity.ok(Map.of(
-                "deductionId", deduction.getId(),
-                "remainingStock", deduction.getInventory() != null && deduction.getInventory().getCurrentStock() != null 
-                        ? deduction.getInventory().getCurrentStock().stock() : 0,
-                "timestamp", deduction.getDeductionDate() != null ? deduction.getDeductionDate().toString() : java.time.LocalDate.now().toString()
-        ));
-    }
-
 }
