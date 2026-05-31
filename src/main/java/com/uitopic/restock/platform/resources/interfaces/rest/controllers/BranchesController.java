@@ -5,10 +5,13 @@ import com.uitopic.restock.platform.resources.domain.services.BranchCommandServi
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.*;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchImageCommandFromResourceAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchInfoCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,27 +67,28 @@ public class BranchesController {
      * @return a ResponseEntity containing a BranchResource object representing the updated branch if the update was successful, or an HTTP 404 Not Found status if no branch with the given ID exists
      */
     @Operation(summary = "Update branch info")
-    @PatchMapping("/{branchId}")
-    public ResponseEntity<BranchResource> updateInfo(@PathVariable String branchId,
-                                                      @Valid @RequestBody UpdateBranchInfoResource resource) {
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.regionOrState(), resource.country(), resource.description());
-        return commandService.handle(command)
+    @PutMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BranchResource> updateBranchInfo(@PathVariable String branchId,
+                                                      @ModelAttribute UpdateBranchInfoResource resource) {
+        var updateBranchInfoCommand = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
+        return commandService.handle(updateBranchInfoCommand)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Endpoint to update branch image. This method is mapped to a PATCH request at the path "/api/v1/branches/{branchId}/image". It takes the branchId as a path variable and an UpdateBranchImageResource object as the request body, validates them, and uses the BranchCommandService to handle the update of the branch image. If the update is successful and a branch with the specified ID exists, the updated branch is transformed into a BranchResource object using the BranchResourceFromEntityAssembler and returned in the response body with an HTTP 200 OK status. If no branch with the given ID exists, an HTTP 404 Not Found status is returned.
+     * Endpoint to update the branch image. This method is mapped to a PATCH request at the path "/api/v1/branches/{branchId}/image". It takes the branchId as a path variable and an UpdateBranchImageResource object as the request body, validates them, and uses the BranchCommandService to handle the update of the branch image. If the update is successful and a branch with the specified ID exists, the updated branch is transformed into a BranchResource object using the BranchResourceFromEntityAssembler and returned in the response body with an HTTP 200 OK status. If no branch with the given ID exists, an HTTP 404 Not Found status is returned.
      * @param branchId the unique identifier of the branch to update
      * @param resource the UpdateBranchImageResource object containing the necessary information to update the branch image
      * @return a ResponseEntity containing a BranchResource object representing the updated branch if the update was successful, or an HTTP 404 Not Found status if no branch with the given ID exists
      */
     @Operation(summary = "Update branch image")
-    @PatchMapping("/{branchId}/image")
+    @PatchMapping(value = "/{branchId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> updateImage(@PathVariable String branchId,
-                                                       @RequestBody UpdateBranchImageResource resource) {
-        return commandService.updateImage(branchId, resource.imageUrl())
+                                                       @ModelAttribute UpdateBranchImageResource resource) {
+
+        var updateBranchImageCommand = UpdateBranchImageCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
+        return commandService.updateImage(updateBranchImageCommand)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }

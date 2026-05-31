@@ -52,8 +52,8 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                         "Supply template not found: " + command.supplyId()));
 
         Money unitPrice = SharedValueObjectFromStringAssembler.toMoneyFromString(command.unitPrice());
-        ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
-                ? new ImageURL(command.imageUrl()) : null;
+        //ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
+        //        ? new ImageURL(command.imageUrl()) : null;
 
         CustomSupply cs = CustomSupply.builder()
                 .accountId(accountId)
@@ -64,7 +64,6 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                 .supplyContent(new SupplyContent(command.supplyContent()))
                 .unitMeasurement(new UnitMeasurement(command.unitMeasurement()))
                 .minimumStock(new MinimumStock(command.minimumStock()))
-                .pictureUrl(imageUrl)
                 .build();
         return repository.save(cs);
     }
@@ -76,15 +75,14 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                             "Supply template not found: " + command.supplyId()));
             Money unitPrice = SharedValueObjectFromStringAssembler.toMoneyFromString(command.unitPrice());
-            ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
-                    ? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
+            //ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
+                    //? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
             existing.update(command.description(), unitPrice,
                     new SupplyContent(command.supplyContent()),
                     new UnitMeasurement(command.unitMeasurement()),
                     new MinimumStock(command.minimumStock()));
             existing.setCategory(category);
             existing.setName(command.name());
-            existing.setPictureUrl(imageUrl);
             return repository.save(existing);
         });
     }

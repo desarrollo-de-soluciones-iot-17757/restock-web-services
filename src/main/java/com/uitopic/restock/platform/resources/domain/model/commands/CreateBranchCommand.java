@@ -9,8 +9,9 @@ package com.uitopic.restock.platform.resources.domain.model.commands;
  * @param city           the city where the branch is located
  * @param regionOrState  the region or state where the branch is located
  * @param country        the country where the branch is located
- * @param imageUrl       (optional) URL of an image representing the branch
  * @param description    (optional) a description of the branch
+ * @param image          (optional) a byte array representing the image of the branch
+ * @param photoFileName (optional) the name of the photo file
  */
 public record CreateBranchCommand(
         String accountId,
@@ -19,6 +20,11 @@ public record CreateBranchCommand(
         String city,
         String regionOrState,
         String country,
-        String imageUrl,
-        String description
-) {}
+        String description,
+        byte[] image,
+        String photoFileName
+) {
+    public boolean hasNewPhoto() {
+        return image != null && photoFileName != null;
+    }
+}

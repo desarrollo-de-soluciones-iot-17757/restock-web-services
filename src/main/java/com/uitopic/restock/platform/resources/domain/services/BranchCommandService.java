@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 
 import java.util.Optional;
@@ -26,13 +27,12 @@ public interface BranchCommandService {
      */
     Optional<Branch> handle(UpdateBranchInfoCommand command);
 
-    /** Handles the update of a branch's image based on the provided branch ID and new image URL. This method retrieves the existing Branch entity, updates its image URL, and saves the updated Branch entity to the repository.
+    /** Handles the update of a branch's image based on the provided UpdateBranchImageCommand. This method retrieves the existing Branch entity, uploads the new image using the ImageService, updates the branch's image URL and public ID, and saves the updated Branch entity to the repository.
      *
-     * @param branchId the unique identifier of the branch to update
-     * @param imageUrl the new image URL to set for the branch
+     * @param command the UpdateBranchImageCommand containing the necessary information to update a branch's image
      * @return an Optional containing the updated Branch entity if the update was successful, or empty if no Branch with the given ID exists
      */
-    Optional<Branch> updateImage(String branchId, String imageUrl);
+    Optional<Branch> updateImage(UpdateBranchImageCommand command);
 
     /** Handles the deletion of a branch based on the provided branch ID. This method checks if a Branch with the given ID exists, and if so, deletes it from the repository.
      *
