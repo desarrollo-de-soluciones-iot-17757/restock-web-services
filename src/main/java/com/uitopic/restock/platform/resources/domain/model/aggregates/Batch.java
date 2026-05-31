@@ -4,7 +4,6 @@ import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Represents a batch of products in the inventory system. A batch is a specific quantity of a product that is received, stored, and managed as a unit within the inventory. Each batch has a unique code, associated product information, stock levels, and relevant dates for manufacturing, expiration, and entry into the inventory system. The Batch class provides methods for managing stock levels and tracking the details of each batch to ensure accurate inventory management.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
@@ -84,6 +86,6 @@ public class Batch extends AuditableAbstractAggregateRoot {
      */
     public void subtrack(@Valid Stock quantity) {
         if (quantity == null) return;
-        this.currentStock = new Stock(this.currentStock.stock() - quantity.stock());
+        this.currentStock = new Stock(this.currentStock.stock() - quantity.stock(), this.currentStock.unitMeasurement());
     }
 }

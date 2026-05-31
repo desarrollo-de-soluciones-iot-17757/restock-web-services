@@ -1,7 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.MinimumStock;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyContent;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -55,14 +54,14 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
     private UnitMeasurement unitMeasurement;
 
     /**
-     * The minimum stock level for this custom supply, which can be used for inventory management and restocking purposes.
-     */
-    private MinimumStock minimumStock;
-
-    /**
      * Optional picture URL for the custom supply.
      */
     private ImageURL pictureUrl;
+
+    /**
+     * Indicates whether the custom supply is perishable or not, which can be important for inventory management and restocking purposes, especially for supplies that have a limited shelf life (e.g., food items, beverages, etc.)
+     */
+    private Boolean isPerishable;
 
     /**
      * Reference to the account that owns this custom supply.
@@ -76,9 +75,8 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
      * @param unitPrice the new unit price of the custom supply
      * @param supplyContent the new supply content of the custom supply
      * @param unitMeasurement the new unit measurement of the custom supply
-     * @param minimumStock the new minimum stock of the custom supply
      */
-    public void update(@NotNull String description, Money unitPrice, SupplyContent supplyContent, UnitMeasurement unitMeasurement, MinimumStock minimumStock) {
+    public void update(@NotNull String description, Money unitPrice, SupplyContent supplyContent, UnitMeasurement unitMeasurement) {
         if (description != null) {
             this.description = description;
         }
@@ -93,10 +91,6 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
 
         if (unitMeasurement != null) {
             this.unitMeasurement = unitMeasurement;
-        }
-
-        if (minimumStock != null) {
-            this.minimumStock = minimumStock;
         }
     }
 }
