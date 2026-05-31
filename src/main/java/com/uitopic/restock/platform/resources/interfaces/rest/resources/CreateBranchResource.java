@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Resource class representing the request body for creating a new branch. This class is used in the REST API to receive the necessary information for creating a branch, including account ID, branch name, address, location details, description, and an optional image file.
+ * Resource class representing the request body for creating a new branch. This class is used in the REST API to receive the necessary 
+ * information for creating a branch, including account ID, branch name, address, location details, description, and an optional image file.
  */
 @Schema(description = "Request resource for creating a branch")
 public record CreateBranchResource(

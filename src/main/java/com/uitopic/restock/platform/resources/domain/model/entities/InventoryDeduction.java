@@ -1,10 +1,27 @@
 package com.uitopic.restock.platform.resources.domain.model.entities;
 
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.shared.domain.model.entities.AuditableModel;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
+/**
+ * Entity representing a stock deduction event recorded against an
+ * {@link Inventory}.
+ *
+ * <p>
+ * Captures the quantity removed from an inventory on a specific date, providing
+ * an audit trail of consumption or waste events. Each deduction is linked to
+ * the
+ * {@link Inventory} from which stock was removed.
+ *
+ * <p>
+ * Extends
+ * {@link com.uitopic.restock.platform.shared.domain.model.entities.AuditableModel}
+ * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
@@ -13,11 +30,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "inventory_deductions")
 public class InventoryDeduction extends AuditableModel {
 
-    private String branchId;
-    private String supplyId;
-    private double quantity;
-    private UnitMeasurement unit;
-    private String reason;
-    private String timestamp;
-    private double remainingStock;
+    /** The inventory from which stock was deducted. */
+    private Inventory inventory;
+
+    /** The quantity of stock that was removed in this deduction event. */
+    private Stock quantityDeducted;
+
+    /** The date on which this deduction was recorded. */
+    private LocalDate deductionDate;
 }

@@ -54,7 +54,7 @@ public class SupplyCommandServiceImpl implements SupplyCommandService {
         try {
             return SupplyNames.valueOf(category.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return SupplyNames.OTHER;
+            return null;
         }
     }
 }

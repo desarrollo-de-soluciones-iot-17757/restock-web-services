@@ -7,48 +7,53 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository interface for managing Branch aggregates. This interface defines the contract for saving, retrieving, and deleting Branch entities from the underlying data store.
- * It includes methods for finding branches by their ID, finding all branches associated with a specific account, and checking for the existence of a branch by name within an account.
+ * Domain repository port for {@link Branch} aggregate persistence.
+ *
+ * <p>Defines the contract for storing and retrieving branches, decoupling the domain
+ * layer from the MongoDB infrastructure. The implementation is provided by
+ * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.BranchRepositoryImpl}.
  */
 public interface BranchRepository {
 
     /**
-     * Saves a Branch entity to the repository. If the branch already exists, it will be updated; otherwise, a new entry will be created.
+     * Persists a {@link Branch} aggregate. Creates a new document if the branch has no ID,
+     * or updates the existing document otherwise.
      *
-     * @param branch the Branch entity to save
-     * @return the saved Branch entity, which may include an auto-generated ID if it was newly created
+     * @param branch the branch to save
+     * @return the saved branch, including any auto-generated ID
      */
     Branch save(Branch branch);
 
     /**
-     * Retrieves a Branch entity by its unique identifier.
+     * Finds a branch by its unique identifier.
      *
-     * @param id the unique identifier of the Branch to retrieve
-     * @return an Optional containing the Branch if found, or empty if no Branch with the given ID exists
+     * @param id the unique identifier of the branch
+     * @return an {@link Optional} containing the {@link Branch} if found, or empty if not found
      */
     Optional<Branch> findById(String id);
 
     /**
-     * Retrieves a list of Branch entities associated with a specific account.
+     * Finds all branches belonging to the specified account.
      *
-     * @param accountId the unique identifier of the account whose branches are to be retrieved
-     * @return a List of Branch entities associated with the specified account
+     * @param accountId the account whose branches are to be retrieved
+     * @return a {@link List} of {@link Branch} aggregates for that account
      */
     List<Branch> findByAccountId(AccountId accountId);
 
     /**
-     * Deletes a Branch entity from the repository by its unique identifier.
+     * Removes a branch document from the store by its unique identifier.
      *
-     * @param id the unique identifier of the Branch to delete
+     * @param id the unique identifier of the branch to delete
      */
     void deleteById(String id);
 
     /**
-     * Checks if a Branch with the given name already exists within the specified account.
+     * Checks whether a branch with the given name already exists within the specified account.
+     * Used to enforce name uniqueness per account before creating or renaming a branch.
      *
-     * @param name the name of the Branch to check for existence
-     * @param accountId the unique identifier of the account to which the Branch belongs
-     * @return true if a Branch with the given name exists within the account, false otherwise
+     * @param name      the branch name to check
+     * @param accountId the account scope for the uniqueness check
+     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
      */
     boolean existsByNameAndAccountId(String name, AccountId accountId);
 }

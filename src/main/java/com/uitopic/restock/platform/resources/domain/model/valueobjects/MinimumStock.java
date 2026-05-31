@@ -1,7 +1,11 @@
 package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
 /**
- * Value object representing the minimum stock level for a supply item.
+ * Value object representing the minimum stock threshold for a {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}.
+ *
+ * <p>When the current stock of a supply falls below this threshold, the inventory state
+ * transitions to {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.InventoryState#LOWSTOCK}.
+ * This value object enforces that the minimum stock is always a non-negative integer.
  *
  * @param minimumStock the minimum stock level, must be a non-negative integer
  */
@@ -9,7 +13,11 @@ public record MinimumStock(
         Integer minimumStock
 ) {
 
-    // Constructor validation to ensure minimumStock is a non-negative integer
+    /**
+     * Compact constructor that validates the minimum stock value.
+     *
+     * @throws IllegalArgumentException if {@code minimumStock} is null or negative
+     */
     public MinimumStock {
         if (minimumStock == null || minimumStock < 0) {
             throw new IllegalArgumentException("Minimum stock must be a non-negative integer.");
@@ -17,22 +25,23 @@ public record MinimumStock(
     }
 
     /**
-     * Checks if the current stock is below or at the minimum stock level.
+     * Checks if the given stock level is below the minimum stock threshold.
      *
-     * @param currentStock the current stock level to compare against the minimum stock
-     * @return true if the current stock is below or at the minimum stock level, false otherwise
+     * @param stock the current stock level to compare against the minimum
+     * @return {@code true} if {@code stock} is below the minimum stock level, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code stock} is negative
      */
-    public Boolean isStockBelowOrAtMinimum(Integer currentStock) {
-        if (currentStock == null || currentStock < 0) {
+    public boolean isStockBelowMinimum(int stock) {
+        if (stock < 0) {
             throw new IllegalArgumentException("Current stock must be a non-negative integer.");
         }
-        return currentStock <= minimumStock;
+        return stock < minimumStock;
     }
 
     /**
-     * Gets the minimum stock value.
+     * Returns the minimum stock threshold value.
      *
-     * @return the minimum stock value
+     * @return the minimum stock as an {@link Integer}
      */
     public Integer getMinimumStock() {
         return minimumStock;

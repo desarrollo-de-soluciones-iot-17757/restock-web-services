@@ -9,11 +9,12 @@ public class BatchResourceFromEntityAssembler {
         return new BatchResource(
                 entity.getId(),
                 entity.getAccountId() != null ? entity.getAccountId().getAccountId() : null,
-                entity.getBranchId(),
-                entity.getCustomSupplyId(),
-                entity.getCurrentQuantity(),
-                entity.getUnit() != null ? entity.getUnit().getUnitName() : null,
-                entity.getExpirationDate(),
+                entity.getReceivingBranch() != null ? entity.getReceivingBranch().getId() : null,
+                entity.getCustomSupply() != null ? entity.getCustomSupply().getId() : null,
+                entity.getCurrentStock() != null ? entity.getCurrentStock().stock() : 0,
+                entity.getCustomSupply() != null && entity.getCustomSupply().getUnitMeasurement() != null 
+                        ? entity.getCustomSupply().getUnitMeasurement().getUnitName() : null,
+                entity.getExpirationDate() != null ? entity.getExpirationDate().toString() : null,
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
         );
     }

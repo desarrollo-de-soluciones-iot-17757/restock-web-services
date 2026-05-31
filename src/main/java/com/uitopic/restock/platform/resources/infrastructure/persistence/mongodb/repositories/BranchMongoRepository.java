@@ -8,17 +8,31 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repository interface for managing Branch entities in MongoDB. This interface extends MongoRepository, providing basic CRUD operations and custom query methods for Branch entities.
+ * MongoDB repository for {@link Branch} aggregates.
+ *
+ * <p>Extends Spring Data's {@link MongoRepository} to provide standard CRUD operations
+ * and custom query methods for the {@code branches} collection. Used exclusively by
+ * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.BranchRepositoryImpl}
+ * as the underlying persistence mechanism.
  */
 @Repository
 public interface BranchMongoRepository extends MongoRepository<Branch, String> {
 
-    /** Custom query method to find all branches associated with a specific account ID. This method returns a list of Branch entities that belong to the given account ID. */
+    /**
+     * Finds all branches associated with the specified account ID.
+     *
+     * @param accountId the account whose branches are to be retrieved
+     * @return a {@link List} of {@link Branch} aggregates for that account
+     */
     List<Branch> findByAccountId(AccountId accountId);
 
-    /** Custom query method to check if a branch with the given name and account ID already exists. This method returns true if a branch with the specified name and account ID exists, false otherwise. */
+    /**
+     * Checks whether a branch with the given name already exists within the specified account.
+     * Used to enforce name uniqueness per account before creating or renaming a branch.
+     *
+     * @param name      the branch name to check
+     * @param accountId the account scope for the uniqueness check
+     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
+     */
     boolean existsByNameAndAccountId(String name, AccountId accountId);
-
-    /** Custom query method to check if a branch with the given location already exists. This method returns true if a branch with the specified location exists, false otherwise. */
-    boolean existsByLocation(String location);
 }
