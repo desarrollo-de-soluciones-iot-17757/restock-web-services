@@ -71,8 +71,7 @@ public class MongoConfig {
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
                 new AccountIdReadConverter(),
-                new AccountIdWriteConverter(),
-                new StringToMultipartFileConverter()
+                new AccountIdWriteConverter()
                 //new StockWriteConverter(),
                 //new StockReadConverter(),
                 //new InventoryStateWriteConverter(),
