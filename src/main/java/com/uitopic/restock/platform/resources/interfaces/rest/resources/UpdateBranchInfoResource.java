@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Request resource for updating branch information, including optional fields for name, address, city, region/state, country, description, and image.
+ * Request resource for updating branch information within the resources bounded context.
  *
  * @param name           the new name of the branch
  * @param address        the new street address of the branch
@@ -22,7 +22,8 @@ public record UpdateBranchInfoResource(
         @Schema(description = "State or Region") String regionOrState,
         @Schema(description = "Country") String country,
         @Schema(description = "Branch description") String description,
-        @Schema(description = "New photo file name")MultipartFile image
+        @Schema(description = "New photo file name") MultipartFile image,
+        @Schema(description = "Whether to remove the current image", example = "false") Boolean removeImage
         ) {
     /** Helper method to check if an image file is provided in the request.
      *
@@ -33,5 +34,13 @@ public record UpdateBranchInfoResource(
                 && !this.image.isEmpty()
                 && this.image.getOriginalFilename() != null
                 && !this.image.getOriginalFilename().isBlank();
+    }
+
+    /** Helper method to check if the image should be removed.
+     *
+     * @return true if removeImage flag is explicitly set to true, false otherwise
+     */
+    public boolean shouldRemoveImage() {
+        return this.removeImage != null && this.removeImage;
     }
 }

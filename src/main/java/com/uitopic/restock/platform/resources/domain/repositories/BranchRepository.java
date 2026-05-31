@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain repository port for {@link Branch} aggregate persistence.
+ * Domain repository port for {@link Branch} aggregate persistence within the resources bounded context.
  *
  * <p>Defines the contract for storing and retrieving branches, decoupling the domain
  * layer from the MongoDB infrastructure. The implementation is provided by

@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Query service implementation for {@link com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer}
+ * entities within the resources bounded context.
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)

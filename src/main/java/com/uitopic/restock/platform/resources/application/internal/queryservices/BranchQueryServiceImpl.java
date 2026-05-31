@@ -12,12 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Query service implementation for {@link Branch} aggregates.
- *
- * <p>Handles read-side operations: lookup by ID and listing by account with optional
- * state filtering and in-memory pagination. Filtering and pagination are applied
- * in-memory after fetching all branches for the account, which is acceptable given
- * the expected number of branches per account.
+ * Query service implementation for {@link Branch} aggregates within the resources bounded context.
  */
 @Slf4j
 @Service

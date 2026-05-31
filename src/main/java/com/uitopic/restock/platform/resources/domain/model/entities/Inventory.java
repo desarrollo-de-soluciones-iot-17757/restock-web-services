@@ -8,7 +8,8 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Entity representing the current inventory of a {@link Batch} at a specific {@link Branch}.
+ * Entity representing the current inventory of a {@link Batch} at a specific
+ * {@link Branch} within the resources bounded context.
  *
  * <p>An {@code Inventory} record ties a batch to a branch and tracks the current stock level
  * at that location. Stock mutations are performed through {@link #addStock(int)} and

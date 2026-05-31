@@ -6,7 +6,8 @@ import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSupp
 import java.util.List;
 
 /**
- * Domain service interface defining the query contract for {@link CustomSupply} aggregate retrieval.
+ * Domain service interface defining the query contract for {@link CustomSupply} aggregate retrieval
+ * within the resources bounded context.
  *
  * <p>Declares the read-side operations available on custom supplies. Implementations live
  * in the application layer

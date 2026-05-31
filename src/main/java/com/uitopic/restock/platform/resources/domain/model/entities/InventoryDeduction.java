@@ -9,16 +9,13 @@ import java.time.LocalDate;
 
 /**
  * Entity representing a stock deduction event recorded against an
- * {@link Inventory}.
+ * {@link Inventory} within the resources bounded context.
  *
- * <p>
- * Captures the quantity removed from an inventory on a specific date, providing
+ * <p>Captures the quantity removed from an inventory on a specific date, providing
  * an audit trail of consumption or waste events. Each deduction is linked to
- * the
- * {@link Inventory} from which stock was removed.
+ * the {@link Inventory} from which stock was removed.
  *
- * <p>
- * Extends
+ * <p>Extends
  * {@link com.uitopic.restock.platform.shared.domain.model.entities.AuditableModel}
  * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
@@ -29,6 +26,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Document(collection = "inventory_deductions")
 public class InventoryDeduction extends AuditableModel {
+
+    /** The identifier of the branch from which stock was deducted. */
+    private String branchId;
 
     /** The inventory from which stock was deducted. */
     private Inventory inventory;

@@ -13,7 +13,8 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Aggregate root representing a user-defined supply item within an account.
+ * Aggregate root representing a user-defined supply item within an account in
+ * the resources bounded context.
  *
  * <p>A {@code CustomSupply} is a supply product configured by an account owner, extending
  * a base {@link Supply} category template with account-specific details such as pricing,

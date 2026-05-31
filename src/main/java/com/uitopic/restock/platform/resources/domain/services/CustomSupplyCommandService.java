@@ -6,7 +6,8 @@ import com.uitopic.restock.platform.resources.domain.model.commands.CreateCustom
 import java.util.Optional;
 
 /**
- * Domain service interface defining the command contract for {@link CustomSupply} aggregate operations.
+ * Domain service interface defining the command contract for {@link CustomSupply} aggregate operations
+ * within the resources bounded context.
  *
  * <p>Declares the write-side operations available on custom supplies: creation, update,
  * and deletion. Implementations live in the application layer

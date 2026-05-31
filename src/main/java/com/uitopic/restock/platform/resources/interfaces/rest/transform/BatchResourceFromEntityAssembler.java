@@ -3,6 +3,10 @@ package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BatchResource;
 
+/**
+ * Assembler to convert {@link com.uitopic.restock.platform.resources.domain.model.aggregates.Batch} entities
+ * to {@link BatchResource} DTOs within the resources bounded context.
+ */
 public class BatchResourceFromEntityAssembler {
 
     public static BatchResource toResourceFromEntity(Batch entity) {

@@ -11,22 +11,18 @@ import java.time.LocalDate;
 
 /**
  * Aggregate root representing a batch of a {@link CustomSupply} received at a
- * {@link Branch}.
+ * {@link Branch} within the resources bounded context.
  *
- * <p>
- * A batch captures a single purchase or delivery event, recording the initial
- * and current
- * stock quantities, unit purchase cost, and relevant dates (fabrication,
- * expiration, entry).
- * Stock changes are applied through {@link #updateStock(int)} to keep the
- * current stock
- * consistent with deductions and transfers recorded in
+ * <p>A batch captures a single purchase or delivery event, recording the initial
+ * and current stock quantities, unit purchase cost, and relevant dates
+ * (fabrication, expiration, entry). Stock changes are applied through
+ * {@link #updateStock(int)} to keep the current stock consistent with
+ * deductions and transfers recorded in
  * {@link com.uitopic.restock.platform.resources.domain.model.entities.InventoryDeduction}
  * and
  * {@link com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer}.
  *
- * <p>
- * Extends
+ * <p>Extends
  * {@link com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot}
  * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
@@ -40,6 +36,12 @@ public class Batch extends AuditableAbstractAggregateRoot {
 
     /** The identifier of the account that owns this batch. */
     private AccountId accountId;
+
+    /** The identifier of the branch where this batch is stored. */
+    private String branchId;
+
+    /** The identifier of the custom supply that this batch contains. */
+    private String customSupplyId;
 
     /**
      * A human-readable code used to identify and track this batch (e.g., a lot

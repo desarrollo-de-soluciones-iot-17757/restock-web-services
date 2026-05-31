@@ -3,6 +3,9 @@ package com.uitopic.restock.platform.resources.application.internal.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of {@link DeviceTelemetryService} within the resources bounded context.
+ */
 @Slf4j
 @Service
 public class DeviceTelemetryServiceImpl implements DeviceTelemetryService {

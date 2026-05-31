@@ -2,8 +2,11 @@ package com.uitopic.restock.platform.resources.application.internal.services;
 
 /**
  * A small service inside the resources bounded context that is responsible for disabling telemetry
- * for devices belonging to a branch. For now it only logs the intent — in a later iteration this
- * can call the devices/tracking bounded context or an integration layer.
+ * on devices attached to a specific branch when the branch is deleted.
+ *
+ * <p>This is a local concern within the resources bounded context — it does NOT call external
+ * services or publish cross-BC events. Full device‑telemetry management lives in
+ * the Device Management bounded context.
  */
 public interface DeviceTelemetryService {
 

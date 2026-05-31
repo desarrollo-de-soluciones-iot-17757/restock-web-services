@@ -5,6 +5,10 @@ import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFac
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the inbound ACL facade for the resources bounded context.
+ * Exposes inventory operations (subtract, add back, adjust) to other bounded contexts.
+ */
 @Slf4j
 @Service
 public class ResourcesContextFacadeImpl implements ResourcesContextFacade {

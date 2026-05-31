@@ -1,7 +1,9 @@
 package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
 /**
- * Value object representing the minimum stock threshold for a {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}.
+ * Value object representing the minimum stock threshold for a
+ * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}
+ * within the resources bounded context.
  *
  * <p>When the current stock of a supply falls below this threshold, the inventory state
  * transitions to {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.InventoryState#LOWSTOCK}.

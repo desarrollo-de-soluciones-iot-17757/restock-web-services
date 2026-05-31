@@ -1,6 +1,5 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetBranchesByAccountIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
@@ -9,6 +8,7 @@ import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBr
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.CreateBranchCommandFromResourceAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchInfoCommandFromResourceAssembler;
 import com.uitopic.restock.platform.shared.interfaces.rest.transform.SharedValueObjectFromStringAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,8 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -45,23 +48,32 @@ public class AccountBranchesController {
     private final BranchCommandService branchCommandService;
     private final BranchQueryService branchQueryService;
 
-    /**
-     * Constructs an {@code AccountBranchesController} with the required services.
-     *
-     * @param branchCommandService the service for handling branch write operations
-     * @param branchQueryService   the service for handling branch read operations
-     */
     public AccountBranchesController(BranchCommandService branchCommandService, BranchQueryService branchQueryService) {
         this.branchCommandService = branchCommandService;
         this.branchQueryService = branchQueryService;
     }
 
-    /**
-     * Retrieves all branches for the specified account.
-     *
-     * @param accountId the unique identifier of the account
-     * @return 200 with a list of {@link BranchResource} DTOs
-     */
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(MultipartFile.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(null);
+            }
+        });
+    }
+
+/**
+ * REST controller handling account-scoped branch operations within the resources bounded context.
+ *
+ * <p>Exposes endpoints under {@code /api/v1/accounts/{accountId}/branches} for creating
+ * branches (including optional image upload) and listing all branches for an account
+ * with optional status filtering and pagination.
+ *
+ * <p>Command handling is delegated to {@link BranchCommandService} and query handling
+ * to {@link BranchQueryService}. The controller only maps resources to commands and
+ * formats responses via {@link BranchResourceFromEntityAssembler}.
+ */
     @Operation(summary = "Get all branches for an account")
     @GetMapping
     public ResponseEntity<List<BranchResource>> getBranchesByAccountId(@PathVariable @NotNull String accountId) {
@@ -83,30 +95,32 @@ public class AccountBranchesController {
     @Operation(summary = "Create a branch for an account")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> createBranch(@PathVariable @NotNull String accountId,
-                                                        @Valid @ModelAttribute CreateBranchResource resource) {
-        var createBranchCommand = CreateBranchCommandFromResourceAssembler.ToCommandFromResource(resource, accountId);
-        var branch = branchCommandService.handle(createBranchCommand);
+                                                       @Valid @ModelAttribute CreateBranchResource resource) {
+        log.info("POST /api/v1/accounts/{}/branches — name: {}", accountId, resource.name());
+        var command = CreateBranchCommandFromResourceAssembler.ToCommandFromResource(resource, accountId);
+        var branch = branchCommandService.handle(command);
+        log.info("Branch created — ID: {}", branch.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(branch));
     }
 
     /**
      * Fully updates the information of a branch belonging to the specified account.
+     * Accepts multipart/form-data to support optional image upload.
      *
      * @param accountId the unique identifier of the account that owns the branch
      * @param branchId  the unique identifier of the branch to update
-     * @param resource  the request body containing the updated branch data
+     * @param resource  the multipart form data containing the updated branch data
      * @return 200 with the updated {@link BranchResource}, or 404 if not found or not owned by the account
      */
     @Operation(summary = "Update branch info for an account")
-    @PutMapping("/{branchId}")
+    @PutMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> updateBranch(@PathVariable @NotNull String accountId,
                                                        @PathVariable @NotNull String branchId,
-                                                       @Valid @RequestBody UpdateBranchInfoResource resource) {
+                                                       @ModelAttribute UpdateBranchInfoResource resource) {
         log.info("PUT /api/v1/accounts/{}/branches/{}", accountId, branchId);
         var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.regionOrState(), resource.country(), resource.description());
+        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
         var updated = branchCommandService.handle(command);
         return updated
                 .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))
@@ -117,21 +131,21 @@ public class AccountBranchesController {
     /**
      * Partially updates the information of a branch belonging to the specified account.
      * Only non-null fields in the request body are applied.
+     * Accepts multipart/form-data to support optional image upload.
      *
      * @param accountId the unique identifier of the account that owns the branch
      * @param branchId  the unique identifier of the branch to patch
-     * @param resource  the request body containing the fields to update
+     * @param resource  the multipart form data containing the fields to update
      * @return 200 with the updated {@link BranchResource}, or 404 if not found or not owned by the account
      */
     @Operation(summary = "Patch branch info for an account (partial update)")
-    @PatchMapping("/{branchId}")
+    @PatchMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> patchBranch(@PathVariable @NotNull String accountId,
                                                       @PathVariable @NotNull String branchId,
-                                                      @RequestBody UpdateBranchInfoResource resource) {
+                                                      @ModelAttribute UpdateBranchInfoResource resource) {
         log.info("PATCH /api/v1/accounts/{}/branches/{}", accountId, branchId);
         var expectedAccountId = SharedValueObjectFromStringAssembler.toAccountIdFromString(accountId);
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.regionOrState(), resource.country(), resource.description());
+        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
         var updated = branchCommandService.handle(command);
         return updated
                 .filter(b -> b.getAccountId() != null && b.getAccountId().equals(expectedAccountId))

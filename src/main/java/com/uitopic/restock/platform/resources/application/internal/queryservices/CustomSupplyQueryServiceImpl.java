@@ -11,11 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Query service implementation for {@link CustomSupply} aggregates.
+ * Query service implementation for {@link CustomSupply} aggregates within the resources bounded context.
  *
- * <p>Handles read-side operations for custom supplies, delegating persistence
- * to the {@link CustomSupplyRepository} port. Marked as read-only transactional to
- * optimize database interactions for query-only workloads.
  */
 @Slf4j
 @Service

@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of {@link BranchRepository} that uses MongoDB for data storage.
+ * Implementation of {@link BranchRepository} that uses MongoDB for data storage
+ * within the resources bounded context.
  *
  * <p>Acts as a bridge between the domain layer and the MongoDB persistence layer,
  * adapting {@link BranchMongoRepository} to the {@link BranchRepository} port.

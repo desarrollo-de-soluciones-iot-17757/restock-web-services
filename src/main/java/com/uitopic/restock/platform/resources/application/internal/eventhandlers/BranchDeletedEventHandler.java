@@ -6,6 +6,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import com.uitopic.restock.platform.resources.application.internal.services.DeviceTelemetryService;
 
+/**
+ * Event handler for {@link BranchDeletedEvent} within the resources bounded context.
+ * Disables telemetry for devices attached to the deleted branch.
+ */
 @Slf4j
 @Component
 public class BranchDeletedEventHandler {

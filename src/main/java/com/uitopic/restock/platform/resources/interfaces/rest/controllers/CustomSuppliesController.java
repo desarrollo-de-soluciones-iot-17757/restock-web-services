@@ -54,11 +54,14 @@ public class CustomSuppliesController {
     @Operation(summary = "Create a custom supply")
     @PostMapping
     public ResponseEntity<CustomSupplyResource> create(@Valid @RequestBody CreateCustomSupplyResource resource) {
+        log.info("POST /api/v1/custom-supplies — creating supply: {}", resource.name());
         var command = new CreateCustomSupplyCommand(resource.accountId(), resource.supplyId(), resource.name(),
                 resource.description(), resource.unitPrice(), resource.supplyContent(),
                 resource.unitMeasurement(), resource.minimumStock(), resource.imageUrl());
+        var customSupply = commandService.handle(command);
+        log.info("Custom supply created successfully — ID: {}", customSupply.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(commandService.handle(command)));
+                .body(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(customSupply));
     }
 
     /**
@@ -72,12 +75,19 @@ public class CustomSuppliesController {
     @PutMapping("/{id}")
     public ResponseEntity<CustomSupplyResource> update(@PathVariable String id,
                                                         @Valid @RequestBody CreateCustomSupplyResource resource) {
+        log.info("PUT /api/v1/custom-supplies/{}", id);
         var command = new CreateCustomSupplyCommand(resource.accountId(), resource.supplyId(), resource.name(),
                 resource.description(), resource.unitPrice(), resource.supplyContent(),
                 resource.unitMeasurement(), resource.minimumStock(), resource.imageUrl());
         return commandService.update(id, command)
-                .map(cs -> ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(cs)))
-                .orElse(ResponseEntity.notFound().build());
+                .map(cs -> {
+                    log.info("Custom supply updated successfully — ID: {}", id);
+                    return ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(cs));
+                })
+                .orElseGet(() -> {
+                    log.warn("Custom supply not found for update — ID: {}", id);
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     /**
@@ -90,7 +100,9 @@ public class CustomSuppliesController {
     @Operation(summary = "Delete a custom supply")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable String id) {
+        log.info("DELETE /api/v1/custom-supplies/{}", id);
         commandService.delete(id);
+        log.info("Custom supply deleted — ID: {}", id);
         return ResponseEntity.ok(Map.of("id", id, "deletedAt", Instant.now().toString()));
     }
 }

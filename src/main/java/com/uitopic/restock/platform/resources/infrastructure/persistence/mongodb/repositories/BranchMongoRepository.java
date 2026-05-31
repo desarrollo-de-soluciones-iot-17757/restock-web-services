@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * MongoDB repository for {@link Branch} aggregates.
+ * MongoDB repository for {@link Branch} aggregates within the resources bounded context.
  *
  * <p>Extends Spring Data's {@link MongoRepository} to provide standard CRUD operations
  * and custom query methods for the {@code branches} collection. Used exclusively by

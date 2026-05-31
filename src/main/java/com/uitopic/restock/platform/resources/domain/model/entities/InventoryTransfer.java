@@ -9,17 +9,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 
 /**
- * Entity representing a stock transfer event between two branches.
+ * Entity representing a stock transfer event between two branches within the
+ * resources bounded context.
  *
- * <p>
- * Captures the movement of stock from an origin {@link Inventory} to a
- * destination
- * {@link Branch}, recording the quantity transferred and the date of the
- * transfer.
- * This provides an audit trail for inter-branch stock movements.
+ * <p>Captures the movement of stock from an origin {@link Inventory} to a
+ * destination {@link Branch}, recording the quantity transferred and the date
+ * of the transfer. This provides an audit trail for inter-branch stock
+ * movements.
  *
- * <p>
- * Extends
+ * <p>Extends
  * {@link com.uitopic.restock.platform.shared.domain.model.entities.AuditableModel}
  * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
@@ -30,6 +28,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Document(collection = "inventory_transfers")
 public class InventoryTransfer extends AuditableModel {
+
+    /** The identifier of the branch from which stock is being transferred. */
+    private String fromBranchId;
+
+    /** The identifier of the branch that will receive the transferred stock. */
+    private String toBranchId;
 
     /** The inventory at the origin branch from which stock is being transferred. */
     private Inventory originInventory;

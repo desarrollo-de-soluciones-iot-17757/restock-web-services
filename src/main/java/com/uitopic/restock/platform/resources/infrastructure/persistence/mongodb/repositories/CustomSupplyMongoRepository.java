@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * MongoDB repository for {@link CustomSupply} aggregates.
+ * MongoDB repository for {@link CustomSupply} aggregates within the resources bounded context.
  *
  * <p>Extends Spring Data's {@link MongoRepository} to provide standard CRUD operations
  * and custom query methods for the {@code custom_supplies} collection. Used exclusively by

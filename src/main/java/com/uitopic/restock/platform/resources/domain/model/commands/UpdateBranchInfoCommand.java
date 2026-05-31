@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.resources.domain.model.commands;
 
 /**
- * Command object for updating branch information.
+ * Command object for updating branch information within the resources bounded context.
  *
  * @param branchId       the ID of the branch to update
  * @param name           the new name of the branch
@@ -20,10 +20,11 @@ public record UpdateBranchInfoCommand(
         String country,
         String description,
         byte[] image,
-        String photoFileName
+        String photoFileName,
+        boolean shouldRemoveImage
 ) {
-    /** Method to check if the command includes a new photo for the branch. This method returns true if both the description and photoFileName fields are not null, indicating that a new photo is included in the update. */
+    /** Method to check if the command includes a new photo for the branch. This method returns true if both the image and photoFileName fields are not null, indicating that a new photo is included in the update. */
     public boolean hasNewPhoto() {
-        return this.description != null && this.photoFileName != null;
+        return this.image != null && this.photoFileName != null;
     }
 }

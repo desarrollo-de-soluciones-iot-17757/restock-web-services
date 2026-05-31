@@ -23,7 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 /**
- * Implementation of {@link BranchCommandService} for handling write operations on {@link Branch} aggregates.
+ * Implementation of {@link BranchCommandService} for handling write operations on {@link Branch}
+ * aggregates within the resources bounded context.
  *
  * <p>Orchestrates branch creation, updates, image changes, and logical deletion.
  * On deletion, the branch is transitioned to {@link BranchStates#INACTIVE} (soft delete)
@@ -76,7 +77,7 @@ public class BranchCommandServiceImpl implements BranchCommandService {
             }
         }
 
-        ImageURL imageUrl = (photoUrl != null && !photoUrl.isBlank()) ? new ImageURL(photoUrl) : null;
+        ImageURL imageUrl = (photoUrl != null && !photoUrl.isBlank()) ? new ImageURL(photoUrl, photoPublicId) : null;
 
         Branch branch = Branch.builder()
                 .accountId(accountId)
@@ -117,11 +118,16 @@ public class BranchCommandServiceImpl implements BranchCommandService {
         String newPhotoUrl = null;
         String newPhotoPublicId = null;
 
-        if (command.hasNewPhoto()) {
+        if (command.shouldRemoveImage()) {
+            log.info("Removing image from branch ID: {}", command.branchId());
+            branch.applyImage(null, null);
+        } else if (command.hasNewPhoto()) {
+            // Handle new image upload
             try {
                 var uploadResult = imageService.upload(command.image(), command.photoFileName());
                 newPhotoUrl = uploadResult.get("url");
                 newPhotoPublicId = uploadResult.get("publicId");
+                branch.applyImage(newPhotoUrl, newPhotoPublicId);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Error uploading new photo to storage: " + e.getMessage());
             }
@@ -132,12 +138,12 @@ public class BranchCommandServiceImpl implements BranchCommandService {
                 : null;
 
         branch.update(addr, command.description(), command.name());
-        branch.applyImage(newPhotoUrl, newPhotoPublicId);
         repository.save(branch);
 
-        if (oldPublicId != null) {
+        if (oldPublicId != null && (command.shouldRemoveImage() || command.hasNewPhoto())) {
             try {
                 imageService.delete(oldPublicId);
+                log.info("Old image deleted from storage — publicId: {}", oldPublicId);
             } catch (Exception e) {
                 log.warn("Could not delete old photo [{}]: {}", oldPublicId, e.getMessage());
             }
@@ -149,6 +155,7 @@ public class BranchCommandServiceImpl implements BranchCommandService {
 
     /**
      * Updates the image of an existing branch, deleting the old one from storage if it exists.
+     * Can also remove the image if the shouldRemoveImage flag is set.
      *
      * @param command the command containing the branch ID and new image data
      * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
@@ -160,10 +167,13 @@ public class BranchCommandServiceImpl implements BranchCommandService {
                 .orElseThrow(() -> new BranchNotFoundException(command.branchId()));
 
         String oldPublicId = branch.hasDefaultImage() ? null : branch.getImageUrl().publicId();
-        String newPhotoUrl = null;
-        String newPhotoPublicId = null;
 
-        if (command.hasNewPhoto()) {
+        if (command.shouldRemoveImage()) {
+            log.info("Removing image from branch ID: {}", command.branchId());
+            branch.applyImage(null, null);
+        } else if (command.hasNewPhoto()) {
+            String newPhotoUrl = null;
+            String newPhotoPublicId = null;
             try {
                 var uploadResult = imageService.upload(command.image(), command.photoFileName());
                 newPhotoUrl = uploadResult.get("url");
@@ -171,14 +181,15 @@ public class BranchCommandServiceImpl implements BranchCommandService {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Error uploading new photo to storage: " + e.getMessage());
             }
+            branch.applyImage(newPhotoUrl, newPhotoPublicId);
         }
 
-        branch.applyImage(newPhotoUrl, newPhotoPublicId);
         repository.save(branch);
 
-        if (oldPublicId != null) {
+        if (oldPublicId != null && (command.shouldRemoveImage() || command.hasNewPhoto())) {
             try {
                 imageService.delete(oldPublicId);
+                log.info("Old image deleted from storage — publicId: {}", oldPublicId);
             } catch (Exception e) {
                 log.warn("Could not delete old photo [{}]: {}", oldPublicId, e.getMessage());
             }

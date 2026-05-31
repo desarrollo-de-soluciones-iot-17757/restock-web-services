@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
- * REST controller for branch operations not scoped to an account path.
+ * REST controller for branch operations within the resources bounded context,
+ * not scoped to an account path.
  *
  * <p>Exposes endpoints under {@code /api/v1/branches} for retrieving a branch by ID,
  * updating branch info, updating the branch image, and logically deleting a branch.

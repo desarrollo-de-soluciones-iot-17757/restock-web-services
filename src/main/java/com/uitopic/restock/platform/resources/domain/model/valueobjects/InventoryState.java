@@ -1,7 +1,8 @@
 package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
 /**
- * Enum representing the inventory state of a supply item at a given branch.
+ * Enum representing the inventory state of a supply item at a given branch
+ * within the resources bounded context.
  *
  * <p>Used by {@link com.uitopic.restock.platform.resources.domain.model.entities.Inventory}
  * to indicate whether a supply is fully stocked, running low, or completely depleted.

@@ -3,6 +3,11 @@ package com.uitopic.restock.platform.resources.application.internal.commandservi
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
+
+/**
+ * Implementation of batch command operations within the resources bounded context.
+ * Handles batch creation, stock subtraction, stock transfers, and inventory adjustments.
+ */
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.SubtractInventoryCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.TransferInventoryCommand;
@@ -30,6 +35,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -70,6 +76,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
 
         Batch batch = Batch.builder()
                 .accountId(new AccountId(command.accountId()))
+                .branchId(branch.getId())
+                .customSupplyId(customSupply.getId())
                 .receivingBranch(branch)
                 .customSupply(customSupply)
                 .initialStock(new Stock((int) command.currentQuantity()))
@@ -110,6 +118,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
 
         batchRepository.save(Batch.builder()
                 .accountId(fromBranch.getAccountId())
+                .branchId(toBranch.getId())
+                .customSupplyId(customSupply.getId())
                 .receivingBranch(toBranch)
                 .customSupply(customSupply)
                 .initialStock(new Stock((int) command.quantity()))
@@ -124,6 +134,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
                 .build();
 
         InventoryTransfer transfer = InventoryTransfer.builder()
+                .fromBranchId(command.fromBranchId())
+                .toBranchId(command.toBranchId())
                 .originInventory(originInventory)
                 .destinationBranch(toBranch)
                 .quantityTransferred(new Stock((int) command.quantity()))
@@ -169,6 +181,7 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         }
 
         InventoryDeduction deduction = InventoryDeduction.builder()
+                .branchId(command.branchId())
                 .inventory(inventory)
                 .quantityDeducted(new Stock((int) command.quantity()))
                 .deductionDate(dedDate)
@@ -204,6 +217,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
 
         batchRepository.save(Batch.builder()
                 .accountId(accountId)
+                .branchId(branch != null ? branch.getId() : null)
+                .customSupplyId(customSupply != null ? customSupply.getId() : null)
                 .receivingBranch(branch)
                 .customSupply(customSupply)
                 .initialStock(new Stock((int) quantity))
@@ -229,6 +244,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
 
             batchRepository.save(Batch.builder()
                     .accountId(accountId)
+                    .branchId(branch != null ? branch.getId() : null)
+                    .customSupplyId(customSupply != null ? customSupply.getId() : null)
                     .receivingBranch(branch)
                     .customSupply(customSupply)
                     .initialStock(new Stock((int) adjustedQuantity))

@@ -2,7 +2,8 @@ package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
 /**
  * Value object representing the content quantity of a single unit of a
- * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}.
+ * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}
+ * within the resources bounded context.
  *
  * <p>Captures the numeric amount of a supply unit (e.g., 500 for 500 ml, 1 for 1 kg).
  * The unit of measurement is tracked separately via

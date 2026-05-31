@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.resources.domain.model.commands;
 
 /**
- * Command object for creating a new branch.
+ * Command object for creating a new branch within the resources bounded context.
  *
  * @param accountId      the ID of the account to which the branch belongs
  * @param name           the name of the branch

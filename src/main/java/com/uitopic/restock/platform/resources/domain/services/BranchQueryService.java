@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain service interface defining the query contract for {@link Branch} aggregate retrieval.
+ * Domain service interface defining the query contract for {@link Branch} aggregate retrieval
+ * within the resources bounded context.
  *
  * <p>Declares the read-side operations available on branches: lookup by ID and listing
  * by account with optional state filtering and pagination. Implementations live in the

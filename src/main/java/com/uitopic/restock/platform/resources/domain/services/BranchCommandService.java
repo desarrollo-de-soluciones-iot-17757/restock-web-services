@@ -8,7 +8,8 @@ import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranch
 import java.util.Optional;
 
 /**
- * Domain service interface defining the command contract for {@link Branch} aggregate operations.
+ * Domain service interface defining the command contract for {@link Branch} aggregate operations
+ * within the resources bounded context.
  *
  * <p>Declares the write-side operations available on branches: creation, info update,
  * image update, and logical deletion. Implementations live in the application layer
