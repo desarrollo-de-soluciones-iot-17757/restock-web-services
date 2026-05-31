@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.resources.application.internal.queryservice
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSuppliesByAccountIdQuery;
+import com.uitopic.restock.platform.resources.domain.repositories.CustomSupplyRepository;
 import com.uitopic.restock.platform.resources.domain.services.CustomSupplyQueryService;
 import com.uitopic.restock.platform.resources.infrastructure.repositories.CustomSupplyRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import java.util.List;
 public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
 
     // Repository for accessing CustomSupply data from the database
-    private final CustomSupplyRepositoryImpl customSupplyRepository;
+    private final CustomSupplyRepository customSupplyRepository;
 
     // Constructor for dependency injection of the CustomSupplyRepositoryImpl
     public CustomSupplyQueryServiceImpl(CustomSupplyRepositoryImpl customSupplyRepository) {
