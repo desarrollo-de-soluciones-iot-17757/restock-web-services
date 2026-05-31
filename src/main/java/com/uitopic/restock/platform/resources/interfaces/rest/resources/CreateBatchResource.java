@@ -1,14 +1,8 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Schema(description = "Request resource for creating a batch")
 public record CreateBatchResource(
@@ -27,9 +21,9 @@ public record CreateBatchResource(
         @NotBlank @Schema(description = "Account ID")
         String accountId,
         @Schema(description = "Manufacturing date (ISO format)")
-        Optional<String> manufacturingDate,
+        String manufacturingDate,
         @Schema(description = "Expiration date (ISO format)")
-        Optional<String> expirationDate,
+        String expirationDate,
         @Schema(description = "Entry date (ISO format)")
-        Optional<String> entryDate
+        String entryDate
 ) {}
