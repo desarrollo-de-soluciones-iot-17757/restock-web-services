@@ -44,11 +44,11 @@ public record Stock(
      *
      * @param other the stock quantity to subtract from the current stock
      * @return a new Stock instance with the resulting stock quantity after subtraction
-     * @throws InvalidStockQuantityException if the resulting stock quantity is negative
+     * @throws InvalidStockException if the resulting stock quantity is negative
      */
     public Stock subtrack(Stock other) {
         if (other.stock > this.stock) {
-            throw new InvalidStockQuantityException("Cannot subtract more stock than available");
+            throw new InvalidStockException("Cannot subtract more stock than available");
         }
 
         if (!other.unitMeasurement().equals(this.unitMeasurement)) {
@@ -70,7 +70,7 @@ public record Stock(
      * Get the unit of measurement for the stock quantity.
      * @return the unit of measurement as a String.
      */
-    public String getUnitMeasurement() {
+    public String getUnit() {
         return this.unitMeasurement;
     }
 }
