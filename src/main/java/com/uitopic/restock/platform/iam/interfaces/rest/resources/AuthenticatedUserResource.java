@@ -1,4 +1,16 @@
 package com.uitopic.restock.platform.iam.interfaces.rest.resources;
 
-public record AuthenticatedUserResource() {
+/**
+ * Resource representing an authenticated user with authentication tokens.
+ *
+ * @param id    the unique identifier of the user
+ * @param email the email address of the user
+ * @param role  the role assigned to the user
+ * @param token the authentication token for the user
+ */
+public record AuthenticatedUserResource(
+                String id,
+                String email,
+                String role,
+                String token) {
 }
