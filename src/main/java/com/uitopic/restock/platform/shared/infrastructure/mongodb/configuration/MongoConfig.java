@@ -6,7 +6,7 @@ import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.conve
 //import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
 //import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockReadConverter;
 //import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockWriteConverter;
-import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.StringToMultipartFileConverter;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -70,6 +70,8 @@ public class MongoConfig {
         return new MongoCustomConversions(List.of(
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
+                new AccountIdReadConverter(),
+                new AccountIdWriteConverter(),
                 new StringToMultipartFileConverter()
                 //new StockWriteConverter(),
                 //new StockReadConverter(),
