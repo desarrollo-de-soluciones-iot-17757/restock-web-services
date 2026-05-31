@@ -1,12 +1,12 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetBranchesByAccountIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.CreateBranchCommandFromResourceAssembler;
 import com.uitopic.restock.platform.shared.interfaces.rest.transform.SharedValueObjectFromStringAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,12 +71,11 @@ public class AccountBranchesController {
      * @return a ResponseEntity containing a BranchResource object representing the newly created branch, along with an HTTP 201 Created status
      */
     @Operation(summary = "Create a branch for an account")
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> createBranch(@PathVariable @NotNull String accountId,
-                                                        @Valid @RequestBody CreateBranchResource resource) {
-        var command = new CreateBranchCommand(accountId, resource.name(), resource.address(),
-                resource.city(), resource.stateOrRegion(), resource.country(), resource.imageUrl(), resource.description());
-        var branch = branchCommandService.handle(command);
+                                                        @Valid @ModelAttribute CreateBranchResource resource) {
+        var createBranchCommand = CreateBranchCommandFromResourceAssembler.ToCommandFromResource(resource, accountId);
+        var branch = branchCommandService.handle(createBranchCommand);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BranchResourceFromEntityAssembler.toResourceFromEntity(branch));
     }
