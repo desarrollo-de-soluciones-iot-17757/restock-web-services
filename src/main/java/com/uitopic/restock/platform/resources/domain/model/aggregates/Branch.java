@@ -9,8 +9,15 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Aggregate root representing a Branch in the system. A Branch is associated with an Account and contains information such as name, description, location, status, and an optional image URL.
- * This class extends AuditableAbstractAggregateRoot to include auditing fields like createdAt and updatedAt.
+ * Aggregate root representing a physical or logical branch belonging to an account.
+ *
+ * <p>A branch is the primary organizational unit within the resources bounded context.
+ * Each branch is owned by an {@link AccountId} and holds location, status, and optional
+ * image information. Branches support soft-delete semantics: deletion transitions the
+ * status to {@link BranchStates#INACTIVE} rather than removing the document from MongoDB.
+ *
+ * <p>Extends {@link com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot}
+ * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -20,40 +27,49 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "branches")
 public class Branch extends AuditableAbstractAggregateRoot {
 
-    /** The name of the branch. This field is required and must be unique within the same account. */
+    /** The display name of the branch. Must be unique within the same account. */
     private String name;
 
-    /** A brief description of the branch. */
+    /** A brief human-readable description of the branch. */
     private String description;
 
-    /** The URL of an optional image associated with the branch. */
+    /** Optional URL pointing to an image that represents the branch. */
     private ImageURL imageUrl;
 
-    /** The location of the branch, including address, city, region/state, and country. */
+    /** The physical location of the branch, encapsulating address, city, region/state, and country. */
     private Address location;
 
-    /** The status of the branch, which can be either active or inactive. */
+    /** The current operational status of the branch ({@link BranchStates#ACTIVE} or {@link BranchStates#INACTIVE}). */
     private BranchStates status;
 
-    /** The ID of the account that owns this branch. */
+    /** The identifier of the account that owns this branch. */
     private AccountId accountId;
 
-    /** The ID of the tenant that this branch belongs to. This is used for multi-tenancy support. */
-    public void update(String address, String city, String country, String regionOrState, String description, String name) {
+    /**
+     * Applies a partial update to the branch, only overwriting fields that are non-null.
+     * Passing {@code null} for any parameter leaves the corresponding field unchanged.
+     *
+     * @param location    the new location, or {@code null} to keep the existing one
+     * @param description the new description, or {@code null} to keep the existing one
+     * @param name        the new name, or {@code null} to keep the existing one
+     */
+    public void update(Address location, String description, String name) {
         if (name != null && !name.isBlank()) this.name = name;
-        if (address != null) this.location = new Address(address, city, regionOrState, country);
+        if (location != null) this.location = location;
         if (description != null) this.description = description;
     }
 
     /**
-     * Methods to activate and deactivate the branch. These methods change the status of the branch accordingly.
+     * Transitions the branch to the {@link BranchStates#INACTIVE} state.
+     * Used for logical (soft) deletion of a branch.
      */
     public void deactivate() {
         this.status = BranchStates.INACTIVE;
     }
 
     /**
-     * Method to activate the branch. This method changes the status of the branch to active.
+     * Transitions the branch to the {@link BranchStates#ACTIVE} state.
+     * Used to re-enable a previously deactivated branch.
      */
     public void activate() {
         this.status = BranchStates.ACTIVE;

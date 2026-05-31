@@ -82,8 +82,8 @@ public class BatchesController {
         var transfer = commandService.handle(command);
         return ResponseEntity.ok(Map.of(
                 "transferId", transfer.getId(),
-                "status", transfer.getStatus(),
-                "completedAt", transfer.getCompletedAt()
+                "status", "completed",
+                "completedAt", transfer.getTransferDate() != null ? transfer.getTransferDate().toString() : java.time.LocalDate.now().toString()
         ));
     }
 
@@ -95,8 +95,9 @@ public class BatchesController {
         var deduction = commandService.handle(command);
         return ResponseEntity.ok(Map.of(
                 "deductionId", deduction.getId(),
-                "remainingStock", deduction.getRemainingStock(),
-                "timestamp", deduction.getTimestamp()
+                "remainingStock", deduction.getInventory() != null && deduction.getInventory().getCurrentStock() != null 
+                        ? deduction.getInventory().getCurrentStock().stock() : 0,
+                "timestamp", deduction.getDeductionDate() != null ? deduction.getDeductionDate().toString() : java.time.LocalDate.now().toString()
         ));
     }
 

@@ -4,13 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * This record represents the request resource for creating a new branch. It includes all necessary information
- * required to create a branch, such as account ID, branch name, address, location details, and optional fields
- * like image URL and description.
+ * Request resource for creating a new branch.
+ * The accountId is taken from the path variable, not from the request body.
  */
 @Schema(description = "Request resource for creating a branch")
 public record CreateBranchResource(
-        @NotBlank @Schema(description = "Account ID that owns this branch") String accountId,
         @NotBlank @Schema(description = "Branch name") String name,
         @NotBlank @Schema(description = "Branch address") String address,
         @NotBlank @Schema(description = "State or Region") String stateOrRegion,

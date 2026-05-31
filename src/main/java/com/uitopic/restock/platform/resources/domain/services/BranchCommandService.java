@@ -7,36 +7,50 @@ import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranch
 import java.util.Optional;
 
 /**
- * Service interface for handling commands related to Branch entities. This interface defines the contract for creating, updating, and deleting Branch entities in the system.
- * It includes methods for handling the creation of a new branch, updating existing branch information, updating the branch image, and deleting a branch by its ID.
+ * Domain service interface defining the command contract for {@link Branch} aggregate operations.
+ *
+ * <p>Declares the write-side operations available on branches: creation, info update,
+ * image update, and logical deletion. Implementations live in the application layer
+ * ({@link com.uitopic.restock.platform.resources.application.internal.commandservices.BranchCommandServiceImpl}).
  */
 public interface BranchCommandService {
 
-    /** Handles the creation of a new branch based on the provided CreateBranchCommand. This method validates the command, checks for any business rules (such as unique branch names within an account), and saves the new Branch entity to the repository.
+    /**
+     * Handles the creation of a new branch for the given account.
+     * Validates that the branch name is unique within the account before persisting.
      *
-     * @param command the CreateBranchCommand containing the necessary information to create a new branch
-     * @return the created Branch entity
+     * @param command the command containing all data required to create the branch
+     * @return the newly created and persisted {@link Branch} aggregate
+     * @throws org.springframework.web.server.ResponseStatusException with 400 if the branch name already exists
      */
     Branch handle(CreateBranchCommand command);
 
-    /** Handles the update of existing branch information based on the provided UpdateBranchInfoCommand. This method retrieves the existing Branch entity, applies the updates specified in the command, validates any business rules (such as unique branch names and locations), and saves the updated Branch entity to the repository.
+    /**
+     * Handles a partial or full update of an existing branch's information.
+     * Only non-null fields in the command are applied. Validates name uniqueness if the name changes.
      *
-     * @param command the UpdateBranchInfoCommand containing the necessary information to update an existing branch
-     * @return an Optional containing the updated Branch entity if the update was successful, or empty if no Branch with the given ID exists
+     * @param command the command containing the branch ID and the fields to update
+     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
+     * @throws com.uitopic.restock.platform.resources.domain.exception.NameAlreadyExist if the new name conflicts with another branch in the same account
      */
     Optional<Branch> handle(UpdateBranchInfoCommand command);
 
-    /** Handles the update of a branch's image based on the provided branch ID and new image URL. This method retrieves the existing Branch entity, updates its image URL, and saves the updated Branch entity to the repository.
+    /**
+     * Updates the image URL of an existing branch.
      *
      * @param branchId the unique identifier of the branch to update
-     * @param imageUrl the new image URL to set for the branch
-     * @return an Optional containing the updated Branch entity if the update was successful, or empty if no Branch with the given ID exists
+     * @param imageUrl the new image URL, or {@code null} to clear the existing image
+     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
      */
     Optional<Branch> updateImage(String branchId, String imageUrl);
 
-    /** Handles the deletion of a branch based on the provided branch ID. This method checks if a Branch with the given ID exists, and if so, deletes it from the repository.
+    /**
+     * Performs a logical deletion of a branch by transitioning its status to
+     * {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates#INACTIVE}
+     * and publishing a {@link com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent}.
      *
-     * @param branchId the unique identifier of the branch to delete
+     * @param branchId the unique identifier of the branch to deactivate
+     * @throws org.springframework.web.server.ResponseStatusException with 404 if the branch does not exist
      */
     void delete(String branchId);
 }

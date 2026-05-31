@@ -5,12 +5,13 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,33 +20,42 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 /**
- * Implementation of the BranchCommandService interface, responsible for handling commands related to Branch entities. This service provides methods for creating, updating, and deleting branches, as well as updating branch images. It interacts with the BranchRepository to perform database operations and uses ApplicationEventPublisher to publish events when a branch is deleted.
+ * Implementation of {@link BranchCommandService} for handling write operations on {@link Branch} aggregates.
+ *
+ * <p>Orchestrates branch creation, updates, image changes, and logical deletion.
+ * On deletion, the branch is transitioned to
+ * {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates#INACTIVE}
+ * (soft delete) and a {@link com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent}
+ * is published via Spring's {@link ApplicationEventPublisher} to notify other bounded contexts.
  */
+@Slf4j
 @Service
 public class BranchCommandServiceImpl implements BranchCommandService {
 
-    /** The BranchRepository used to perform CRUD operations on Branch entities. This repository is injected into the service and is responsible for saving, retrieving, and deleting Branch entities from the underlying data store. */
     private final BranchRepository repository;
-
-    /** The ApplicationEventPublisher used to publish events related to branch deletion. This publisher is used to notify other components that a branch has been deleted. */
     private final ApplicationEventPublisher eventPublisher;
 
-    /** Constructor for BranchCommandServiceImpl. This constructor takes a BranchRepository and ApplicationEventPublisher as parameters and assigns them to the repository and eventPublisher fields respectively. */
     public BranchCommandServiceImpl(BranchRepository repository, ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
         this.eventPublisher = eventPublisher;
     }
 
     /**
-     * Handles the CreateBranchCommand by creating a new Branch entity and saving it to the database.
-     * @param command the CreateBranchCommand containing the necessary information to create a new branch
-     * @return the created Branch entity
+     * Creates a new branch for the account specified in the command.
+     * Validates that the branch name is unique within the account before persisting.
+     *
+     * @param command the command containing all data required to create the branch
+     * @return the newly created and persisted {@link Branch} aggregate
+     * @throws org.springframework.web.server.ResponseStatusException with 400 if the branch name already exists
      */
     @Override
     public Branch handle(CreateBranchCommand command) {
+        log.info("Creating branch '{}' for account ID: {}", command.name(), command.accountId());
         var accountId = new AccountId(command.accountId());
-        if (repository.existsByNameAndAccountId(command.name(), accountId))
+        if (repository.existsByNameAndAccountId(command.name(), accountId)) {
+            log.warn("Branch name '{}' already exists for account ID: {}", command.name(), command.accountId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Branch name already exists for this account");
+        }
 
         ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
                 ? new ImageURL(command.imageUrl()) : null;
@@ -54,57 +64,77 @@ public class BranchCommandServiceImpl implements BranchCommandService {
                 .accountId(accountId)
                 .name(command.name())
                 .location(new Address(command.address(), command.city(), command.regionOrState(), command.country()))
+                .imageUrl(imageUrl)
                 .status(BranchStates.ACTIVE)
                 .description(command.description())
                 .build();
-        return repository.save(branch);
+        Branch saved = repository.save(branch);
+        log.info("Branch created with ID: {}", saved.getId());
+        return saved;
     }
 
-    /** Handles the UpdateBranchInfoCommand by updating an existing Branch entity's information and saving the changes to the database. This method checks for business rules such as unique branch names within an account and unique branch locations before applying updates.
-     * @param command the UpdateBranchInfoCommand containing the necessary information to update an existing branch
-     * @return an Optional containing the updated Branch entity if the update was successful, or empty if no Branch with the given ID exists
+    /**
+     * Applies a partial or full update to an existing branch.
+     * Only non-null fields in the command are applied. Validates name uniqueness if the name changes.
+     *
+     * @param command the command containing the branch ID and the fields to update
+     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
+     * @throws com.uitopic.restock.platform.resources.domain.exception.NameAlreadyExist if the new name conflicts with another branch in the same account
      */
     @Override
     public Optional<Branch> handle(UpdateBranchInfoCommand command) {
+        log.info("Updating branch ID: {}", command.branchId());
         return repository.findById(command.branchId()).map(branch -> {
-
             if (command.name() != null && !command.name().equals(branch.getName())) {
-                if (repository.existsByNameAndAccountId(command.name(), branch.getAccountId()))
+                if (repository.existsByNameAndAccountId(command.name(), branch.getAccountId())) {
+                    log.warn("Branch name '{}' already exists for account ID: {}", command.name(), branch.getAccountId());
                     throw new NameAlreadyExist("Branch name already exists for this account");
+                }
             }
-
-            branch.update(command.address(), command.city(), command.regionOrState(), command.country(), command.description(), command.name());
-            return repository.save(branch);
-        });
-    }
-
-    /** Handles the update of a branch's image by updating the image URL of an existing Branch entity and saving the changes to the database.
-     * @param branchId the unique identifier of the branch to update
-     * @param imageUrl the new image URL to set for the branch
-     * @return an Optional containing the updated Branch entity if the update was successful, or empty if no Branch with the given ID exists
-     */
-    @Override
-    public Optional<Branch> updateImage(String branchId, String imageUrl) {
-        return repository.findById(branchId).map(branch -> {
-            if (imageUrl != null && !imageUrl.isBlank()) {
-                branch.setImageUrl(new ImageURL(imageUrl));
-            } else {
-                branch.setImageUrl(null);
-            }
-            return repository.save(branch);
+            Address addr = (command.address() != null)
+                    ? new Address(command.address(), command.city(), command.regionOrState(), command.country())
+                    : null;
+            branch.update(addr, command.description(), command.name());
+            Branch updated = repository.save(branch);
+            log.info("Branch updated — ID: {}", updated.getId());
+            return updated;
         });
     }
 
     /**
-     * Handles the deletion of a branch by deactivating the Branch entity and publishing a BranchDeletedEvent. This method checks if a Branch with the given ID exists, and if so, deactivates it and saves the changes to the repository. It then publishes an event to notify other components that the branch has been deleted.
-     * @param branchId the unique identifier of the branch to delete
+     * Updates the image URL of an existing branch.
+     *
+     * @param branchId the unique identifier of the branch to update
+     * @param imageUrl the new image URL, or {@code null} to clear the existing image
+     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
+     */
+    @Override
+    public Optional<Branch> updateImage(String branchId, String imageUrl) {
+        log.info("Updating image for branch ID: {}", branchId);
+        return repository.findById(branchId).map(branch -> {
+            branch.setImageUrl((imageUrl != null && !imageUrl.isBlank()) ? new ImageURL(imageUrl) : null);
+            Branch updated = repository.save(branch);
+            log.info("Branch image updated — ID: {}", updated.getId());
+            return updated;
+        });
+    }
+
+    /**
+     * Logically deletes a branch by setting its status to
+     * {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates#INACTIVE}
+     * and publishing a {@link com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent}.
+     *
+     * @param branchId the unique identifier of the branch to deactivate
+     * @throws org.springframework.web.server.ResponseStatusException with 404 if the branch does not exist
      */
     @Override
     public void delete(String branchId) {
+        log.info("Deleting (logical) branch ID: {}", branchId);
         var branch = repository.findById(branchId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found: " + branchId));
         branch.deactivate();
         repository.save(branch);
         eventPublisher.publishEvent(new BranchDeletedEvent(branchId, branch.getAccountId().getAccountId()));
+        log.info("Branch deactivated and event published — ID: {}", branchId);
     }
 }
