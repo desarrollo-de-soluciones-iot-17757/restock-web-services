@@ -3,7 +3,7 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response resource representing a custom supply item for the wrapper.
+ * Response resource representing a custom supply item for the wrapper within the resources bounded context.
  *
  * @param id Unique identifier of the custom supply
  * @param name Name of the custom supply

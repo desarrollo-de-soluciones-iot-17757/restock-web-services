@@ -4,7 +4,9 @@ import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranch
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchImageResource;
 
 /**
- * Assembler class for converting UpdateBranchImageResource to UpdateBranchImageCommand.
+ * Assembler to convert {@link com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchImageResource}
+ * to {@link com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand}
+ * within the resources bounded context.
  */
 public class UpdateBranchImageCommandFromResourceAssembler {
 
@@ -16,7 +18,6 @@ public class UpdateBranchImageCommandFromResourceAssembler {
      */
     public static UpdateBranchImageCommand ToCommandFromResource(UpdateBranchImageResource resource, String branchId) {
         try {
-
             if (!resource.hasImage()) {
                 return new UpdateBranchImageCommand(branchId, null, null);
             }

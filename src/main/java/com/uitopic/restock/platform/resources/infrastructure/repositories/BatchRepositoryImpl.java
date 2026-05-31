@@ -9,6 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link BatchRepository} that uses MongoDB for data storage
+ * within the resources bounded context.
+ */
 @Repository
 public class BatchRepositoryImpl implements BatchRepository {
 

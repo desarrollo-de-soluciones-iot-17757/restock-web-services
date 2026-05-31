@@ -14,6 +14,9 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+/**
+ * REST controller for retrieving batches by branch within the resources bounded context.
+ */
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/branches/{branchId}/batches", produces = APPLICATION_JSON_VALUE)

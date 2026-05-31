@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * MongoDB repository for {@link com.uitopic.restock.platform.resources.domain.model.aggregates.Batch}
+ * aggregates within the resources bounded context.
+ */
 @Repository
 public interface BatchMongoRepository extends MongoRepository<Batch, String> {
     List<Batch> findByBranchId(String branchId);

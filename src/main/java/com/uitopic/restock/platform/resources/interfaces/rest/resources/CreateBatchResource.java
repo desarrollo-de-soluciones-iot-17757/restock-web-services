@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+/** Request resource for creating a batch within the resources bounded context. */
 @Schema(description = "Request resource for creating a batch")
 public record CreateBatchResource(
         @NotBlank @Schema(description = "Account ID") String accountId,

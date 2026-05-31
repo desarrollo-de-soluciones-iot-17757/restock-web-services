@@ -2,8 +2,14 @@ package com.uitopic.restock.platform.resources.application.acl;
 
 import com.uitopic.restock.platform.resources.domain.services.BatchCommandService;
 import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFacade;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the inbound ACL facade for the resources bounded context.
+ * Exposes inventory operations (subtract, add back, adjust) to other bounded contexts.
+ */
+@Slf4j
 @Service
 public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
 
@@ -15,16 +21,23 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
 
     @Override
     public double subtractSupplyStock(String branchId, String supplyId, double quantity) {
-        return batchCommandService.subtractStock(branchId, supplyId, quantity);
+        log.debug("Subtracting supply stock: branchId={}, supplyId={}, quantity={}", branchId, supplyId, quantity);
+        double remaining = batchCommandService.subtractStock(branchId, supplyId, quantity);
+        log.debug("Stock subtracted. Remaining stock: {}", remaining);
+        return remaining;
     }
 
     @Override
     public void addSupplyStockBack(String branchId, String supplyId, double quantity, String unit) {
+        log.debug("Adding supply stock back: branchId={}, supplyId={}, quantity={}, unit={}", branchId, supplyId, quantity, unit);
         batchCommandService.addStockBack(branchId, supplyId, quantity, unit);
+        log.debug("Stock added back successfully.");
     }
 
     @Override
     public void adjustStock(String branchId, String supplyId, double adjustedQuantity, String unit) {
+        log.debug("Adjusting supply stock: branchId={}, supplyId={}, adjustedQuantity={}, unit={}", branchId, supplyId, adjustedQuantity, unit);
         batchCommandService.adjustStock(branchId, supplyId, adjustedQuantity, unit);
+        log.debug("Stock adjusted successfully.");
     }
 }

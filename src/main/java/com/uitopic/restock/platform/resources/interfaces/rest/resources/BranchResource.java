@@ -3,7 +3,7 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response resource representing a branch.
+ * Response resource representing a branch within the resources bounded context.
  *
  * @param id            Unique identifier of the branch
  * @param accountId     Account that owns this branch

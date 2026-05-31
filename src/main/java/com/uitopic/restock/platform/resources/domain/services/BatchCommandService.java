@@ -7,6 +7,10 @@ import com.uitopic.restock.platform.resources.domain.model.commands.TransferInve
 import com.uitopic.restock.platform.resources.domain.model.entities.InventoryDeduction;
 import com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer;
 
+/**
+ * Domain service interface defining the command contract for {@link com.uitopic.restock.platform.resources.domain.model.aggregates.Batch}
+ * operations within the resources bounded context.
+ */
 public interface BatchCommandService {
     Batch handle(CreateBatchCommand command);
     InventoryTransfer handle(TransferInventoryCommand command);

@@ -4,7 +4,8 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
 
 /**
- * Assembler class to convert Branch entities to BranchResource DTOs for REST API responses.
+ * Assembler to convert {@link com.uitopic.restock.platform.resources.domain.model.aggregates.Branch} entities
+ * to {@link BranchResource} DTOs within the resources bounded context.
  */
 public class BranchResourceFromEntityAssembler {
 

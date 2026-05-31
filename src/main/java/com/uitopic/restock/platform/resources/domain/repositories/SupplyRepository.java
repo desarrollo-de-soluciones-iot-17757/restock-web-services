@@ -5,6 +5,10 @@ import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Domain repository port for {@link com.uitopic.restock.platform.resources.domain.model.entities.Supply}
+ * persistence within the resources bounded context.
+ */
 public interface SupplyRepository {
     List<Supply> findAll();
     Optional<Supply> findById(String id);

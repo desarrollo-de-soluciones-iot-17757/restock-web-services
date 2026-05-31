@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /**
- * Response resource representing a wrapper for a list of custom supplies associated with an account.
+ * Response resource representing a wrapper for a list of custom supplies associated with an account
+ * within the resources bounded context.
  *
  * @param accountId Unique identifier of the account
  * @param totalSupplies Total number of custom supplies
