@@ -1,7 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.MinimumStock;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyContent;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -13,17 +12,8 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Aggregate root representing a user-defined supply item within an account in
- * the resources bounded context.
- *
- * <p>A {@code CustomSupply} is a supply product configured by an account owner, extending
- * a base {@link Supply} category template with account-specific details such as pricing,
- * content quantity, unit of measurement, and minimum stock threshold.
- *
- * <p>Custom supplies are the central resource tracked across {@link Batch} and
- * {@link com.uitopic.restock.platform.resources.domain.model.entities.Inventory} entities.
- * Extends {@link com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot}
- * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
+ * Represents a custom supply in the system, which is a specific type of supply that can be created and managed by users.
+ * This class extends the AuditableAbstractAggregateRoot to include auditing capabilities, allowing for tracking of creation and modification details.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -33,53 +23,60 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "custom_supplies")
 public class CustomSupply extends AuditableAbstractAggregateRoot {
 
-    /** The display name of this custom supply, unique within the owning account. */
+    /**
+     * The name of the custom supply, which can be used to identify and differentiate it from other supplies
+     */
     private String name;
 
-    /** A human-readable description providing additional details about this supply. */
+    /**
+     * A brief description of the custom supply, which can provide additional information about the supply and its characteristics
+     */
     private String description;
 
     /**
-     * The base supply category this custom supply is derived from.
-     * References a {@link Supply} entity (e.g., "Wines", "Fruits", "Vegetables").
+     * The category of the custom supply, which can be used for organizing and categorizing supplies (e.g., "Wines", "Fruits", "Vegetables", etc.)
      */
     private Supply category;
 
-    /** The price per unit of this custom supply, used for cost tracking and billing. */
+    /**
+     * The price per unit of the custom supply, which can be used for pricing and billing purposes
+     */
     private Money unitPrice;
 
     /**
-     * The numeric content of a single unit (e.g., 500 for 500 ml, 1.5 for 1.5 kg).
-     * The unit of measurement is captured separately in {@link #unitMeasurement}.
+     * The content or quantity of the custom supply, which can be used to specify how much of the supply is included in a single unit (e.g., "500ml", "1kg", "10 pieces", etc.)
      */
     private SupplyContent supplyContent;
 
-    /** The unit of measurement for this supply (e.g., "kg", "liters", "pieces"). */
+    /**
+     * The unit of measurement for the custom supply, such as "pieces", "boxes", "liters", etc.
+     */
     private UnitMeasurement unitMeasurement;
 
     /**
-     * The minimum stock threshold for this supply.
-     * When current stock falls below this value, the inventory state transitions to
-     * {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.InventoryState#LOWSTOCK}.
+     * Optional picture URL for the custom supply.
      */
-    private MinimumStock minimumStock;
-
-    /** Optional URL pointing to a picture that represents this custom supply. */
     private ImageURL pictureUrl;
 
-    /** The identifier of the account that owns this custom supply. */
+    /**
+     * Indicates whether the custom supply is perishable or not, which can be important for inventory management and restocking purposes, especially for supplies that have a limited shelf life (e.g., food items, beverages, etc.)
+     */
+    private Boolean isPerishable;
+
+    /**
+     * Reference to the account that owns this custom supply.
+     */
     private AccountId accountId;
 
     /**
-     * Applies a partial update to this custom supply, only overwriting fields that are non-null.
+     * Updates the custom supply with the provided details.
      *
-     * @param description     the new description, or {@code null} to keep the existing one
-     * @param unitPrice       the new unit price, or {@code null} to keep the existing one
-     * @param supplyContent   the new supply content, or {@code null} to keep the existing one
-     * @param unitMeasurement the new unit of measurement, or {@code null} to keep the existing one
-     * @param minimumStock    the new minimum stock threshold, or {@code null} to keep the existing one
+     * @param description the new description of the custom supply
+     * @param unitPrice the new unit price of the custom supply
+     * @param supplyContent the new supply content of the custom supply
+     * @param unitMeasurement the new unit measurement of the custom supply
      */
-    public void update(@NotNull String description, Money unitPrice, SupplyContent supplyContent, UnitMeasurement unitMeasurement, MinimumStock minimumStock) {
+    public void update(@NotNull String description, Money unitPrice, SupplyContent supplyContent, UnitMeasurement unitMeasurement) {
         if (description != null) {
             this.description = description;
         }
@@ -94,10 +91,6 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
 
         if (unitMeasurement != null) {
             this.unitMeasurement = unitMeasurement;
-        }
-
-        if (minimumStock != null) {
-            this.minimumStock = minimumStock;
         }
     }
 }

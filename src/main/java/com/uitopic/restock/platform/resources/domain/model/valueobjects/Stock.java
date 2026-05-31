@@ -1,57 +1,76 @@
 package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
+import com.uitopic.restock.platform.resources.domain.exception.InvalidStockException;
+import com.uitopic.restock.platform.resources.domain.exception.InvalidStockQuantityException;
+
 /**
- * Value object representing a stock quantity in the resources bounded context.
+ * Value object representing the stock quantity of a product in the inventory. It encapsulates the logic for validating and manipulating stock quantities, ensuring that they are always non-negative and providing methods for adding and subtracting stock.
  *
- * <p>Stored as a plain integer primitive in MongoDB via the registered
- * {@link com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockWriteConverter}
- * and {@link com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockReadConverter}.
- * This avoids embedding a nested document for a single numeric field.
- *
- * @param stock the stock quantity, must be non-negative
+ * @param stock the quantity of stock, which must be a non-negative integer
+ * @param unitMeasurement the unit of measurement for the stock quantity (e.g., "units", "kg", "liters", etc.)
  */
-public record Stock(int stock) {
+public record Stock(
+        Double stock,
+        String unitMeasurement
+) {
 
-    /**
-     * Compact constructor that validates the stock quantity.
-     *
-     * @throws IllegalArgumentException if {@code stock} is negative
-     */
+    // Constructor to validate the stock quantity
     public Stock {
-        if (stock < 0) throw new IllegalArgumentException("Stock quantity cannot be negative: " + stock);
+        if (stock < 0) {
+            throw new InvalidStockQuantityException("Stock quantity cannot be negative");
+        }
+
+        if (unitMeasurement.trim().isBlank()) {
+            throw new IllegalArgumentException("Unit measurement cannot be blank");
+        }
     }
 
     /**
-     * Returns a new {@link Stock} with the given quantity added to the current value.
+     * Add the given stock quantity to the current stock and return a new Stock instance with the updated quantity.
      *
-     * @param quantity the amount to add, must be non-negative
-     * @return a new {@link Stock} with the updated quantity
-     * @throws IllegalArgumentException if {@code quantity} is negative
+     * @param other the stock quantity to add to the current stock
+     * @return a new Stock instance with the resulting stock quantity after addition
      */
-    public Stock addStock(int quantity) {
-        if (quantity < 0) throw new IllegalArgumentException("Quantity to add cannot be negative");
-        return new Stock(this.stock + quantity);
+    public Stock add(Stock other) {
+        if (!other.unitMeasurement().equals(this.unitMeasurement)) {
+            throw new InvalidStockException("Unit measurement does not match");
+        }
+
+        return new Stock(this.stock + other.stock(), this.unitMeasurement);
     }
 
     /**
-     * Returns a new {@link Stock} with the given quantity subtracted from the current value.
+     * Subtract the given stock quantity from the current stock. If the resulting stock quantity is negative, an exception is thrown.
      *
-     * @param quantity the amount to subtract, must be non-negative and not exceed current stock
-     * @return a new {@link Stock} with the updated quantity
-     * @throws IllegalArgumentException if {@code quantity} is negative or exceeds current stock
+     * @param other the stock quantity to subtract from the current stock
+     * @return a new Stock instance with the resulting stock quantity after subtraction
+     * @throws InvalidStockException if the resulting stock quantity is negative
      */
-    public Stock subtractStock(int quantity) {
-        if (quantity < 0) throw new IllegalArgumentException("Quantity to subtract cannot be negative");
-        if (quantity > this.stock) throw new IllegalArgumentException("Cannot subtract more than current stock");
-        return new Stock(this.stock - quantity);
+    public Stock subtrack(Stock other) {
+        if (other.stock > this.stock) {
+            throw new InvalidStockException("Cannot subtract more stock than available");
+        }
+
+        if (!other.unitMeasurement().equals(this.unitMeasurement)) {
+            throw new InvalidStockException("Unit measurement does not match");
+        }
+
+        return new Stock(this.stock - other.stock(), this.unitMeasurement);
     }
 
     /**
-     * Returns the raw stock quantity value.
-     *
-     * @return the stock quantity as a primitive int
+     * Get the current stock quantity.
+     * @return the current stock quantity as an Integer.
      */
-    public int getStock() {
-        return stock;
+    public Double getValue() {
+        return this.stock;
+    }
+
+    /**
+     * Get the unit of measurement for the stock quantity.
+     * @return the unit of measurement as a String.
+     */
+    public String getUnit() {
+        return this.unitMeasurement;
     }
 }

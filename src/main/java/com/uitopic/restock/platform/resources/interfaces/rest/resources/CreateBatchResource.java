@@ -7,10 +7,26 @@ import jakarta.validation.constraints.NotBlank;
 /** Request resource for creating a batch within the resources bounded context. */
 @Schema(description = "Request resource for creating a batch")
 public record CreateBatchResource(
-        @NotBlank @Schema(description = "Account ID") String accountId,
-        @NotBlank @Schema(description = "Branch ID") String branchId,
-        @NotBlank @Schema(description = "Custom supply ID") String customSupplyId,
-        @Min(0) @Schema(description = "Current quantity") double currentQuantity,
-        @NotBlank @Schema(description = "Unit of measurement") String unit,
-        @Schema(description = "Expiration date (ISO format)") String expirationDate
+        @NotBlank @Schema(description = "Batch code")
+        String code,
+        @Min(0) @Schema(description = "Current quantity")
+        Double initialStock,
+        @NotBlank @Schema(description = "Unit of measurement (e.g., 'kg', 'liters', 'units')")
+        String unitMeasurement,
+        @NotBlank @Schema(description = "Unit purchase cost amount")
+        String unitPurchaseCostAmount,
+        @NotBlank @Schema(description = "Unit purchase cost currency")
+        String unitPurchaseCostCurrency,
+        @NotBlank @Schema(description = "Custom supply ID")
+        String customSupplyId,
+        @NotBlank @Schema(description = "Branch ID")
+        String receivingBranchId,
+        @NotBlank @Schema(description = "Account ID")
+        String accountId,
+        @Schema(description = "Manufacturing date (ISO format)")
+        String manufacturingDate,
+        @Schema(description = "Expiration date (ISO format)")
+        String expirationDate,
+        @Schema(description = "Entry date (ISO format)")
+        String entryDate
 ) {}

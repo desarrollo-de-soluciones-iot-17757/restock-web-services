@@ -4,27 +4,17 @@ import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
- * Aggregate root representing a batch of a {@link CustomSupply} received at a
- * {@link Branch} within the resources bounded context.
- *
- * <p>A batch captures a single purchase or delivery event, recording the initial
- * and current stock quantities, unit purchase cost, and relevant dates
- * (fabrication, expiration, entry). Stock changes are applied through
- * {@link #updateStock(int)} to keep the current stock consistent with
- * deductions and transfers recorded in
- * {@link com.uitopic.restock.platform.resources.domain.model.entities.InventoryDeduction}
- * and
- * {@link com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer}.
- *
- * <p>Extends
- * {@link com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot}
- * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
+ * Represents a batch of products in the inventory system. A batch is a specific quantity of a product that is received, stored, and managed as a unit within the inventory. Each batch has a unique code, associated product information, stock levels, and relevant dates for manufacturing, expiration, and entry into the inventory system. The Batch class provides methods for managing stock levels and tracking the details of each batch to ensure accurate inventory management.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -34,62 +24,68 @@ import java.time.LocalDate;
 @Document(collection = "batches")
 public class Batch extends AuditableAbstractAggregateRoot {
 
-    /** The identifier of the account that owns this batch. */
-    private AccountId accountId;
-
-    /** The identifier of the branch where this batch is stored. */
-    private String branchId;
-
-    /** The identifier of the custom supply that this batch contains. */
-    private String customSupplyId;
-
     /**
-     * A human-readable code used to identify and track this batch (e.g., a lot
-     * number).
+     * The unique code for the batch, which serves as an identifier for the batch. This code is used to track and manage the batch within the inventory system. It is a string value that can be generated based on specific rules or conventions defined by the business.
      */
     private String code;
 
-    /** The stock quantity at the time this batch was received. */
+    /**
+     * The unique identifier for the product associated with this batch. This field is used to link the batch to a specific product in the inventory system, allowing for accurate tracking and management of stock levels for that product. It is a string value that corresponds to the product's unique identifier in the database.
+     */
     private Stock initialStock;
 
-    /** The current remaining stock quantity in this batch. */
+    /**
+     * The current stock level for the batch, which represents the quantity of items available in the batch. This field is updated as items are added or removed from the batch, allowing for real-time tracking of inventory levels. It is a Stock value object that encapsulates the quantity and provides methods for managing stock levels.
+     */
     private Stock currentStock;
 
-    /** The cost paid per unit when this batch was purchased. */
+    /**
+     * The unit of measurement for the items in the batch, which indicates how the quantity of items is measured (e.g., pieces, kilograms, liters). This field is important for ensuring that stock levels are accurately tracked and managed according to the appropriate unit of measurement. It is a UnitMeasurement value object that defines the type of measurement used for the batch.
+     */
     private Money unitPurchaseCost;
 
-    /** The date on which this batch was manufactured or produced. */
-    private LocalDate fabricationDate;
-
     /**
-     * The date after which this batch should no longer be used (for perishable
-     * supplies).
+     * The identifier for the custom supply related to this batch, which is used to link the batch to a specific supply order or source. This field is optional, as not all batches may be associated with a custom supply (e.g., if the batch was created from existing inventory). It is represented as a String that cannot be null.
      */
-    private LocalDate expirationDate;
-
-    /** The date on which this batch was received at the branch. */
-    private LocalDate entryDate;
-
-    /** The custom supply that this batch contains. */
-    private CustomSupply customSupply;
-
-    /** The branch at which this batch was received and is stored. */
-    private Branch receivingBranch;
+    @NotNull
+    @NotBlank
+    private String customSupplyId;
 
     /**
-     * Updates the current stock of this batch by the given quantity.
-     * Positive values add stock; negative values subtract stock.
+     * The identifier for the receiving branch where the batch was received, which is used to track the location of the batch within the inventory system. This field is optional, as not all batches may have a receiving branch (e.g., if the batch was created from existing inventory). It is represented as a String that cannot be null.
+     */
+    @NotNull
+    @NotBlank
+    private String receivingBranchId;
+
+    /**
+     * The identifier for the account associated with this batch, which is used to link the batch to a specific account in the inventory system. This field is important for tracking ownership and responsibility for the batch, as well as for managing inventory levels and costs associated with the batch. It is an AccountId value object that encapsulates the unique identifier for the account.
+     */
+    @Valid
+    private AccountId accountId;
+
+    /**
+     * The date when the batch was manufactured, which is important for tracking the age of the batch and managing inventory based on expiration dates. This field is optional, as not all batches may have a manufacturing date available. It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
+     */
+    private Optional<LocalDate> manufacturingDate;
+
+    /**
+     * The date when the batch expires, which is crucial for managing inventory and ensuring that expired items are not sold or used. This field is optional, as not all batches may have an expiration date (e.g., non-perishable items). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
+     */
+    private Optional<LocalDate> expirationDate;
+
+    /**
+     * The date when the batch was entered into the inventory system, which is important for tracking the age of the batch and managing inventory based on entry dates. This field is optional, as not all batches may have an entry date available (e.g., if the batch was created before the inventory system was implemented). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
+     */
+    private Optional<LocalDate> entryDate;
+
+    /**
+     * Subtracks the specified quantity from the current stock of the batch. This method is used to update the stock levels when items are removed from the batch, ensuring that the current stock accurately reflects the quantity of items available. If the provided quantity is null, the method does nothing. Otherwise, it creates a new Stock instance with the updated quantity by subtracting the specified quantity from the current stock.
      *
-     * @param quantity the amount to add (positive) or subtract (negative)
-     * @return this batch with the updated current stock
-     * @throws IllegalArgumentException if the resulting stock would be negative
+     * @param quantity The quantity to be subtracted from the current stock, represented as a Stock value object. This parameter is validated to ensure that it is not null and that it represents a valid quantity of items to be removed from the batch.
      */
-    public Batch updateStock(int quantity) {
-        if (quantity >= 0) {
-            this.currentStock = this.currentStock.addStock(quantity);
-        } else {
-            this.currentStock = this.currentStock.subtractStock(-quantity);
-        }
-        return this;
+    public void subtrack(@Valid Stock quantity) {
+        if (quantity == null) return;
+        this.currentStock = new Stock(this.currentStock.stock() - quantity.stock(), this.currentStock.unitMeasurement());
     }
 }

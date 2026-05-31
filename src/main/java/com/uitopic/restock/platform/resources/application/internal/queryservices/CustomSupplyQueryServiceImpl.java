@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupp
 import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSuppliesByAccountIdQuery;
 import com.uitopic.restock.platform.resources.domain.repositories.CustomSupplyRepository;
 import com.uitopic.restock.platform.resources.domain.services.CustomSupplyQueryService;
+import com.uitopic.restock.platform.resources.infrastructure.repositories.CustomSupplyRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,25 +12,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Query service implementation for {@link CustomSupply} aggregates within the resources bounded context.
- *
+ * Implementation of the CustomSupplyQueryService interface that handles queries related to CustomSupply aggregates.
+ * This service is responsible for fetching CustomSupply data based on specific query criteria, such as account ID.
  */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
 
+    // Repository for accessing CustomSupply data from the database
     private final CustomSupplyRepository customSupplyRepository;
 
-    public CustomSupplyQueryServiceImpl(CustomSupplyRepository customSupplyRepository) {
+    // Constructor for dependency injection of the CustomSupplyRepositoryImpl
+    public CustomSupplyQueryServiceImpl(CustomSupplyRepositoryImpl customSupplyRepository) {
         this.customSupplyRepository = customSupplyRepository;
     }
 
     /**
-     * Retrieves all custom supplies associated with the account specified in the query.
+     * Handles the GetCustomSuppliesByAccountIdQuery and returns a list of CustomSupply aggregates.
      *
-     * @param query the query containing the account ID
-     * @return a {@link List} of {@link CustomSupply} aggregates for that account
+     * @param query the query object containing the account ID for which to fetch the custom supplies
+     * @return a list of CustomSupply aggregates that are associated with the specified account ID
      */
     @Override
     public List<CustomSupply> handle(GetCustomSuppliesByAccountIdQuery query) {

@@ -8,8 +8,6 @@ import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.ImageURLWriteConverter;
 //import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
 //import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
-//import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockReadConverter;
-//import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.StockWriteConverter;
 import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,9 +70,15 @@ public class MongoConfig {
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
         return new MongoCustomConversions(List.of(
+                new InventoryStateReadConverter(),
+                new InventoryStateWriteConverter()
+
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
                 new AccountIdReadConverter(),
+<<<<<<< HEAD
+                new AccountIdWriteConverter()
+=======
                 new AccountIdWriteConverter(),
                 new AddressWriteConverter(),
                 new AddressReadConverter(),
@@ -84,6 +88,7 @@ public class MongoConfig {
                 //new StockReadConverter(),
                 //new InventoryStateWriteConverter(),
                 //new InventoryStateReadConverter()
+>>>>>>> origin/develop
         ));
     }
 }
