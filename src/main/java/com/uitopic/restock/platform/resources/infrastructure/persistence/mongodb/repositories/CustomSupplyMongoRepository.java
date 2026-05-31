@@ -8,26 +8,31 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * MongoDB repository interface for managing CustomSupply aggregates.
- * This interface extends the Spring Data MongoRepository, providing CRUD operations and custom query methods for CustomSupply aggregates in a MongoDB database.
+ * MongoDB repository for {@link CustomSupply} aggregates within the resources bounded context.
+ *
+ * <p>Extends Spring Data's {@link MongoRepository} to provide standard CRUD operations
+ * and custom query methods for the {@code custom_supplies} collection. Used exclusively by
+ * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.CustomSupplyRepositoryImpl}
+ * as the underlying persistence mechanism.
  */
 @Repository
 public interface CustomSupplyMongoRepository extends MongoRepository<CustomSupply, String> {
 
     /**
-     * Finds a list of CustomSupply aggregates by the given account ID.
+     * Finds all custom supplies associated with the specified account ID.
      *
-     * @param accountId the account ID for which to fetch the custom supplies
-     * @return a list of CustomSupply aggregates that are associated with the specified account ID
+     * @param accountId the account whose custom supplies are to be retrieved
+     * @return a {@link List} of {@link CustomSupply} aggregates for that account
      */
     List<CustomSupply> findByAccountId(AccountId accountId);
 
     /**
-     * Checks if a CustomSupply with the given account ID and name already exists.
+     * Checks whether a custom supply with the given name already exists within the specified account.
+     * Used to enforce name uniqueness per account before creating a new custom supply.
      *
-     * @param accountId the account ID to check for
-     * @param name the name of the CustomSupply to check for
-     * @return true if a CustomSupply with the specified account ID and name exists, false otherwise
+     * @param accountId the account scope for the uniqueness check
+     * @param name      the supply name to check
+     * @return {@code true} if a custom supply with that name exists in the account, {@code false} otherwise
      */
     Boolean existsByAccountIdAndName(AccountId accountId, String name);
 }

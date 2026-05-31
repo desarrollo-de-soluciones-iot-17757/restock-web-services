@@ -13,4 +13,3 @@ public class InventoryStateWriteConverter implements Converter<InventoryState, S
         return source == null ? null : source.name();
     }
 }
-

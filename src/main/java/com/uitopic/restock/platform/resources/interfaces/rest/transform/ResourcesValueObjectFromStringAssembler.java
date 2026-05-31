@@ -5,7 +5,8 @@ import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyCo
 import jakarta.validation.constraints.NotEmpty;
 
 /**
- * The ResourcesValueObjectFromStringAssembler class provides static methods to convert string representations of value objects related to resources, such as MinimumStock and SupplyContent, into their corresponding value object instances. This is useful for transforming data received from REST API requests into the appropriate domain model value objects for further processing within the application.
+ * Assembler to convert string representations of resources value objects (e.g. MinimumStock, SupplyContent)
+ * into their corresponding domain instances within the resources bounded context.
  */
 public class ResourcesValueObjectFromStringAssembler {
 

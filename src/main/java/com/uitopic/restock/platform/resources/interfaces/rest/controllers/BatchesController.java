@@ -73,8 +73,8 @@ public class BatchesController {
         );
         var batch = commandService.handle(command);
         return batch.map(value -> ResponseEntity.status(HttpStatus.CREATED).body(
-                BatchResourceFromEntityAssembler
-                        .toResourceFromEntity(value)))
+                        BatchResourceFromEntityAssembler
+                                .toResourceFromEntity(value)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 

@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link InventoryTransferRepository} that uses MongoDB for data storage
+ * within the resources bounded context.
+ */
 @Repository
 public class InventoryTransferRepositoryImpl implements InventoryTransferRepository {
 

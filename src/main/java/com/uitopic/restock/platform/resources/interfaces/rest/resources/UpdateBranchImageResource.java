@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Request resource for updating branch image.
+ * Request resource for updating branch image within the resources bounded context.
  *
  * @param image the new image file for the branch
  */

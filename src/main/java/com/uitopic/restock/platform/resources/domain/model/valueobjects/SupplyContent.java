@@ -1,30 +1,36 @@
 package com.uitopic.restock.platform.resources.domain.model.valueobjects;
 
 /**
- * Represents the content of a supply item, such as weight or volume.
- * This value object encapsulates the content value and ensures it is valid.
+ * Value object representing the content quantity of a single unit of a
+ * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}
+ * within the resources bounded context.
  *
- * @param content the content value, which must be a positive number and not exceed 10,000
+ * <p>Captures the numeric amount of a supply unit (e.g., 500 for 500 ml, 1 for 1 kg).
+ * The unit of measurement is tracked separately via
+ * {@link com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement}.
+ * This value object enforces that the content is always a positive number.
+ *
+ * @param content the content value, must be a positive number
  */
 public record SupplyContent(
         Double content
 ) {
 
-    // Validation logic to ensure content is a positive number and does not exceed 10,000
+    /**
+     * Compact constructor that validates the content value.
+     *
+     * @throws IllegalArgumentException if {@code content} is null or not positive
+     */
     public SupplyContent {
         if (content == null || content <= 0) {
             throw new IllegalArgumentException("Content must be a positive number.");
-        }
-
-        if (content > 10000) {
-            throw new IllegalArgumentException("Content must not exceed 10,000.");
         }
     }
 
     /**
      * Returns the content value.
      *
-     * @return the content value
+     * @return the content as a {@link Double}
      */
     public Double getContent() {
         return content;

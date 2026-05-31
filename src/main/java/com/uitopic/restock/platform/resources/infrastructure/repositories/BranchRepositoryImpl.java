@@ -10,24 +10,33 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of the BranchRepository interface using MongoDB as the underlying data store. This class uses a BranchMongoRepository to perform CRUD operations on Branch entities in the MongoDB database.
- * It provides methods for saving, retrieving, and deleting Branch entities, as well as checking for the existence of branches by name and location.
+ * Implementation of {@link BranchRepository} that uses MongoDB for data storage
+ * within the resources bounded context.
+ *
+ * <p>Acts as a bridge between the domain layer and the MongoDB persistence layer,
+ * adapting {@link BranchMongoRepository} to the {@link BranchRepository} port.
+ * This keeps the domain layer free of Spring Data dependencies.
  */
 @Repository
 public class BranchRepositoryImpl implements BranchRepository {
 
-    /** The MongoDB repository for managing Branch entities. */
+    /** The underlying Spring Data MongoDB repository for {@link Branch} documents. */
     private final BranchMongoRepository mongo;
 
-    /** Constructor for BranchRepositoryImpl. This constructor takes a BranchMongoRepository as a parameter and assigns it to the mongo field. The BranchMongoRepository is used to perform database operations on Branch entities. */
+    /**
+     * Constructs a {@code BranchRepositoryImpl} with the given MongoDB repository.
+     *
+     * @param mongo the Spring Data MongoDB repository to delegate to
+     */
     public BranchRepositoryImpl(BranchMongoRepository mongo) {
         this.mongo = mongo;
     }
 
     /**
-     * Saves a Branch entity to the database.
-     * @param branch the Branch entity to save
-     * @return the saved Branch entity
+     * Persists a {@link Branch} aggregate to MongoDB.
+     *
+     * @param branch the branch to save
+     * @return the saved branch, including any auto-generated ID
      */
     @Override
     public Branch save(Branch branch) {
@@ -35,9 +44,10 @@ public class BranchRepositoryImpl implements BranchRepository {
     }
 
     /**
-     * Retrieves a Branch entity by its unique identifier.
-     * @param id the unique identifier of the Branch to retrieve
-     * @return an Optional containing the Branch if found, or empty if no Branch with the given ID exists
+     * Finds a branch by its unique identifier.
+     *
+     * @param id the unique identifier of the branch
+     * @return an {@link Optional} containing the {@link Branch} if found, or empty if not found
      */
     @Override
     public Optional<Branch> findById(String id) {
@@ -45,9 +55,10 @@ public class BranchRepositoryImpl implements BranchRepository {
     }
 
     /**
-     * Retrieves a list of Branch entities associated with a specific account.
-     * @param accountId the unique identifier of the account whose branches are to be retrieved
-     * @return a List of Branch entities associated with the specified account
+     * Finds all branches belonging to the specified account.
+     *
+     * @param accountId the account whose branches are to be retrieved
+     * @return a {@link List} of {@link Branch} aggregates for that account
      */
     @Override
     public List<Branch> findByAccountId(AccountId accountId) {
@@ -55,8 +66,9 @@ public class BranchRepositoryImpl implements BranchRepository {
     }
 
     /**
-     * Deletes a Branch entity from the database by its unique identifier.
-     * @param id the unique identifier of the Branch to delete
+     * Removes a branch document from MongoDB by its unique identifier.
+     *
+     * @param id the unique identifier of the branch to delete
      */
     @Override
     public void deleteById(String id) {
@@ -64,10 +76,11 @@ public class BranchRepositoryImpl implements BranchRepository {
     }
 
     /**
-     * Checks if a Branch with the given name already exists within the specified account.
-     * @param name the name of the Branch to check for existence
-     * @param accountId the unique identifier of the account to which the Branch belongs
-     * @return true if a Branch with the given name exists within the account, false otherwise
+     * Checks whether a branch with the given name already exists within the specified account.
+     *
+     * @param name      the branch name to check
+     * @param accountId the account scope for the uniqueness check
+     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
      */
     @Override
     public boolean existsByNameAndAccountId(String name, AccountId accountId) {

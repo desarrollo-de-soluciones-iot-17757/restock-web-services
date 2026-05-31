@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.resources.interfaces.acl;
 
 /**
- * Inbound ACL facade — exposes Resources BC inventory operations to other bounded contexts.
+ * Inbound ACL facade — exposes resources bounded context inventory operations to other bounded contexts.
  */
 public interface ResourcesContextFacade {
     double subtractSupplyStock(String branchId, String supplyId, Integer quantity);

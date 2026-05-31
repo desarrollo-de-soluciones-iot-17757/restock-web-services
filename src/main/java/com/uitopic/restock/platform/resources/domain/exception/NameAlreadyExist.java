@@ -1,7 +1,8 @@
 package com.uitopic.restock.platform.resources.domain.exception;
 
 /**
- * Exception thrown when attempting to create a resource with a name that already exists.
+ * Exception thrown when attempting to create a resource with a name that already exists
+ * within the resources bounded context.
  */
 public class NameAlreadyExist extends RuntimeException {
 

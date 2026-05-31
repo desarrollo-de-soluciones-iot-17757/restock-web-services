@@ -4,7 +4,8 @@ import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranch
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBranchResource;
 
 /**
- * Assembler class responsible for converting CreateBranchResource objects into CreateBranchCommand objects. This class provides a static method that takes a CreateBranchResource as input and returns a corresponding CreateBranchCommand, which can then be used in the application layer to handle the creation of a new branch.
+ * Assembler to convert {@link CreateBranchResource} to {@link com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand}
+ * within the resources bounded context.
  */
 public class CreateBranchCommandFromResourceAssembler {
 

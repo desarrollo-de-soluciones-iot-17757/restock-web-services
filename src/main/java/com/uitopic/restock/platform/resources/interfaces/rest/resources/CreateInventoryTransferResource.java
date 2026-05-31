@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+/** Request resource for transferring inventory between branches within the resources bounded context. */
 @Schema(description = "Request resource for transferring inventory between branches")
 public record CreateInventoryTransferResource(
         @NotBlank @Schema(description = "Source branch ID") String fromBranchId,

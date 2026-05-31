@@ -9,8 +9,15 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Aggregate root representing a Branch in the system. A Branch is associated with an Account and contains information such as name, description, location, status, and an optional image URL.
- * This class extends AuditableAbstractAggregateRoot to include auditing fields like createdAt and updatedAt.
+ * Aggregate root representing a physical or logical branch belonging to an account.
+ *
+ * <p>A branch is the primary organizational unit within the resources bounded context.
+ * Each branch is owned by an {@link AccountId} and holds location, status, and optional
+ * image information. Branches support soft-delete semantics: deletion transitions the
+ * status to {@link BranchStates#INACTIVE} rather than removing the document from MongoDB.
+ *
+ * <p>Extends {@link com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot}
+ * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -20,66 +27,114 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "branches")
 public class Branch extends AuditableAbstractAggregateRoot {
 
-    /** The name of the branch. This field is required and must be unique within the same account. */
+    /** The display name of the branch. Must be unique within the same account. */
     private String name;
 
-    /** A brief description of the branch. */
+    /** A brief human-readable description of the branch. */
     private String description;
 
-    /** The URL of an optional image associated with the branch. */
+    /** Optional URL pointing to an image that represents the branch. */
     private ImageURL imageUrl;
 
-    /** The location of the branch, including address, city, region/state, and country. */
+    /** The physical location of the branch, encapsulating address, city, region/state, and country. */
     private Address location;
 
-    /** The status of the branch, which can be either active or inactive. */
+    /** The current operational status of the branch ({@link BranchStates#ACTIVE} or {@link BranchStates#INACTIVE}). */
     private BranchStates status;
 
-    /** The ID of the account that owns this branch. */
+    /** The identifier of the account that owns this branch. */
     private AccountId accountId;
 
     private static final String DEFAULT_IMAGE_URL = "https://res.cloudinary.com/deuy1pr9e/image/upload/v1780190808/restock_deafult_branch_image.jpg";
     private static final String DEFAULT_PUBLIC_ID = "restock_deafult_branch_image";
 
-    /** Constructor for creating a new Branch instance. This constructor initializes the branch with the provided name, description, location, image URL, and account ID. The status of the branch is set to active by default. */
-    public Branch(String name, String description, String address, String city, String country, String regionOrState, String accountId, String imageUrl, String publicId) {
+
+    /**
+     * Constructs a new Branch instance with the specified details. If the provided image URL is null or blank,
+     * the default placeholder image will be used.
+     *
+     * @param name        the name of the branch
+     * @param address     the street address of the branch
+     * @param city        the city where the branch is located
+     * @param regionOrState the region or state where the branch is located
+     * @param country     the country where the branch is located
+     * @param description a brief description of the branch
+     * @param accountId   the identifier of the account that owns this branch
+     * @param imageUrl    the URL of the branch's image, or {@code null} to use the default
+     * @param publicId    the Cloudinary public ID of the image
+     */
+    public Branch(String name, String address, String city, String regionOrState, String country, String description, String accountId, String imageUrl, String publicId) {
+        this.name = name;
+        this.location = new Address(address, city, regionOrState, country);
+        this.description = description;
+        this.accountId = new AccountId(accountId);
+        applyImage(imageUrl, publicId);
+        this.status = BranchStates.ACTIVE;
+    }
+
+    /**
+     * Updates the branch's details, including name, description, location, and image.
+     *
+     * @param name        the new name of the branch
+     * @param description the new description of the branch
+     * @param address     the new street address of the branch
+     * @param city        the new city of the branch
+     * @param regionOrState the new region or state of the branch
+     * @param country     the new country of the branch
+     * @param imageUrl    the new URL of the branch's image, or {@code null} to use the default
+     * @param publicId    the Cloudinary public ID of the new image
+     * @return the updated Branch instance (for method chaining)
+     */
+    public Branch updateBranch(String name, String description,String address, String city, String regionOrState, String country, String imageUrl, String publicId) {
         this.name = name;
         this.description = description;
         this.location = new Address(address, city, regionOrState, country);
-        this.accountId = new AccountId(accountId);
-        this.status = BranchStates.ACTIVE;
-        this.applyImage(imageUrl, publicId);
-    }
-
-    /** The ID of the tenant that this branch belongs to. This is used for multi-tenancy support. */
-    public Branch updateBranch(String name, String address, String city, String country, String regionOrState, String description, String imageUrl, String publicId) {
-        if (name != null && !name.isBlank()) this.name = name;
-        if (address != null) this.location = new Address(address, city, regionOrState, country);
-        this.applyImage(imageUrl, publicId);
-        if (description != null) this.description = description;
+        applyImage(imageUrl, publicId);
         return this;
     }
 
     /**
-     * Methods to activate and deactivate the branch. These methods change the status of the branch accordingly.
+     * Updates only the branch's image. If the provided URL is null or blank, the default placeholder image will be used.
+     *
+     * @param imageUrl the new URL of the branch's image, or {@code null} to use the default
+     * @param publicId the Cloudinary public ID of the new image
+     * @return the updated Branch instance (for method chaining)
+     */
+    public Branch updateBranchImage(String imageUrl, String publicId) {
+        applyImage(imageUrl, publicId);
+        return this;
+    }
+
+    /**
+     * Transitions the branch to the {@link BranchStates#INACTIVE} state.
+     * Used for logical (soft) deletion of a branch.
      */
     public void deactivate() {
         this.status = BranchStates.INACTIVE;
     }
 
     /**
-     * Method to activate the branch. This method changes the status of the branch to active.
+     * Transitions the branch to the {@link BranchStates#ACTIVE} state.
+     * Used to re-enable a previously deactivated branch.
      */
     public void activate() {
         this.status = BranchStates.ACTIVE;
     }
 
-    /** Static method to return the default image URL for branches. This method creates and returns an ImageURL object with the default image URL and public ID. */
+    /**
+     * Returns whether the branch is currently using the default placeholder image.
+     */
     public boolean hasDefaultImage() {
-        return DEFAULT_PUBLIC_ID.equals(this.imageUrl.publicId());
+        return this.imageUrl != null && DEFAULT_PUBLIC_ID.equals(this.imageUrl.publicId());
     }
 
-    /** Method to apply an image to the branch. This method takes an image URL and public ID as parameters and updates the branch's imageUrl field accordingly. It returns the updated Branch instance. */
+    /**
+     * Applies an image to the branch. If the provided URL is null or blank,
+     * the default placeholder image is used instead.
+     *
+     * @param imageUrl the URL of the new image, or {@code null} to use the default
+     * @param publicId the Cloudinary public ID of the new image
+     */
     public void applyImage(String imageUrl, String publicId) {
         if (imageUrl == null || imageUrl.isBlank()) {
             this.imageUrl = new ImageURL(DEFAULT_IMAGE_URL, DEFAULT_PUBLIC_ID);

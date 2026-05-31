@@ -76,7 +76,7 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                             "Supply template not found: " + command.supplyId()));
             Money unitPrice = SharedValueObjectFromStringAssembler.toMoneyFromString(command.unitPrice());
             //ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
-                    //? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
+            //? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
             existing.update(command.description(), unitPrice,
                     new SupplyContent(command.supplyContent()),
                     new UnitMeasurement(command.unitMeasurement()));
