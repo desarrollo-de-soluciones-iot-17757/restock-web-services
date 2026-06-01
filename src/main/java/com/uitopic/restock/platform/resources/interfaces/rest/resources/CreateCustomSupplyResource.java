@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
+/** Request resource for creating a custom supply within the resources bounded context. */
 @Schema(description = "Request resource for creating a custom supply")
 public record CreateCustomSupplyResource(
         @NotBlank @Schema(description = "Account ID") String accountId,

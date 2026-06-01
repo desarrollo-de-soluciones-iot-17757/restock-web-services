@@ -70,8 +70,7 @@ public class OpenApiConfiguration {
 
         // Configure server URL (you can change this to your actual server URL)
         openApi.servers(List.of(
-                new Server().url("https://restock-platform.onrender.com").description("Production server"),
-                new Server().url("http://localhost:8080").description("Local development server")
+                new Server().url("/")
         ));
 
         return openApi;

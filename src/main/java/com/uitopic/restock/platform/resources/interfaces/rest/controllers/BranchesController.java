@@ -1,24 +1,35 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.resources.domain.services.BranchQueryService;
-import com.uitopic.restock.platform.resources.interfaces.rest.resources.*;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchImageResource;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchImageCommandFromResourceAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchInfoCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.util.Map;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+/**
+ * REST controller for branch operations within the resources bounded context,
+ * not scoped to an account path.
+ *
+ * <p>Exposes endpoints under {@code /api/v1/branches} for retrieving a branch by ID,
+ * updating branch info, updating the branch image, and logically deleting a branch.
+ * This controller complements {@link AccountBranchesController}, which handles account-scoped
+ * branch creation and listing.
+ *
+ * <p>Command handling is delegated to {@link BranchCommandService} and query handling
+ * to {@link BranchQueryService}. The controller only maps resources to commands and
+ * formats responses via {@link BranchResourceFromEntityAssembler}.
+ */
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/branches", produces = APPLICATION_JSON_VALUE)
@@ -28,52 +39,80 @@ public class BranchesController {
     private final BranchCommandService commandService;
     private final BranchQueryService queryService;
 
+    /**
+     * Constructs a {@code BranchesController} with the required services.
+     *
+     * @param commandService the service for handling branch write operations
+     * @param queryService   the service for handling branch read operations
+     */
     public BranchesController(BranchCommandService commandService, BranchQueryService queryService) {
         this.commandService = commandService;
         this.queryService = queryService;
     }
 
-    @Operation(summary = "Create a branch")
-    @PostMapping
-    public ResponseEntity<BranchResource> create(@Valid @RequestBody CreateBranchResource resource) {
-        var command = new CreateBranchCommand(resource.accountId(), resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.imageUrl(), resource.description());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BranchResourceFromEntityAssembler.toResourceFromEntity(commandService.handle(command)));
-    }
-
+    /**
+     * Retrieves a branch by its unique identifier.
+     *
+     * @param branchId the unique identifier of the branch
+     * @return 200 with the {@link BranchResource}, or 404 if not found
+     */
     @Operation(summary = "Get branch by ID")
     @GetMapping("/{branchId}")
     public ResponseEntity<BranchResource> getById(@PathVariable String branchId) {
+        log.debug("GET /api/v1/branches/{}", branchId);
         return queryService.findById(branchId)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Updates the information of a branch. Accepts multipart/form-data to support
+     * optional image upload alongside info fields.
+     *
+     * @param branchId the unique identifier of the branch to update
+     * @param resource the multipart form data containing the fields to update
+     * @return 200 with the updated {@link BranchResource}, or 404 if not found
+     */
     @Operation(summary = "Update branch info")
-    @PatchMapping("/{branchId}")
-    public ResponseEntity<BranchResource> updateInfo(@PathVariable String branchId,
-                                                      @Valid @RequestBody UpdateBranchInfoResource resource) {
-        var command = new UpdateBranchInfoCommand(branchId, resource.name(), resource.address(),
-                resource.city(), resource.country(), resource.description());
+    @PutMapping(value = "/{branchId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BranchResource> updateBranchInfo(@PathVariable String branchId,
+                                                           @ModelAttribute UpdateBranchInfoResource resource) {
+        log.info("PUT /api/v1/branches/{}", branchId);
+        var command = UpdateBranchInfoCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
         return commandService.handle(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Updates the image of a branch. Accepts multipart/form-data to support file upload.
+     *
+     * @param branchId the unique identifier of the branch
+     * @param resource the multipart form data containing the new image file
+     * @return 200 with the updated {@link BranchResource}, or 404 if not found
+     */
     @Operation(summary = "Update branch image")
-    @PatchMapping("/{branchId}/image")
+    @PatchMapping(value = "/{branchId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BranchResource> updateImage(@PathVariable String branchId,
-                                                       @RequestBody UpdateBranchImageResource resource) {
-        return commandService.updateImage(branchId, resource.imageUrl())
+                                                      @ModelAttribute UpdateBranchImageResource resource) {
+        log.info("PATCH /api/v1/branches/{}/image", branchId);
+        var command = UpdateBranchImageCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
+        return commandService.updateImage(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Delete a branch")
+    /**
+     * Logically deletes a branch by transitioning its status to inactive.
+     *
+     * @param branchId the unique identifier of the branch to delete
+     * @return 204 No Content on success
+     */
+    @Operation(summary = "Delete a branch (logical)")
     @DeleteMapping("/{branchId}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable String branchId) {
+    public ResponseEntity<Void> delete(@PathVariable String branchId) {
+        log.info("DELETE /api/v1/branches/{}", branchId);
         commandService.delete(branchId);
-        return ResponseEntity.ok(Map.of("branchId", branchId, "deletedAt", Instant.now().toString()));
+        return ResponseEntity.noContent().build();
     }
 }

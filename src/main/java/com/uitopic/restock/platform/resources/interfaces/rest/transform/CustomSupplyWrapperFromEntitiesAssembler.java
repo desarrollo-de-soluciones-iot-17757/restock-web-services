@@ -9,8 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * CustomSupplyWrapperFromEntitiesAssembler is a utility class that provides methods to transform a list of CustomSupply entities into a CustomSupplyWrapper.
- * This class is used to convert the domain model (CustomSupply) into a format suitable for API responses (CustomSupplyWrapper), which includes a list of CustomSupplyItems and the total count of
+ * Assembler to convert a list of {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply} entities
+ * to a {@link CustomSupplyWrapper} DTO within the resources bounded context.
  */
 public class CustomSupplyWrapperFromEntitiesAssembler {
 
@@ -30,7 +30,6 @@ public class CustomSupplyWrapperFromEntitiesAssembler {
                 entity.getUnitPrice().getCurrencyCode(),
                 entity.getSupplyContent().getContent(),
                 entity.getUnitMeasurement().getUnitName(),
-                entity.getMinimumStock().getMinimumStock(),
                 entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null
         );
     }

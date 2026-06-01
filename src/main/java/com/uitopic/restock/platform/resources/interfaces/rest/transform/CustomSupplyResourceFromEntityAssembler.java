@@ -5,8 +5,8 @@ import com.uitopic.restock.platform.resources.interfaces.rest.resources.CustomSu
 import jakarta.validation.constraints.NotNull;
 
 /**
- * CustomSupplyResourceFromEntityAssembler is a utility class that provides a method to transform a CustomSupply entity into a CustomSupplyResource.
- * This class is used to convert the domain model (CustomSupply) into a format suitable for API responses (CustomSupplyResource).
+ * Assembler to convert {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply} entities
+ * to {@link CustomSupplyResource} DTOs within the resources bounded context.
  */
 public class CustomSupplyResourceFromEntityAssembler {
 
@@ -26,7 +26,6 @@ public class CustomSupplyResourceFromEntityAssembler {
                 entity.getUnitPrice().getCurrencyCode(),
                 entity.getSupplyContent().getContent(),
                 entity.getUnitMeasurement().getUnitName(),
-                entity.getMinimumStock().getMinimumStock(),
                 entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null,
                 entity.getAccountId().getAccountId()
         );
