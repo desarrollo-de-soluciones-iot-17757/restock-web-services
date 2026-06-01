@@ -6,7 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Event handler for {@link StockSubtractedEvent} within the resources bounded context.
+ * Event handler for handling the StockSubtractedEvent. This event is triggered when stock is subtracted from an inventory due to reasons such as sales, damage, theft, or expiration.
+ * The handler logs the details of the stock subtraction, including the inventory ID, the quantity subtracted, and the remaining stock after the subtraction.
  */
 @Slf4j
 @Component
@@ -14,7 +15,16 @@ public class StockSubtractedEventHandler {
 
     @EventListener
     public void on(StockSubtractedEvent event) {
-        log.info("Stock subtracted: deductionId={}, branchId={}, supplyId={}, qty={}, remaining={}",
-                event.deductionId(), event.branchId(), event.supplyId(), event.quantity(), event.remainingStock());
+        var eventName = event.getClass().getSimpleName().toUpperCase();
+        var inventoryId = String.join(event.getBranchId(), "+", event.getBatchId());
+        var quantitySubtracted = String.join(event.getQuantitySubtracted().toString(), event.getUnitMeasurement());
+        var remainingStock = String.join(event.getRemainingStock().toString(), event.getUnitMeasurement());
+
+        log.info("{}: Inventory with id {} had {} of stock subtracted. Remaining stock is {}.",
+                eventName,
+                inventoryId,
+                quantitySubtracted,
+                remainingStock
+        );
     }
 }
