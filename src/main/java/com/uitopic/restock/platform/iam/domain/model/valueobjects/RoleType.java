@@ -5,7 +5,8 @@ package com.uitopic.restock.platform.iam.domain.model.valueobjects;
  * These govern the access control levels of the authenticated users.
  */
 public enum RoleType {
-
+    RESTAURANTADMIN,
+    RETAILADMIN,
     ADMIN,
     CASHIER,
     WAREHOUSEMAN

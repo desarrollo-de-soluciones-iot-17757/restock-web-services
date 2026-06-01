@@ -11,6 +11,8 @@ import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.domain.services.UserCommandService;
 import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import org.bson.types.ObjectId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -106,9 +108,10 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
         String passwordHash = hashingService.encode(command.password());
-        User user = new User(email, passwordHash, new Role(roleType), null);
+        String generatedAccountId = new ObjectId().toHexString();
+        User user = new User(email, passwordHash, new Role(roleType), new AccountId(generatedAccountId));
         User saved = userRepository.save(user);
-        log.info("User registered successfully with ID: {}", saved.getId());
+        log.info("User registered successfully with ID: {} and accountId: {}", saved.getId(), generatedAccountId);
 
         log.info("Creating profile for user ID: {} via ProfilesContextFacade ACL", saved.getId());
         try {
