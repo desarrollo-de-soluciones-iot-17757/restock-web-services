@@ -47,10 +47,9 @@ public class WebSecurityConfiguration {
         return http
                 .cors(configurer -> configurer.configurationSource(request -> {
                     var cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of("*"));
+                    cors.setAllowedOriginPatterns(List.of("*"));
                     cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    cors.setAllowedHeaders(List.of("*"
-                    ));
+                    cors.setAllowedHeaders(List.of("*"));
                     cors.setExposedHeaders(List.of("Authorization", "Access-Control-Allow-Origin"));
                     cors.setAllowCredentials(true);
                     cors.setMaxAge(3600L);
