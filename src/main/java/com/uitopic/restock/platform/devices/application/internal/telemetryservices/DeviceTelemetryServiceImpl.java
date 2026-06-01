@@ -1,5 +1,6 @@
-package com.uitopic.restock.platform.resources.application.internal.services;
+package com.uitopic.restock.platform.devices.application.internal.telemetryservices;
 
+import com.uitopic.restock.platform.devices.domain.services.DeviceTelemetryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,4 +17,3 @@ public class DeviceTelemetryServiceImpl implements DeviceTelemetryService {
         log.info("Disabling telemetry for devices attached to branchId={}", branchId);
     }
 }
-
