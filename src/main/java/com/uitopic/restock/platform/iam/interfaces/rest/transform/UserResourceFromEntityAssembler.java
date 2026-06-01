@@ -25,11 +25,15 @@ public class UserResourceFromEntityAssembler {
      *         token
      */
     public static AuthenticatedUserResource toResourceFromEntity(User user, String token) {
+        String accountId = null;
+        if (user.getAccountId() != null) {
+            accountId = user.getAccountId().getAccountId();
+        }
         return new AuthenticatedUserResource(
                 user.getId(),
                 user.getEmail().email(),
                 user.getRole().getType().name(),
-                token);
+                token,accountId);
     }
 
     /**
@@ -39,9 +43,13 @@ public class UserResourceFromEntityAssembler {
      * @return a {@link UserResource} representing the user
      */
     public static UserResource toResourceFromEntity(User user) {
+        String accountId = null;
+        if (user.getAccountId() != null) {
+            accountId = user.getAccountId().getAccountId();
+        }
         return new UserResource(
                 user.getId(),
                 user.getEmail().email(),
-                user.getRole().getType().name());
-    }
+                user.getRole().getType().name(),
+                accountId);    }
 }
