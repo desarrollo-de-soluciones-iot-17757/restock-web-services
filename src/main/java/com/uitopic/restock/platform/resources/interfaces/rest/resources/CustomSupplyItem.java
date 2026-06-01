@@ -3,7 +3,7 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response resource representing a custom supply item for the wrapper.
+ * Response resource representing a custom supply item for the wrapper within the resources bounded context.
  *
  * @param id Unique identifier of the custom supply
  * @param name Name of the custom supply
@@ -34,8 +34,6 @@ public record CustomSupplyItem(
         double supplyContent,
         @Schema(description = "Unit of measurement for the supply content", example = "grams")
         String unitMeasurement,
-        @Schema(description = "Minimum stock level for the custom supply", example = "10")
-        int minimumStock,
         @Schema(description = "URL of the custom supply's picture", example = "https://example.com/images/premium-coffee-beans.jpg")
         String pictureUrl
 ) {

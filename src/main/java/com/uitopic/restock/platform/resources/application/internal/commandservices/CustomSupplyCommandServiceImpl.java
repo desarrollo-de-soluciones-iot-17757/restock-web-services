@@ -53,7 +53,7 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
 
         Money unitPrice = SharedValueObjectFromStringAssembler.toMoneyFromString(command.unitPrice());
         ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
-                ? new ImageURL(command.imageUrl()) : null;
+                ? new ImageURL(command.imageUrl(), command.imageUrl()) : null;
 
         CustomSupply cs = CustomSupply.builder()
                 .accountId(accountId)
@@ -63,7 +63,6 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                 .unitPrice(unitPrice)
                 .supplyContent(new SupplyContent(command.supplyContent()))
                 .unitMeasurement(new UnitMeasurement(command.unitMeasurement()))
-                .minimumStock(new MinimumStock(command.minimumStock()))
                 .pictureUrl(imageUrl)
                 .build();
         return repository.save(cs);
@@ -76,15 +75,14 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                             "Supply template not found: " + command.supplyId()));
             Money unitPrice = SharedValueObjectFromStringAssembler.toMoneyFromString(command.unitPrice());
-            ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
-                    ? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
+            //ImageURL imageUrl = (command.imageUrl() != null && !command.imageUrl().isBlank())
+            //? new ImageURL(command.imageUrl()) : existing.getPictureUrl();
             existing.update(command.description(), unitPrice,
                     new SupplyContent(command.supplyContent()),
-                    new UnitMeasurement(command.unitMeasurement()),
-                    new MinimumStock(command.minimumStock()));
+                    new UnitMeasurement(command.unitMeasurement()));
+
             existing.setCategory(category);
             existing.setName(command.name());
-            existing.setPictureUrl(imageUrl);
             return repository.save(existing);
         });
     }
@@ -93,7 +91,7 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
     public void delete(String id) {
         repository.findById(id).ifPresentOrElse(cs -> {
             boolean hasStock = batchRepository.findByCustomSupplyId(id)
-                    .stream().anyMatch(b -> b.getCurrentQuantity() > 0);
+                    .stream().anyMatch(b -> b.getCurrentStock().getValue() > 0);
             if (hasStock) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         "Supply has active batches with stock — deplete them first");

@@ -6,8 +6,16 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Represents a supply item in the inventory system, extending the AuditableModel to include common auditing fields.
- * This class includes specific attributes related to the supply item, such as its name, description, category, and perishability.
+ * Entity representing a base supply template in the resources bounded context.
+ *
+ * <p>A {@code Supply} acts as a catalog entry that defines a category of supply item
+ * (e.g., POTATO, TOMATO) along with its description and perishability flag.
+ * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply} aggregates
+ * reference a {@code Supply} as their {@code category}, allowing account-specific customization
+ * on top of a shared supply template.
+ *
+ * <p>Extends {@link com.uitopic.restock.platform.shared.domain.model.entities.AuditableModel}
+ * to inherit {@code createdAt} and {@code updatedAt} audit timestamps.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,23 +25,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "supplies")
 public class Supply extends AuditableModel {
 
-    /**
-     * Name of the supply item.
-     */
+    /** The display name of this supply template. */
     private String name;
 
-    /**
-     * Detailed description of the supply item.
-     */
+    /** A detailed description of this supply item and its characteristics. */
     private String description;
 
     /**
-     * Category of the supply item, represented as an enum for better type safety and maintainability.
+     * The category of this supply, represented as a {@link SupplyNames} enum value
+     * for type safety and maintainability.
      */
     private SupplyNames category;
 
     /**
-     * Indicates whether the supply item is perishable, which can affect storage and handling requirements.
+     * Indicates whether this supply item is perishable.
+     * Perishable supplies require expiration date tracking in associated {@link com.uitopic.restock.platform.resources.domain.model.aggregates.Batch} records.
      */
     private Boolean isPerishable;
 }

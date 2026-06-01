@@ -40,8 +40,8 @@ public class SharedValueObjectFromStringAssembler {
      * @param imageURL the string representation of the image URL
      * @return an ImageURL value object constructed from the provided string
      */
-    public static ImageURL toImageURLFromString(@NotBlank String imageURL) {
-        return new ImageURL(imageURL);
+    public static ImageURL toImageURLFromString(@NotBlank String imageURL, String accountId) {
+        return new ImageURL(imageURL, accountId);
     }
 
     /**

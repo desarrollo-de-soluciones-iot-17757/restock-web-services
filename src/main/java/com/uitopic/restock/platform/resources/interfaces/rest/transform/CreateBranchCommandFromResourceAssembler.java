@@ -1,0 +1,41 @@
+package com.uitopic.restock.platform.resources.interfaces.rest.transform;
+
+import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBranchResource;
+
+/**
+ * Assembler to convert {@link CreateBranchResource} to {@link com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand}
+ * within the resources bounded context.
+ */
+public class CreateBranchCommandFromResourceAssembler {
+
+    /**
+     * Converts a CreateBranchResource object into a CreateBranchCommand object.
+     *
+     * @param resource createBranchResource to be converted
+     * @return a CreateBranchCommand containing the data from the resource
+     * @throws RuntimeException if there is an error during conversion, such as issues with reading the image file
+     */
+    public static CreateBranchCommand ToCommandFromResource(CreateBranchResource resource, String accountId) {
+        try {
+
+            if (!resource.hasNewPhoto()) {
+                return new CreateBranchCommand(accountId, resource.name(), resource.address(), resource.city(), resource.stateOrRegion(), resource.country(), resource.description(), null, null);
+            }
+
+            return new CreateBranchCommand(
+                    accountId,
+                    resource.name(),
+                    resource.address(),
+                    resource.city(),
+                    resource.stateOrRegion(),
+                    resource.country(),
+                    resource.description(),
+                    resource.image().getBytes(),
+                    resource.image().getOriginalFilename()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to convert CreateBranchResource to CreateBranchCommand", e);
+        }
+    }
+}

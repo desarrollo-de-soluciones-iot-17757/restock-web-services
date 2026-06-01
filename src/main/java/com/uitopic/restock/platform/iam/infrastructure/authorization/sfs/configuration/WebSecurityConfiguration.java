@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 /**
  * Web security configuration class for the IAM bounded context.
@@ -42,7 +45,16 @@ public class WebSecurityConfiguration {
     @Bean   
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(Customizer.withDefaults())
+                .cors(configurer -> configurer.configurationSource(request -> {
+                    var cors = new CorsConfiguration();
+                    cors.setAllowedOriginPatterns(List.of("*"));
+                    cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    cors.setAllowedHeaders(List.of("*"));
+                    cors.setExposedHeaders(List.of("Authorization", "Access-Control-Allow-Origin"));
+                    cors.setAllowCredentials(true);
+                    cors.setMaxAge(3600L);
+                    return cors;
+                }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedEntryPoint))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.shared.interfaces.rest;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.uitopic.restock.platform.shared.domain.exceptions.InvalidCredentialsException;
+import com.uitopic.restock.platform.resources.domain.exception.NameAlreadyExist;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -66,6 +67,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NameAlreadyExist.class)
+    public ResponseEntity<Map<String, String>> handleNameAlreadyExist(NameAlreadyExist ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
 }

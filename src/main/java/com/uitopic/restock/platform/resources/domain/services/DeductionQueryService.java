@@ -6,7 +6,7 @@ import com.uitopic.restock.platform.resources.domain.model.queries.GetInventoryD
 import java.util.List;
 import java.util.Optional;
 
-public interface InventoryDeductionQueryService {
+public interface DeductionQueryService {
     List<InventoryDeduction> handle(GetInventoryDeductionsByBatchId query);
     Optional<InventoryDeduction> findById(String id);
 }

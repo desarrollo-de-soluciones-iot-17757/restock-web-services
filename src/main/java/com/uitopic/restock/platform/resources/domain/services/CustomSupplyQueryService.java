@@ -6,16 +6,20 @@ import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSupp
 import java.util.List;
 
 /**
- * Service interface for handling queries related to CustomSupply aggregates.
- * This service is responsible for processing queries and returning the appropriate data.
+ * Domain service interface defining the query contract for {@link CustomSupply} aggregate retrieval
+ * within the resources bounded context.
+ *
+ * <p>Declares the read-side operations available on custom supplies. Implementations live
+ * in the application layer
+ * ({@link com.uitopic.restock.platform.resources.application.internal.queryservices.CustomSupplyQueryServiceImpl}).
  */
 public interface CustomSupplyQueryService {
 
     /**
-     * Handles the GetCustomSuppliesByAccountIdQuery and returns a list of CustomSupply aggregates.
+     * Retrieves all custom supplies associated with the account specified in the query.
      *
-     * @param query the query object containing the account ID for which to fetch the custom supplies
-     * @return a list of CustomSupply aggregates that are associated with the specified account ID
+     * @param query the query containing the account ID
+     * @return a {@link List} of {@link CustomSupply} aggregates for that account
      */
     List<CustomSupply> handle(GetCustomSuppliesByAccountIdQuery query);
 }

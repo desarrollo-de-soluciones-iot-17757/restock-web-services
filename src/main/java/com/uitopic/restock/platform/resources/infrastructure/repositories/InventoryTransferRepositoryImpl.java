@@ -2,18 +2,22 @@ package com.uitopic.restock.platform.resources.infrastructure.repositories;
 
 import com.uitopic.restock.platform.resources.domain.model.entities.InventoryTransfer;
 import com.uitopic.restock.platform.resources.domain.repositories.InventoryTransferRepository;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.InventoryTransferMongoRepository;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.TransferMongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link InventoryTransferRepository} that uses MongoDB for data storage
+ * within the resources bounded context.
+ */
 @Repository
 public class InventoryTransferRepositoryImpl implements InventoryTransferRepository {
 
-    private final InventoryTransferMongoRepository mongo;
+    private final TransferMongoRepository mongo;
 
-    public InventoryTransferRepositoryImpl(InventoryTransferMongoRepository mongo) {
+    public InventoryTransferRepositoryImpl(TransferMongoRepository mongo) {
         this.mongo = mongo;
     }
 
