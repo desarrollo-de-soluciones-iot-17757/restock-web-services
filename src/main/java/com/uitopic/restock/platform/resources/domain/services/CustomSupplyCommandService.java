@@ -2,6 +2,8 @@ package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateCustomSupplyCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyImageCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyPerishableCommand;
 
 import java.util.Optional;
 
@@ -10,7 +12,7 @@ import java.util.Optional;
  * within the resources bounded context.
  *
  * <p>Declares the write-side operations available on custom supplies: creation, update,
- * and deletion. Implementations live in the application layer
+ * perishable-status update, and deletion. Implementations live in the application layer
  * ({@link com.uitopic.restock.platform.resources.application.internal.commandservices.CustomSupplyCommandServiceImpl}).
  */
 public interface CustomSupplyCommandService {
@@ -36,6 +38,23 @@ public interface CustomSupplyCommandService {
      * @return an {@link Optional} containing the updated {@link CustomSupply}, or empty if not found
      */
     Optional<CustomSupply> update(String id, CreateCustomSupplyCommand command);
+
+    /**
+     * Patches the perishable status of an existing custom supply.
+     *
+     * @param command the command containing the supply ID and the new perishable flag
+     * @return an {@link Optional} containing the patched {@link CustomSupply}, or empty if not found
+     */
+    Optional<CustomSupply> updatePerishable(UpdateCustomSupplyPerishableCommand command);
+
+    /**
+     * Uploads or replaces the image of an existing custom supply.
+     * Deletes the old Cloudinary image if it was not the default.
+     *
+     * @param command the command containing the supply ID and raw image bytes
+     * @return an {@link Optional} containing the updated {@link CustomSupply}, or empty if not found
+     */
+    Optional<CustomSupply> updateImage(UpdateCustomSupplyImageCommand command);
 
     /**
      * Deletes a custom supply by its unique identifier.
