@@ -2,20 +2,49 @@ package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.DeleteBatchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.TransferBatchStockCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBatchCommand;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Service interface for handling batch-related commands, including creating batches, transferring inventory, and subtracting inventory.
- * This service provides methods to process commands and manage inventory levels across branches, ensuring accurate stock management and traceability of inventory movements.
+ * Command service contract for Batch write operations.
  */
 public interface BatchCommandService {
 
     /**
-     * Handles the creation of a new batch based on the provided command, which includes details such as the supply, quantity, and associated branch.
+     * Creates a new batch.
      *
-     * @param command the command containing the necessary information to create a new batch
-     * @return an Optional containing the created Batch if successful, or an empty Optional if the creation failed due to validation errors or other issues
+     * @param command command with the batch data
+     * @return created batch
      */
-    Optional<Batch> handle(CreateBatchCommand command);
+    Batch handle(CreateBatchCommand command);
+
+    /**
+     * Updates an existing batch.
+     *
+     * Entry date is not updated because it represents when the batch was registered.
+     *
+     * @param command command with the updated batch data
+     * @return updated batch, or empty if not found
+     */
+    Optional<Batch> handle(UpdateBatchCommand command);
+
+    /**
+     * Deletes an existing batch.
+     *
+     * @param command command with the batch identifier
+     */
+    void handle(DeleteBatchCommand command);
+
+    /**
+     * Transfers stock from a batch to another branch.
+     *
+     * @param command command with source batch, target branch and quantity
+     * @return affected batches: source and target
+     */
+    List<Batch> handle(TransferBatchStockCommand command);
+    
 }

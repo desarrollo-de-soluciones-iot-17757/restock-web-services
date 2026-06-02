@@ -4,8 +4,7 @@ import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.SupplyResource;
 
 /**
- * Assembler to convert {@link com.uitopic.restock.platform.resources.domain.model.entities.Supply} entities
- * to {@link SupplyResource} DTOs within the resources bounded context.
+ * Assembler to convert Supply into SupplyResource.
  */
 public class SupplyResourceFromEntityAssembler {
 
@@ -14,7 +13,7 @@ public class SupplyResourceFromEntityAssembler {
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getCategory() != null ? entity.getCategory().name() : null,
+                entity.getCategory(),
                 entity.getIsPerishable() != null && entity.getIsPerishable(),
                 entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
         );

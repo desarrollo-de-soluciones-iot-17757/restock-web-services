@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * Event handler for {@link BranchDeletedEvent} within the resources bounded context.
- * Disables telemetry for devices attached to the deleted branch.
+ * Handles BranchDeletedEvent after a branch is deactivated.
  */
 @Slf4j
 @Component
@@ -21,10 +20,15 @@ public class BranchDeletedEventHandler {
         this.deviceTelemetryService = deviceTelemetryService;
     }
 
+    /**
+     * Disables telemetry for devices attached to the deactivated branch.
+     *
+     * @param event branch deleted event
+     */
     @EventListener
     public void on(BranchDeletedEvent event) {
-        log.info("Branch deleted: branchId={}, accountId={}", event.branchId(), event.accountId());
-        // try to disable telemetry for devices attached to this branch. Implementation is local to resources BC.
+        log.info("Branch deactivated: branchId={}, accountId={}", event.branchId(), event.accountId());
+
         try {
             deviceTelemetryService.disableTelemetryForBranch(event.branchId());
         } catch (Exception ex) {

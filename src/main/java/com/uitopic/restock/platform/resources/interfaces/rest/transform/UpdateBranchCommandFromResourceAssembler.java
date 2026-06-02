@@ -1,28 +1,47 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchStatusCommand;
-import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchStatusResource;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchCommand;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchResource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
- * Assembler class responsible for transforming incoming REST API resources into domain command objects
- * for branch status updates. This class provides a static method to convert an {@link UpdateBranchStatusResource}
- * along with the branch identifier into an {@link UpdateBranchStatusCommand} that can be processed by the
- * domain service layer.
- *
- * <p>Example usage:
- * <pre>
- *     UpdateBranchStatusResource resource = new UpdateBranchStatusResource("INACTIVE");
- *     UpdateBranchStatusCommand command = UpdateBranchCommandFromResourceAssembler.ToCommandFromResource("branch123", resource);
- * </pre>
+ * Assembler to convert UpdateBranchResource into UpdateBranchCommand.
  */
 public class UpdateBranchCommandFromResourceAssembler {
 
-    /**
-     * Transforms an {@link UpdateBranchStatusResource} and a branch identifier into an {@link UpdateBranchStatusCommand}.
-     * @param branchId the unique identifier of the branch
-     * @param resource the resource containing the status update information
-     */
-    public static UpdateBranchStatusCommand ToCommandFromResource(String branchId, UpdateBranchStatusResource resource) {
-        return new UpdateBranchStatusCommand(branchId, resource.status());
+    public static UpdateBranchCommand toCommandFromResource(String branchId, UpdateBranchResource resource) {
+        return new UpdateBranchCommand(
+                branchId,
+                resource.name(),
+                resource.description(),
+                resource.address(),
+                resource.city(),
+                resource.regionOrState(),
+                resource.country(),
+                getBytes(resource.image()),
+                getFileName(resource.image())
+        );
+    }
+
+    private static byte[] getBytes(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read branch image", e);
+        }
+    }
+
+    private static String getFileName(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        return file.getOriginalFilename();
     }
 }

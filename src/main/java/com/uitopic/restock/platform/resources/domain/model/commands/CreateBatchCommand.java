@@ -1,33 +1,37 @@
 package com.uitopic.restock.platform.resources.domain.model.commands;
 
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
-
 import java.time.LocalDate;
-import java.util.Optional;
 
 /**
- * Command to create a new batch of supplies in the inventory system.
- *
- * @param code the unique code for the batch
- * @param initialStock the initial stock quantity for the batch
- * @param unitPurchaseCost the cost per unit for purchasing the supplies in the batch
- * @param customSupplyId the custom identifier for the supply associated with the batch
- * @param receivingBranchId the identifier for the branch receiving the batch
- * @param accountId the identifier for the account responsible for the batch
- * @param manufacturingDate the optional manufacturing date of the supplies in the batch
- * @param expirationDate the optional expiration date of the supplies in the batch
- * @param entryDate the optional date when the batch was entered into the system
+ * Command to create a new batch.
  */
 public record CreateBatchCommand(
         String code,
-        Stock initialStock,
-        Money unitPurchaseCost,
+        Double currentStock,
         String customSupplyId,
-        String receivingBranchId,
-        AccountId accountId,
-        Optional<LocalDate> manufacturingDate,
-        Optional<LocalDate> expirationDate,
-        Optional<LocalDate> entryDate
-) {}
+        String branchId,
+        String accountId,
+        LocalDate expirationDate,
+        LocalDate entryDate
+) {
+    public CreateBatchCommand {
+        validateText(code, "Batch code");
+        validateText(customSupplyId, "Custom supply ID");
+        validateText(branchId, "Branch ID");
+        validateText(accountId, "Account ID");
+
+        if (currentStock == null) {
+            throw new IllegalArgumentException("Current stock cannot be null");
+        }
+
+        if (currentStock < 0) {
+            throw new IllegalArgumentException("Current stock cannot be negative");
+        }
+    }
+
+    private static void validateText(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or blank");
+        }
+    }
+}

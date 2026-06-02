@@ -1,145 +1,184 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyPerishableCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.DeleteCustomSupplyCommand;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllCustomSuppliesQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSuppliesByAccountIdQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSupplyByIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.CustomSupplyCommandService;
-import com.uitopic.restock.platform.resources.interfaces.rest.resources.*;
+import com.uitopic.restock.platform.resources.domain.services.CustomSupplyQueryService;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateCustomSupplyResource;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.CustomSupplyResource;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateCustomSupplyResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.CreateCustomSupplyCommandFromResourceAssembler;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.CustomSupplyResourceFromEntityAssembler;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateCustomSupplyCommandFromResourceAssembler;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 /**
- * REST controller for custom supply CRUD operations not scoped to an account
- * path.
+ * REST controller for custom supply management.
  *
- * <p>
- * Exposes endpoints under {@code /api/v1/custom-supplies} for creating,
- * updating,
- * and deleting custom supplies. Account-scoped listing is handled separately by
- * {@link AccountCustomSuppliesController}.
- *
- * <p>
- * Command handling is delegated to {@link CustomSupplyCommandService}. The
- * controller
- * only maps resources to commands and formats responses via
- * {@link CustomSupplyResourceFromEntityAssembler}.
+ * Provides CRUD operations and account-scoped queries using optional query
+ * parameters. Endpoints that receive images use multipart/form-data.
  */
-@Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/custom-supplies", produces = APPLICATION_JSON_VALUE)
-@Tag(name = "Custom Supplies", description = "Custom supply CRUD operations.")
+@Tag(name = "Custom Supplies", description = "Custom supply management and query endpoints.")
 public class CustomSuppliesController {
 
-    private final CustomSupplyCommandService commandService;
+    private final CustomSupplyCommandService customSupplyCommandService;
+    private final CustomSupplyQueryService customSupplyQueryService;
 
     /**
-     * Constructs a {@code CustomSuppliesController} with the required command
-     * service.
+     * Creates a CustomSuppliesController with the required command and query services.
      *
-     * @param commandService the service for handling custom supply write operations
+     * @param customSupplyCommandService service used to execute custom supply write operations
+     * @param customSupplyQueryService service used to execute custom supply read operations
      */
-    public CustomSuppliesController(CustomSupplyCommandService commandService) {
-        this.commandService = commandService;
+    public CustomSuppliesController(
+            CustomSupplyCommandService customSupplyCommandService,
+            CustomSupplyQueryService customSupplyQueryService
+    ) {
+        this.customSupplyCommandService = customSupplyCommandService;
+        this.customSupplyQueryService = customSupplyQueryService;
     }
 
     /**
-     * Creates a new custom supply for the account specified in the request.
-     * Accepts multipart/form-data with a JSON part for the text data and an
-     * optional file part for the image.
+     * Gets custom supplies using optional query parameters.
      *
-     * @param resource the JSON part containing the custom supply text data
-     * @param image    optional image file sent as multipart
-     * @return 201 Created with the newly created {@link CustomSupplyResource}
+     * If accountId is provided, only custom supplies from that account are returned.
+     * If no accountId is provided, all custom supplies are returned.
+     *
+     * @param accountId optional account identifier
+     * @return list of custom supply resources
      */
-    @Operation(summary = "Create a custom supply")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Get custom supplies with optional filters")
+    @GetMapping
+    public ResponseEntity<List<CustomSupplyResource>> getAll(
+            @RequestParam(required = false) String accountId
+    ) {
+        var customSupplies = hasValue(accountId)
+                ? customSupplyQueryService.handle(new GetCustomSuppliesByAccountIdQuery(new AccountId(accountId)))
+                : customSupplyQueryService.handle(new GetAllCustomSuppliesQuery());
+
+        var resources = customSupplies.stream()
+                .map(CustomSupplyResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+
+        return ResponseEntity.ok(resources);
+    }
+
+    /**
+     * Creates a new custom supply using multipart/form-data.
+     *
+     * The account identifier is received as a query parameter to keep the base
+     * endpoint under the custom supplies resource.
+     *
+     * Example:
+     * POST /api/v1/custom-supplies?accountId=acc-123
+     *
+     * @param accountId account identifier
+     * @param resource multipart form data with custom supply information and optional image
+     * @return created custom supply resource
+     */
+    @Operation(summary = "Create custom supply")
+    @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CustomSupplyResource> create(
-            @Valid @ModelAttribute CreateCustomSupplyResource resource) {
-        log.info("POST /api/v1/custom-supplies — creating supply: {}", resource.name());
-        var command = CreateCustomSupplyCommandFromResourceAssembler.toCommandFromResource(resource);
-        var customSupply = commandService.handle(command);
-        log.info("Custom supply created successfully — ID: {}", customSupply.getId());
+            @RequestParam String accountId,
+            @Valid @ModelAttribute CreateCustomSupplyResource resource
+    ) {
+        var command = CreateCustomSupplyCommandFromResourceAssembler.toCommandFromResource(
+                accountId,
+                resource
+        );
+
+        var customSupply = customSupplyCommandService.handle(command);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(customSupply));
     }
 
     /**
-     * Fully updates an existing custom supply with the data provided in the
-     * request.
-     * Accepts multipart/form-data to support optional image upload via Cloudinary.
+     * Gets a custom supply by its identifier.
      *
-     * @param id       the unique identifier of the custom supply to update
-     * @param resource the multipart form data containing the updated supply data
-     * @return 200 with the updated {@link CustomSupplyResource}, or 404 if not found
+     * If the custom supply is not found, a ResponseStatusException is thrown so
+     * the GlobalExceptionHandler can return a structured error response.
+     *
+     * @param customSupplyId custom supply identifier
+     * @return custom supply resource
      */
-    @Operation(summary = "Update a custom supply")
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<CustomSupplyResource> update(@PathVariable String id,
-                                                        @Valid @ModelAttribute UpdateCustomSupplyResource resource) {
-        log.info("PUT /api/v1/custom-supplies/{}", id);
-        var command = UpdateCustomSupplyCommandFromResourceAssembler.toCommandFromResource(resource);
-        return commandService.update(id, command)
-                .map(cs -> {
-                    log.info("Custom supply updated successfully — ID: {}", id);
-                    return ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(cs));
-                })
-                .orElseGet(() -> {
-                    log.warn("Custom supply not found for update — ID: {}", id);
-                    return ResponseEntity.notFound().build();
-                });
+    @Operation(summary = "Get custom supply by ID")
+    @GetMapping("/{customSupplyId}")
+    public ResponseEntity<CustomSupplyResource> getById(@PathVariable String customSupplyId) {
+        var customSupply = customSupplyQueryService.handle(new GetCustomSupplyByIdQuery(customSupplyId))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Custom supply not found: " + customSupplyId
+                ));
+
+        return ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(customSupply));
     }
 
     /**
-     * Patches the perishable status of a custom supply.
+     * Updates an existing custom supply using multipart/form-data.
      *
-     * @param id       the unique identifier of the custom supply
-     * @param resource the request body containing the new perishable flag
-     * @return 200 with the updated {@link CustomSupplyResource}, or 404 if not
-     *         found
+     * If no image is provided, the current custom supply image is preserved.
+     *
+     * @param customSupplyId custom supply identifier
+     * @param resource multipart form data with updated custom supply information and optional image
+     * @return updated custom supply resource
      */
-    @Operation(summary = "Update perishable status of a custom supply")
-    @PatchMapping(value = "/{id}/perishable", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<CustomSupplyResource> updatePerishable(
-            @PathVariable String id,
-            @RequestBody UpdateCustomSupplyPerishableResource resource) {
-        log.info("PATCH /api/v1/custom-supplies/{}/perishable — isPerishable: {}", id, resource.isPerishable());
-        var command = new UpdateCustomSupplyPerishableCommand(id, resource.isPerishable());
-        return commandService.updatePerishable(command)
-                .map(cs -> {
-                    log.info("Perishable status updated — ID: {}", id);
-                    return ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(cs));
-                })
-                .orElseGet(() -> {
-                    log.warn("Custom supply not found for perishable update — ID: {}", id);
-                    return ResponseEntity.notFound().build();
-                });
+    @Operation(summary = "Update custom supply")
+    @PatchMapping(value = "/{customSupplyId}", consumes = MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CustomSupplyResource> update(
+            @PathVariable String customSupplyId,
+            @Valid @ModelAttribute UpdateCustomSupplyResource resource
+    ) {
+        var command = UpdateCustomSupplyCommandFromResourceAssembler.toCommandFromResource(
+                customSupplyId,
+                resource
+        );
+
+        var customSupply = customSupplyCommandService.handle(command)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Custom supply not found: " + customSupplyId
+                ));
+
+        return ResponseEntity.ok(CustomSupplyResourceFromEntityAssembler.toResourceFromEntity(customSupply));
     }
 
     /**
-     * Deletes a custom supply by its unique identifier.
-     * Deletion is blocked if the supply has active batches with remaining stock.
+     * Deletes a custom supply by its identifier.
      *
-     * @param id the unique identifier of the custom supply to delete
-     * @return 200 with a confirmation map containing the deleted ID and timestamp
+     * @param customSupplyId custom supply identifier
+     * @return deletion confirmation
      */
-    @Operation(summary = "Delete a custom supply")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable String id) {
-        log.info("DELETE /api/v1/custom-supplies/{}", id);
-        commandService.delete(id);
-        log.info("Custom supply deleted — ID: {}", id);
-        return ResponseEntity.ok(Map.of("id", id, "deletedAt", Instant.now().toString()));
+    @Operation(summary = "Delete custom supply")
+    @DeleteMapping("/{customSupplyId}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable String customSupplyId) {
+        customSupplyCommandService.handle(new DeleteCustomSupplyCommand(customSupplyId));
+
+        return ResponseEntity.ok(Map.of(
+                "id", customSupplyId,
+                "deletedAt", Instant.now().toString()
+        ));
+    }
+
+    private boolean hasValue(String value) {
+        return value != null && !value.isBlank();
     }
 }

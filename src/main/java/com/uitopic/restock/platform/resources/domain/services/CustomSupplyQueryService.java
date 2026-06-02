@@ -1,25 +1,39 @@
 package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllCustomSuppliesQuery;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSuppliesByAccountIdQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSupplyByIdQuery;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Domain service interface defining the query contract for {@link CustomSupply} aggregate retrieval
- * within the resources bounded context.
- *
- * <p>Declares the read-side operations available on custom supplies. Implementations live
- * in the application layer
- * ({@link com.uitopic.restock.platform.resources.application.internal.queryservices.CustomSupplyQueryServiceImpl}).
+ * Query service contract for CustomSupply read operations.
  */
 public interface CustomSupplyQueryService {
 
     /**
-     * Retrieves all custom supplies associated with the account specified in the query.
+     * Retrieves all custom supplies.
      *
-     * @param query the query containing the account ID
-     * @return a {@link List} of {@link CustomSupply} aggregates for that account
+     * @param query query to get all custom supplies
+     * @return list of custom supplies
+     */
+    List<CustomSupply> handle(GetAllCustomSuppliesQuery query);
+
+    /**
+     * Retrieves all custom supplies from an account.
+     *
+     * @param query query with the account identifier
+     * @return list of custom supplies for the account
      */
     List<CustomSupply> handle(GetCustomSuppliesByAccountIdQuery query);
+
+    /**
+     * Retrieves a custom supply by its identifier.
+     *
+     * @param query query with the custom supply identifier
+     * @return custom supply if found
+     */
+    Optional<CustomSupply> handle(GetCustomSupplyByIdQuery query);
 }

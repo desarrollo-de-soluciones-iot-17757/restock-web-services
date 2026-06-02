@@ -16,6 +16,6 @@ public class UnitMeasurementWriteConverter implements Converter<UnitMeasurement,
 
     @Override
     public String convert(UnitMeasurement source) {
-        return source == null ? null : source.getUnitName();
+        return source == null ? null : source.unitName();
     }
 }

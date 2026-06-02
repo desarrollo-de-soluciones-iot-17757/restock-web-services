@@ -1,82 +1,90 @@
 package com.uitopic.restock.platform.resources.application.internal.commandservices;
 
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.uitopic.restock.platform.resources.domain.model.commands.SeedSuppliesCommand;
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyNames;
-import com.uitopic.restock.platform.resources.domain.repositories.SupplyRepository;
 import com.uitopic.restock.platform.resources.domain.services.SupplyCommandService;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.SupplyRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
+import java.io.InputStream;
+import java.util.List;
 
 /**
- * Implementation of {@link SupplyCommandService} for handling write operations on {@link Supply}
- * entities within the resources bounded context.
+ * Application service for Supply write operations.
  *
- * <p>Handles seeding of supply templates into the database. Supply templates serve as base categories
- * that {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply} aggregates
- * reference. This service ensures that creation of supply templates follows the required business rules.
+ * Handles the seeding of the base supply catalog from a JSON file.
  */
 @Slf4j
 @Service
 public class SupplyCommandServiceImpl implements SupplyCommandService {
 
-    private final SupplyRepository repository;
+    private final SupplyRepository supplyRepository;
+    private final ObjectMapper objectMapper;
 
-    public SupplyCommandServiceImpl(SupplyRepository repository) {
-        this.repository = repository;
+    public SupplyCommandServiceImpl(SupplyRepository supplyRepository, ObjectMapper objectMapper) {
+        this.supplyRepository = supplyRepository;
+        this.objectMapper = objectMapper;
     }
 
+    /**
+     * Seeds the base supply catalog from the supplies.json file.
+     *
+     * @param command command to start the seed process
+     */
     @Override
-    public Supply handle(SeedSuppliesCommand command) {
-        log.info("Creating supply template: name='{}', category='{}'", command.name(), command.category());
-        SupplyNames category = parseCategory(command.category());
-        Supply supply = repository.save(Supply.builder()
-                .name(command.name())
-                .description(command.description())
-                .category(category)
-                .isPerishable(command.isPerishable())
-                .build());
-        log.info("Supply template created successfully — ID: {}", supply.getId());
-        return supply;
-    }
+    public void handle(SeedSuppliesCommand command) {
+        log.info("Starting supplies seed process");
 
-    @Override
-    public Optional<Supply> update(String id, SeedSuppliesCommand command) {
-        log.info("Updating supply template — ID: {}, name='{}'", id, command.name());
-        return repository.findById(id).map(existing -> {
-            existing.setName(command.name());
-            existing.setDescription(command.description());
-            existing.setCategory(parseCategory(command.category()));
-            existing.setIsPerishable(command.isPerishable());
-            Supply updated = repository.save(existing);
-            log.info("Supply template updated successfully — ID: {}", id);
-            return updated;
-        }).or(() -> {
-            log.warn("Supply template not found for update — ID: {}", id);
-            return Optional.empty();
-        });
-    }
-
-    @Override
-    public void delete(String id) {
-        log.info("Deleting supply template — ID: {}", id);
-        if (repository.findById(id).isEmpty()) {
-            log.warn("Supply template not found for deletion — ID: {}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Supply not found: " + id);
-        }
-        repository.deleteById(id);
-        log.info("Supply template deleted successfully — ID: {}", id);
-    }
-
-    private SupplyNames parseCategory(String category) {
         try {
-            return SupplyNames.valueOf(category.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
+            InputStream inputStream = new ClassPathResource("jsonData/supplies.json").getInputStream();
+
+            List<SupplySeedData> supplies = objectMapper.readValue(
+                    inputStream,
+                    new TypeReference<>() {}
+            );
+
+            for (SupplySeedData supplyData : supplies) {
+                if (supplyRepository.existsByName(supplyData.name())) {
+                    log.debug("Supply already exists: {}", supplyData.name());
+                    continue;
+                }
+
+                Supply supply = new Supply(
+                        supplyData.name(),
+                        supplyData.description(),
+                        supplyData.category(),
+                        supplyData.isPerishable()
+                );
+
+                supplyRepository.save(supply);
+
+                log.info("Seeded supply: {}", supply.getName());
+            }
+
+            log.info("Supplies seed process finished successfully");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading supplies.json", e);
         }
+    }
+
+    /**
+     * Internal DTO used only for reading seed data from supplies.json.
+     *
+     * @param name supply name
+     * @param description supply description
+     * @param category supply category
+     * @param isPerishable whether the supply is perishable
+     */
+    private record SupplySeedData(
+            String name,
+            String description,
+            String category,
+            Boolean isPerishable
+    ) {
     }
 }

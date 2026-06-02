@@ -1,41 +1,86 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.MinimumStock;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyContent;
-import jakarta.validation.constraints.NotEmpty;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockRange;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
+
+import java.math.BigDecimal;
 
 /**
- * Assembler to convert string representations of resources value objects (e.g. MinimumStock, SupplyContent)
- * into their corresponding domain instances within the resources bounded context.
+ * Assembler to convert REST resource values into domain value objects.
  */
 public class ResourcesValueObjectFromStringAssembler {
 
+    private ResourcesValueObjectFromStringAssembler() {
+    }
+
     /**
-     * Converts a string representation of minimum stock into a MinimumStock value object. The string should represent a numeric value (e.g., "10" for 10 units). If the string cannot be parsed into a valid integer, an IllegalArgumentException is thrown.
+     * Converts minimum and maximum stock values into a StockRange value object.
      *
-     * @param minimumStockStr the string representation of the minimum stock to be converted
-     * @return a MinimumStock value object representing the parsed minimum stock
+     * @param minimumStock minimum stock value
+     * @param maximumStock maximum stock value
+     * @return stock range value object
      */
-    public static MinimumStock toMinimumStockFromString(@NotEmpty String minimumStockStr, @NotEmpty String unitMeasurement) {
+    public static StockRange toStockRangeFromValues(Double minimumStock, Double maximumStock) {
+        return new StockRange(minimumStock, maximumStock);
+    }
+
+    /**
+     * Converts a string representation of money into a Money value object.
+     *
+     * Expected format: "10.00 PEN".
+     *
+     * @param moneyStr money string
+     * @return money value object
+     */
+    public static Money toMoneyFromString(String moneyStr) {
+        if (moneyStr == null || moneyStr.isBlank()) {
+            throw new IllegalArgumentException("Money value cannot be null or blank");
+        }
+
+        String[] parts = moneyStr.trim().split("\\s+");
+
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Money value must have format: 'amount currency', e.g. '10.00 PEN'");
+        }
+
         try {
-            Double minimumStockValue = Double.parseDouble(minimumStockStr);
-            return new MinimumStock(minimumStockValue, unitMeasurement);
+            BigDecimal amount = new BigDecimal(parts[0]);
+            String currencyCode = parts[1].toUpperCase();
+
+            return new Money(amount, currencyCode);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid minimum stock value: " + minimumStockStr, e);
+            throw new IllegalArgumentException("Invalid money amount: " + parts[0], e);
         }
     }
 
     /**
-     * Converts a string representation of supply content into a SupplyContent value object. The string should represent a numeric value (e.g., "500" for 500ml, "1" for 1kg, etc.). If the string cannot be parsed into a valid double, an IllegalArgumentException is thrown.
+     * Converts a string into a UnitMeasurement value object.
      *
-     * @param supplyContentStr the string representation of the supply content to be converted
-     * @return a SupplyContent value object representing the parsed supply content
+     * @param unitMeasurement unit measurement string
+     * @return unit measurement value object
      */
-    public static SupplyContent toSupplyContentFromString(@NotEmpty String supplyContentStr) {
-        try {
-            return new SupplyContent(Double.valueOf(supplyContentStr));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid supply content value: " + supplyContentStr, e);
+    public static UnitMeasurement toUnitMeasurementFromString(String unitMeasurement) {
+        if (unitMeasurement == null || unitMeasurement.isBlank()) {
+            throw new IllegalArgumentException("Unit measurement cannot be null or blank");
         }
+
+        return new UnitMeasurement(unitMeasurement);
+    }
+
+    /**
+     * Converts image URL data into an ImageURL value object.
+     *
+     * @param imageUrl image URL
+     * @param imagePublicId Cloudinary public ID
+     * @return image URL value object, or null if no image URL was provided
+     */
+    public static ImageURL toImageURLFromStrings(String imageUrl, String imagePublicId) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        return new ImageURL(imageUrl, imagePublicId);
     }
 }

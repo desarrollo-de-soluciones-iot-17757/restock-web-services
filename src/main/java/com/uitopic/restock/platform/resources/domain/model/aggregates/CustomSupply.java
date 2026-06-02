@@ -1,121 +1,156 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
+import com.uitopic.restock.platform.resources.domain.model.commands.CreateCustomSupplyCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyCommand;
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.MinimumStock;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyContent;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockRange;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * Represents a custom supply in the system, which is a specific type of supply that can be created and managed by users.
- * This class extends the AuditableAbstractAggregateRoot to include auditing capabilities, allowing for tracking of creation and modification details.
+ * Aggregate root representing a custom supply in the resources bounded context.
+ *
+ * A custom supply is created from a base supply and stores account-specific
+ * information such as name, stock range, unit price, unit measurement,
+ * description and optional picture URL.
+ *
+ * This aggregate stores both the supply identifier and the full supply data.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Document(collection = "custom_supplies")
 public class CustomSupply extends AuditableAbstractAggregateRoot {
 
     /**
-     * The name of the custom supply, which can be used to identify and differentiate it from other supplies
-     */
-    private String name;
-
-    /**
-     * A brief description of the custom supply, which can provide additional information about the supply and its characteristics.
-     */
-    private String description;
-
-    /**
-     * The supply template this custom supply is based on (e.g., the base Supply catalog entry).
-     */
-    private Supply supply;
-
-    /**
-     * The price per unit of the custom supply, which can be used for pricing and billing purposes.
-     */
-    private Money unitPrice;
-
-    /**
-     * The content or quantity of the custom supply per unit (e.g., 500 for 500 ml, 1 for 1 kg).
-     */
-    private SupplyContent content;
-
-    /**
-     * The unit of measurement for the custom supply, such as "pieces", "boxes", "liters", etc.
-     */
-    private UnitMeasurement unitMeasurement;
-
-    /**
-     * The minimum stock threshold below which a restocking alert should be triggered.
-     */
-    private MinimumStock minimumStock;
-
-    /**
-     * URL of the image for this custom supply.
-     */
-    private ImageURL imageUrl;
-
-    /**
-     * Reference to the account that owns this custom supply.
+     * Account that owns this custom supply.
      */
     private AccountId accountId;
 
     /**
-     * Indicates whether this custom supply is perishable (i.e., has a limited shelf life).
-     * This field overrides the perishability of the base {@link Supply} template at the account level.
+     * Custom display name of this supply.
      */
-    private Boolean isPerishable;
+    private String name;
 
     /**
-     * Updates the perishable status of this custom supply.
-     *
-     * @param isPerishable {@code true} if the supply is perishable, {@code false} otherwise
-     * @return this instance (fluent)
+     * Identifier of the base supply used to create this custom supply.
      */
-    public CustomSupply updatePerishable(boolean isPerishable) {
-        this.isPerishable = isPerishable;
-        return this;
+    private String supplyId;
+
+    /**
+     * Full base supply data associated with this custom supply.
+     */
+    private Supply supply;
+
+    /**
+     * Minimum and maximum stock range configured for this custom supply.
+     */
+    private StockRange stockRange;
+
+    /**
+     * Price per unit of this custom supply.
+     */
+    private Money unitPrice;
+
+    /**
+     * Description provided for this custom supply.
+     */
+    private String description;
+
+    /**
+     * Unit of measurement used by this custom supply.
+     */
+    private UnitMeasurement unitMeasurement;
+
+    /**
+     * Optional picture URL associated with this custom supply.
+     */
+    private ImageURL pictureUrl;
+
+    /**
+     * Creates a custom supply from a command, a loaded base supply and an optional picture.
+     *
+     * @param command command with the custom supply data
+     * @param supply base supply loaded from persistence
+     * @param pictureUrl uploaded picture URL, or null if no image was provided
+     */
+    public CustomSupply(CreateCustomSupplyCommand command, Supply supply, ImageURL pictureUrl) {
+        if (command == null) {
+            throw new IllegalArgumentException("Create custom supply command cannot be null");
+        }
+
+        if (supply == null) {
+            throw new IllegalArgumentException("Supply cannot be null");
+        }
+
+        this.accountId = new AccountId(command.accountId());
+        this.name = command.name();
+        this.supplyId = command.supplyId();
+        this.supply = supply;
+        this.stockRange = command.stockRange();
+        this.unitPrice = command.unitPrice();
+        this.description = command.description();
+        this.unitMeasurement = command.unitMeasurement();
+        this.pictureUrl = pictureUrl;
     }
 
     /**
-     * Updates the custom supply with the provided details.
+     * Partially updates this custom supply.
      *
-     * @param minimumStock    the new minimum stock threshold
-     * @param unitPrice       the new unit price of the custom supply
-     * @param description     the new description of the custom supply
-     * @param content         the new supply content (quantity per unit)
-     * @param unitMeasurement the new unit of measurement
-     * @return this instance (fluent)
+     * The base supply ID and account ID are not modified by this operation.
+     *
+     * @param command command with optional updated fields
+     * @param pictureUrl picture URL to keep or replace
+     * @return updated custom supply
      */
-    public CustomSupply update(MinimumStock minimumStock, Money unitPrice, @NotNull String description,
-                               SupplyContent content, UnitMeasurement unitMeasurement) {
-        if (minimumStock != null) {
-            this.minimumStock = minimumStock;
+    public CustomSupply update(
+            UpdateCustomSupplyCommand command,
+            ImageURL pictureUrl
+    ) {
+        if (command == null) {
+            throw new IllegalArgumentException("Update custom supply command cannot be null");
         }
 
-        if (unitPrice != null) {
-            this.unitPrice = unitPrice;
+        if (command.name() != null) {
+            if (command.name().isBlank()) {
+                throw new IllegalArgumentException("Custom supply name cannot be blank");
+            }
+            this.name = command.name();
         }
 
-        if (description != null) {
-            this.description = description;
+        if (command.description() != null) {
+            if (command.description().isBlank()) {
+                throw new IllegalArgumentException("Description cannot be blank");
+            }
+            this.description = command.description();
         }
 
-        if (content != null) {
-            this.content = content;
+        if (command.stockRange() != null) {
+            this.stockRange = command.stockRange();
         }
 
-        if (unitMeasurement != null) {
-            this.unitMeasurement = unitMeasurement;
+        if (command.unitPrice() != null) {
+            this.unitPrice = command.unitPrice();
+        }
+
+        if (command.unitMeasurement() != null) {
+            this.unitMeasurement = command.unitMeasurement();
+        }
+
+        if (pictureUrl != null) {
+            this.pictureUrl = pictureUrl;
         }
 
         return this;

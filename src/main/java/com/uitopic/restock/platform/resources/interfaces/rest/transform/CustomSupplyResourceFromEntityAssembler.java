@@ -2,53 +2,32 @@ package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CustomSupplyResource;
-import jakarta.validation.constraints.NotNull;
 
 /**
- * Assembler to convert
- * {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply}
- * entities
- * to {@link CustomSupplyResource} DTOs within the resources bounded context.
- *
- * <p>
- * Maps the Supply entity to a {@link CustomSupplyResource.SupplyDto} primitive
- * nested object,
- * ensuring the Supply is not treated as a subdocument but as a complete value
- * object.
+ * Assembler to convert CustomSupply into CustomSupplyResource.
  */
 public class CustomSupplyResourceFromEntityAssembler {
 
-    /**
-     * Static method to transform a CustomSupply entity into a CustomSupplyResource.
-     *
-     * <p>
-     * Converts the Supply entity reference into a SupplyDto primitive object
-     * containing
-     * all necessary supply information.
-     *
-     * @param entity The CustomSupply entity to be transformed.
-     * @return A CustomSupplyResource containing the data from the entity with
-     *         Supply as a primitive DTO.
-     */
-    public static CustomSupplyResource toResourceFromEntity(@NotNull CustomSupply entity) {
-        CustomSupplyResource.SupplyDto supplyDto = new CustomSupplyResource.SupplyDto(
-                entity.getSupply().getId(),
-                entity.getSupply().getName(),
-                entity.getSupply().getDescription(),
-                entity.getSupply().getCategory().name(),
-                entity.getSupply().getIsPerishable());
+    public static CustomSupplyResource toResourceFromEntity(CustomSupply entity) {
+        var supply = entity.getSupply();
+        var pictureUrl = entity.getPictureUrl();
 
         return new CustomSupplyResource(
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
-                supplyDto,
+                entity.getSupplyId(),
+                supply != null ? supply.getName() : null,
+                supply != null ? supply.getCategory() : null,
                 entity.getUnitPrice().getAmount().toString(),
                 entity.getUnitPrice().getCurrencyCode(),
-                entity.getContent().getContent(),
-                entity.getUnitMeasurement().getUnitName(),
-                entity.getImageUrl() != null ? entity.getImageUrl().getUrl() : null,
+                entity.getUnitMeasurement().unitName(),
+                entity.getStockRange() != null ? entity.getStockRange().minStock() : null,
+                entity.getStockRange() != null ? entity.getStockRange().maxStock() : null,
+                pictureUrl != null ? pictureUrl.url() : null,
+                pictureUrl != null ? pictureUrl.publicId() : null,
                 entity.getAccountId().getAccountId(),
-                entity.getIsPerishable());
+                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
+        );
     }
 }

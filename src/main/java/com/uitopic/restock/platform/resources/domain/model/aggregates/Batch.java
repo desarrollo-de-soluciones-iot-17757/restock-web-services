@@ -3,89 +3,192 @@ package com.uitopic.restock.platform.resources.domain.model.aggregates;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 /**
- * Represents a batch of products in the inventory system. A batch is a specific quantity of a product that is received, stored, and managed as a unit within the inventory. Each batch has a unique code, associated product information, stock levels, and relevant dates for manufacturing, expiration, and entry into the inventory system. The Batch class provides methods for managing stock levels and tracking the details of each batch to ensure accurate inventory management.
+ * Aggregate root representing a batch of stock in a branch.
+ *
+ * A batch stores the current quantity available for a custom supply in a
+ * specific branch. It keeps references to the custom supply, branch and account
+ * that own the stock.
  */
 @EqualsAndHashCode(callSuper = true)
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Document(collection = "batches")
 public class Batch extends AuditableAbstractAggregateRoot {
 
     /**
-     * The unique code for the batch, which serves as an identifier for the batch. This code is used to track and manage the batch within the inventory system. It is a string value that can be generated based on specific rules or conventions defined by the business.
+     * Business code used to identify the batch.
      */
     private String code;
 
     /**
-     * The unique identifier for the product associated with this batch. This field is used to link the batch to a specific product in the inventory system, allowing for accurate tracking and management of stock levels for that product. It is a string value that corresponds to the product's unique identifier in the database.
-     */
-    private Stock initialStock;
-
-    /**
-     * The current stock level for the batch, which represents the quantity of items available in the batch. This field is updated as items are added or removed from the batch, allowing for real-time tracking of inventory levels. It is a Stock value object that encapsulates the quantity and provides methods for managing stock levels.
+     * Current stock available in this batch.
      */
     private Stock currentStock;
 
     /**
-     * The unit of measurement for the items in the batch, which indicates how the quantity of items is measured (e.g., pieces, kilograms, liters). This field is important for ensuring that stock levels are accurately tracked and managed according to the appropriate unit of measurement. It is a UnitMeasurement value object that defines the type of measurement used for the batch.
+     * Identifier of the custom supply associated with this batch.
      */
-    private Money unitPurchaseCost;
-
-    /**
-     * The identifier for the custom supply related to this batch, which is used to link the batch to a specific supply order or source. This field is optional, as not all batches may be associated with a custom supply (e.g., if the batch was created from existing inventory). It is represented as a String that cannot be null.
-     */
-    @NotNull
-    @NotBlank
     private String customSupplyId;
 
     /**
-     * The identifier for the receiving branch where the batch was received, which is used to track the location of the batch within the inventory system. This field is optional, as not all batches may have a receiving branch (e.g., if the batch was created from existing inventory). It is represented as a String that cannot be null.
+     * Identifier of the branch where this batch is stored.
      */
-    @NotNull
-    @NotBlank
-    private String receivingBranchId;
+    private String branchId;
 
     /**
-     * The identifier for the account associated with this batch, which is used to link the batch to a specific account in the inventory system. This field is important for tracking ownership and responsibility for the batch, as well as for managing inventory levels and costs associated with the batch. It is an AccountId value object that encapsulates the unique identifier for the account.
+     * Account that owns this batch.
      */
-    @Valid
     private AccountId accountId;
 
     /**
-     * The date when the batch was manufactured, which is important for tracking the age of the batch and managing inventory based on expiration dates. This field is optional, as not all batches may have a manufacturing date available. It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
+     * Optional expiration date of the batch.
      */
-    private Optional<LocalDate> manufacturingDate;
+    private LocalDate expirationDate;
 
     /**
-     * The date when the batch expires, which is crucial for managing inventory and ensuring that expired items are not sold or used. This field is optional, as not all batches may have an expiration date (e.g., non-perishable items). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
+     * Date when the batch entered the inventory.
      */
-    private Optional<LocalDate> expirationDate;
+    private LocalDate entryDate;
 
     /**
-     * The date when the batch was entered into the inventory system, which is important for tracking the age of the batch and managing inventory based on entry dates. This field is optional, as not all batches may have an entry date available (e.g., if the batch was created before the inventory system was implemented). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
-     */
-    private Optional<LocalDate> entryDate;
-
-    /**
-     * Subtracks the specified quantity from the current stock of the batch. This method is used to update the stock levels when items are removed from the batch, ensuring that the current stock accurately reflects the quantity of items available. If the provided quantity is null, the method does nothing. Otherwise, it creates a new Stock instance with the updated quantity by subtracting the specified quantity from the current stock.
+     * Creates a new batch.
      *
-     * @param quantity The quantity to be subtracted from the current stock, represented as a Stock value object. This parameter is validated to ensure that it is not null and that it represents a valid quantity of items to be removed from the batch.
+     * @param code batch code
+     * @param currentStock current stock
+     * @param customSupplyId custom supply identifier
+     * @param branchId branch identifier
+     * @param accountId account identifier
+     * @param expirationDate expiration date
+     * @param entryDate inventory entry date
      */
-    public void subtrack(@Valid Stock quantity) {
-        if (quantity == null) return;
-        this.currentStock = new Stock(this.currentStock.stock() - quantity.stock(), this.currentStock.unitMeasurement());
+    @Builder
+    public Batch(
+            String code,
+            Stock currentStock,
+            String customSupplyId,
+            String branchId,
+            String accountId,
+            LocalDate expirationDate,
+            LocalDate entryDate
+    ) {
+        validateText(code, "Batch code");
+        validateText(customSupplyId, "Custom supply ID");
+        validateText(branchId, "Branch ID");
+        validateText(accountId, "Account ID");
+
+        if (currentStock == null) {
+            throw new IllegalArgumentException("Current stock cannot be null");
+        }
+
+        this.code = code;
+        this.currentStock = currentStock;
+        this.customSupplyId = customSupplyId;
+        this.branchId = branchId;
+        this.accountId = new AccountId(accountId);
+        this.expirationDate = expirationDate;
+        this.entryDate = entryDate;
+    }
+
+    /**
+     * Increases the current stock of this batch.
+     *
+     * @param quantity quantity to add
+     */
+    public void increase(Stock quantity) {
+        this.currentStock = this.currentStock.add(quantity);
+    }
+
+    /**
+     * Subtracts from the current stock of this batch.
+     *
+     * @param quantity quantity to subtract
+     */
+    public void subtract(Stock quantity) {
+        this.currentStock = this.currentStock.subtract(quantity);
+    }
+
+    /**
+     * Transfers stock from this batch to another batch.
+     *
+     * @param targetBatch target batch
+     * @param quantity quantity to transfer
+     */
+    public void transferTo(Batch targetBatch, Stock quantity) {
+        if (targetBatch == null) {
+            throw new IllegalArgumentException("Target batch cannot be null");
+        }
+
+        if (!this.customSupplyId.equals(targetBatch.customSupplyId)) {
+            throw new IllegalArgumentException("Stock can only be transferred between batches of the same custom supply");
+        }
+
+        this.subtract(quantity);
+        targetBatch.increase(quantity);
+    }
+
+    private void validateStockOperation(Stock quantity) {
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
+        }
+
+        if (this.currentStock == null) {
+            throw new IllegalStateException("Current stock is not initialized");
+        }
+
+        if (!this.currentStock.unitMeasurement().equals(quantity.unitMeasurement())) {
+            throw new IllegalArgumentException("Stock unit measurement does not match");
+        }
+
+        if (quantity.stock() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+    }
+
+    private void validateText(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or blank");
+        }
+    }
+
+    /**
+     * Changes the batch code.
+     *
+     * @param code new batch code
+     */
+    public void changeCode(String code) {
+        validateText(code, "Batch code");
+        this.code = code;
+    }
+
+    /**
+     * Changes the current stock.
+     *
+     * @param currentStock new current stock
+     */
+    public void changeCurrentStock(Stock currentStock) {
+        if (currentStock == null) {
+            throw new IllegalArgumentException("Current stock cannot be null");
+        }
+
+        this.currentStock = currentStock;
+    }
+
+    /**
+     * Changes the expiration date.
+     *
+     * @param expirationDate new expiration date
+     */
+    public void changeExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

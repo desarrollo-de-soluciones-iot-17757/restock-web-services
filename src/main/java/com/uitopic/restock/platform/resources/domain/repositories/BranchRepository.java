@@ -7,53 +7,58 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain repository port for {@link Branch} aggregate persistence within the resources bounded context.
- *
- * <p>Defines the contract for storing and retrieving branches, decoupling the domain
- * layer from the MongoDB infrastructure. The implementation is provided by
- * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.BranchRepositoryImpl}.
+ * Domain repository port for Branch aggregate persistence.
  */
 public interface BranchRepository {
 
     /**
-     * Persists a {@link Branch} aggregate. Creates a new document if the branch has no ID,
-     * or updates the existing document otherwise.
+     * Find all branches.
      *
-     * @param branch the branch to save
-     * @return the saved branch, including any auto-generated ID
+     * @return list of branches
+     */
+    List<Branch> findAll();
+
+    /**
+     * Saves a branch.
+     *
+     * @param branch branch to save
+     * @return saved branch
      */
     Branch save(Branch branch);
 
     /**
-     * Finds a branch by its unique identifier.
+     * Finds a branch by its identifier.
      *
-     * @param id the unique identifier of the branch
-     * @return an {@link Optional} containing the {@link Branch} if found, or empty if not found
+     * @param id branch identifier
+     * @return branch if found
      */
     Optional<Branch> findById(String id);
 
     /**
-     * Finds all branches belonging to the specified account.
+     * Finds all branches that belong to an account.
      *
-     * @param accountId the account whose branches are to be retrieved
-     * @return a {@link List} of {@link Branch} aggregates for that account
+     * @param accountId account identifier
+     * @return branches owned by the account
      */
     List<Branch> findByAccountId(AccountId accountId);
 
     /**
-     * Removes a branch document from the store by its unique identifier.
+     * Checks whether a branch name already exists in an account.
      *
-     * @param id the unique identifier of the branch to delete
-     */
-    void deleteById(String id);
-
-    /**
-     * Checks whether a branch with the given name already exists within the specified account.
-     * Used to enforce name uniqueness per account before creating or renaming a branch.
-     *
-     * @param name      the branch name to check
-     * @param accountId the account scope for the uniqueness check
-     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
+     * @param name branch name
+     * @param accountId account identifier
+     * @return true if a branch with that name exists
      */
     boolean existsByNameAndAccountId(String name, AccountId accountId);
+
+    /**
+     * Checks whether another branch with the same name exists in an account,
+     * excluding the current branch.
+     *
+     * @param name branch name
+     * @param accountId account identifier
+     * @param id branch identifier to exclude
+     * @return true if another branch with the same name exists
+     */
+    boolean existsByNameAndAccountIdAndIdNot(String name, AccountId accountId, String id);
 }
