@@ -3,10 +3,16 @@ package com.uitopic.restock.platform.resources.domain.model.queries;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 
 /**
- * Query to get all the custom supplies from a specific account within the resources bounded context.
+ * Query to get all custom supplies from a specific account.
  *
- * @param accountId the ID of the account to retrieve custom supplies for
+ * @param accountId account identifier
  */
-public record GetCustomSuppliesByAccountIdQuery(AccountId accountId) {
-
+public record GetCustomSuppliesByAccountIdQuery(
+        AccountId accountId
+) {
+    public GetCustomSuppliesByAccountIdQuery {
+        if (accountId == null) {
+            throw new IllegalArgumentException("Account ID cannot be null");
+        }
+    }
 }

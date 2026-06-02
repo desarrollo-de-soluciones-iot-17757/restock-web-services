@@ -1,21 +1,21 @@
 package com.uitopic.restock.platform.resources.domain.model.commands;
 
 /**
- * Command to create a new branch.
+ * Command to update branch information.
  */
-public record CreateBranchCommand(
-        String accountId,
+public record UpdateBranchCommand(
+        String branchId,
         String name,
+        String description,
         String address,
         String city,
         String regionOrState,
         String country,
-        String description,
         byte[] image,
         String photoFileName
 ) {
-    public CreateBranchCommand {
-        validateText(accountId, "Account ID");
+    public UpdateBranchCommand {
+        validateText(branchId, "Branch ID");
         validateText(name, "Branch name");
         validateText(address, "Branch address");
         validateText(city, "Branch city");
