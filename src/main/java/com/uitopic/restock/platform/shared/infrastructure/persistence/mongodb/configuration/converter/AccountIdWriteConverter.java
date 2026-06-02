@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.shared.infrastructure.mongodb.converter;
+package com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration.converter;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.core.convert.converter.Converter;

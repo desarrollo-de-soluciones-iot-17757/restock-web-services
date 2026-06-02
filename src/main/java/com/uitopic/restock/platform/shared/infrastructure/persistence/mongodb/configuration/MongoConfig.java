@@ -1,9 +1,9 @@
-package com.uitopic.restock.platform.shared.infrastructure.mongodb.configuration;
+package com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration;
 
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
-import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
+import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
