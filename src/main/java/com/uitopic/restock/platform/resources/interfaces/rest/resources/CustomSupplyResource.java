@@ -3,41 +3,54 @@ package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response resource representing a custom supply within the resources bounded context.
- *
- * @param id Unique identifier of the custom supply
- * @param name Name of the custom supply
- * @param description Detailed description of the custom supply
- * @param categoryName Category name of the custom supply
- * @param unitPriceAmount Price of the custom supply
- * @param unitPriceCurrencyCode Currency code for the unit price
- * @param supplyContent Content amount of the custom supply
- * @param unitMeasurement Unit of measurement for the supply content
- * @param minimumStock Minimum stock level for the custom supply
- * @param pictureUrl URL of the custom supply's picture
- * @param accountId Unique identifier of the account associated with the custom supply
+ * Response resource representing a custom supply.
  */
 @Schema(description = "Response resource representing a custom supply")
 public record CustomSupplyResource(
-        @Schema(description = "Unique identifier of the custom supply", example = "123e4567-e89b-12d3-a456-426614174000")
+
+        @Schema(description = "Custom supply ID")
         String id,
-        @Schema(description = "Name of the custom supply", example = "Premium Coffee Beans")
+
+        @Schema(description = "Custom supply name")
         String name,
-        @Schema(description = "Detailed description of the custom supply", example = "High-quality Arabica coffee beans sourced from Colombia.")
+
+        @Schema(description = "Custom supply description")
         String description,
-        @Schema(description = "Category name of the custom supply", example = "Beverages")
+
+        @Schema(description = "Base supply ID")
+        String supplyId,
+
+        @Schema(description = "Base supply name")
+        String supplyName,
+
+        @Schema(description = "Base supply category")
         String categoryName,
-        @Schema(description = "Price of the custom supply", example = "19.99")
+
+        @Schema(description = "Unit price amount")
         String unitPriceAmount,
-        @Schema(description = "Currency code for the unit price", example = "PEN")
+
+        @Schema(description = "Unit price currency code")
         String unitPriceCurrencyCode,
-        @Schema(description = "Content amount of the custom supply", example = "500")
-        double supplyContent,
-        @Schema(description = "Unit of measurement for the supply content", example = "grams")
+
+        @Schema(description = "Unit of measurement")
         String unitMeasurement,
-        @Schema(description = "URL of the custom supply's picture", example = "https://example.com/images/premium-coffee-beans.jpg")
+
+        @Schema(description = "Minimum stock")
+        Double minimumStock,
+
+        @Schema(description = "Maximum stock")
+        Double maximumStock,
+
+        @Schema(description = "Image URL")
         String pictureUrl,
-        @Schema(description = "Unique identifier of the account associated with the custom supply", example = "123e4567-e89b-12d3-a456-426614174000")
-        String accountId
+
+        @Schema(description = "Cloudinary public ID")
+        String picturePublicId,
+
+        @Schema(description = "Account ID")
+        String accountId,
+
+        @Schema(description = "Creation timestamp")
+        String createdAt
 ) {
 }
