@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
+import com.uitopic.restock.platform.resources.domain.model.commands.TransferInventoryCommand;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -56,4 +57,21 @@ public class StockTransferredEvent {
      */
     @NotBlank
     String unitMeasurement;
+
+    /**
+     * Constructor to create a StockTransferredEvent based on the provided TransferInventoryCommand and the remaining stock at both branches after the transfer. This constructor initializes the event with relevant information from the command and the updated inventory levels, allowing for accurate tracking of stock movements across branches.
+     *
+     * @param command the command containing the details of the inventory transfer, including source and destination branch IDs, batch ID, quantity transferred, and unit of measurement
+     * @param fromBranchRemainingStock the new amount of stock available at the source branch after the transfer has been completed
+     * @param toBranchRemainingStock the new amount of stock available at the destination branch after the transfer has been completed
+     */
+    public StockTransferredEvent(TransferInventoryCommand command, Double fromBranchRemainingStock, Double toBranchRemainingStock) {
+        this.fromBranchId = command.fromBranchId();
+        this.toBranchId = command.toBranchId();
+        this.batchId = command.batchId();
+        this.quantityTransferred = command.quantity().getValue();
+        this.unitMeasurement = command.quantity().getUnit();
+        this.fromBranchRemainingStock = fromBranchRemainingStock;
+        this.toBranchRemainingStock = toBranchRemainingStock;
+    }
 }

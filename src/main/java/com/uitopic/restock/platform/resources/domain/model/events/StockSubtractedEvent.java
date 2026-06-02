@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
+import com.uitopic.restock.platform.resources.domain.model.commands.SubtractInventoryCommand;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -44,4 +45,18 @@ public class StockSubtractedEvent {
      */
     @NotBlank
     private String unitMeasurement;
+
+    /**
+     * Constructor to create a StockSubtractedEvent from a SubtractInventoryCommand. This constructor initializes the event's fields based on the information provided in the command, including the branch ID, batch ID, quantity subtracted, unit of measurement, and remaining stock after the subtraction.
+     *
+     * @param command the SubtractInventoryCommand containing the details of the stock subtraction, including the branch ID, batch ID, quantity to subtract, and unit of measurement
+     * @param remainingStock the remaining quantity of stock in the inventory after the subtraction occurred, which is calculated based on the original stock level minus the quantity subtracted
+     */
+    public StockSubtractedEvent(SubtractInventoryCommand command, Double remainingStock) {
+        this.branchId = command.branchId();
+        this.batchId = command.batchId();
+        this.quantitySubtracted = command.quantity().getValue();
+        this.unitMeasurement = command.quantity().getUnit();
+        this.remainingStock = remainingStock;
+    }
 }
