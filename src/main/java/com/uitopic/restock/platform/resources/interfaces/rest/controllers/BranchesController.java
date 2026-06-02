@@ -113,7 +113,7 @@ public class BranchesController {
      * @return 204 No Content if successful, or 404 if the branch is not found
      */
     @Operation(summary = "Delete a branch (logical)")
-    @PatchMapping("/{branchId}")
+    @PatchMapping("/{branchId}/status")
     public ResponseEntity<Void> delete(@PathVariable String branchId, @RequestBody UpdateBranchStatusResource resource) {
         log.info("DELETE /api/v1/branches/{}", branchId);
         var updateBranchStatusCommand = UpdateBranchCommandFromResourceAssembler.ToCommandFromResource(branchId, resource);
