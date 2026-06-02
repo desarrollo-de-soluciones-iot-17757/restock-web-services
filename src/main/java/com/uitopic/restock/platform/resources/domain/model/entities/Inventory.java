@@ -55,6 +55,10 @@ public class Inventory extends AuditableModel {
      */
     public void add(@Valid Stock quantity) {
         this.currentStock = this.currentStock == null ? quantity : this.currentStock.add(quantity);
+
+        if (this.currentStock.getValue() > this.minimumStock.getMinimumStock()) {
+            toInStock();
+        }
     }
 
     /**
@@ -64,6 +68,16 @@ public class Inventory extends AuditableModel {
      */
     public void subtrack(@Valid Stock quantity) {
         this.currentStock = this.currentStock.subtrack(quantity);
+
+        // Update the inventory state based on the new current stock level
+        if (this.currentStock.getValue() < this.minimumStock.getMinimumStock()) {
+            toLowStock();
+        }
+
+        // If the current stock is zero, update the inventory state to OUT_OF_STOCK
+        if (this.currentStock.getValue() == 0) {
+            toOutOfStock();
+        }
     }
 
     /**
