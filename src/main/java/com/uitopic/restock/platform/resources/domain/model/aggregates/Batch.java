@@ -67,17 +67,12 @@ public class Batch extends AuditableAbstractAggregateRoot {
     /**
      * The date when the batch was manufactured, which is important for tracking the age of the batch and managing inventory based on expiration dates. This field is optional, as not all batches may have a manufacturing date available. It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
      */
-    private Optional<LocalDate> manufacturingDate;
+    private String manufacturingDate;
 
     /**
      * The date when the batch expires, which is crucial for managing inventory and ensuring that expired items are not sold or used. This field is optional, as not all batches may have an expiration date (e.g., non-perishable items). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
      */
-    private Optional<LocalDate> expirationDate;
-
-    /**
-     * The date when the batch was entered into the inventory system, which is important for tracking the age of the batch and managing inventory based on entry dates. This field is optional, as not all batches may have an entry date available (e.g., if the batch was created before the inventory system was implemented). It is represented as an Optional<LocalDate> to indicate that it may or may not be present.
-     */
-    private Optional<LocalDate> entryDate;
+    private String expirationDate;
 
     /**
      * Subtracks the specified quantity from the current stock of the batch. This method is used to update the stock levels when items are removed from the batch, ensuring that the current stock accurately reflects the quantity of items available. If the provided quantity is null, the method does nothing. Otherwise, it creates a new Stock instance with the updated quantity by subtracting the specified quantity from the current stock.

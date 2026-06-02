@@ -22,12 +22,4 @@ public record CustomSupplyWrapper(
         List<CustomSupplyItem> supplies
 ) {
 
-    /**
-     * Adds a custom supply item to the wrapper and updates the total supplies count.
-     *
-     * @param item The custom supply item to be added
-     */
-    public void addItem(CustomSupplyItem item) {
-        this.supplies.add(item);
-    }
 }

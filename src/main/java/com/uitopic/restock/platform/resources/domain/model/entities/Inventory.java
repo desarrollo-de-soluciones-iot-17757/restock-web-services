@@ -9,6 +9,9 @@ import lombok.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 /**
  * Represents the inventory of a custom supply in a specific branch and batch. It contains information about the current stock, minimum stock level, and inventory state.
  * The inventory can be associated with a batch and a branch. The inventory state is determined based on the current stock and minimum stock level, and it can be used for inventory management and restocking purposes.
@@ -42,6 +45,11 @@ public class Inventory extends AuditableModel {
      * The minimum stock level for this custom supply, which can be used for inventory management and restocking purposes.
      */
     private MinimumStock minimumStock;
+
+    /**
+     * The date when the inventory was entered into the system. It can be null if the inventory has not been assigned an entry date yet.
+     */
+    private String entryDate;
 
     /**
      * The state of the inventory, which can be one of the following: IN_STOCK, OUT_OF_STOCK, OVERSTOCKED, or LOW_STOCK. It can be null if the inventory has not been assigned a state yet.
