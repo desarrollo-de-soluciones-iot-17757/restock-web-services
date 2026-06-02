@@ -1,30 +1,27 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.resources;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Request resource for creating a branch using multipart/form-data.
+ * Request resource for partially updating a branch.
+ *
+ * All fields are optional. Only provided fields are applied.
  */
-@Schema(description = "Request resource for creating a branch")
-public record CreateBranchResource(
-        @NotBlank
+@Schema(description = "Request resource for partially updating a branch")
+public record UpdateBranchResource(
         @Schema(description = "Branch name")
         String name,
 
-        @NotBlank
         @Schema(description = "Branch address")
         String address,
 
-        @NotBlank
         @Schema(description = "Branch city")
         String city,
 
         @Schema(description = "Branch region or state")
         String regionOrState,
 
-        @NotBlank
         @Schema(description = "Branch country")
         String country,
 
