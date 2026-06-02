@@ -12,7 +12,6 @@ public interface CommunicationsContextFacade {
      * Creates a notification based on the provided email contents. This method is responsible for generating a notification that can be sent to users or other systems, based on the information contained in the EmailContents object.
      *
      * @param contents The contents of the email, including subject, body, recipient information, and any other relevant details needed to create a notification.
-     * @return A string representing the result of the notification creation process, which could be a success message, an identifier for the created notification, or any relevant information about the outcome of the operation.
      */
-    String createNotification(EmailContents contents);
+    void createNotification(EmailContents contents);
 }
