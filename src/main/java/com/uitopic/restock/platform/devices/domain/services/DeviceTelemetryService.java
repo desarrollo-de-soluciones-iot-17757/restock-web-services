@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.resources.application.internal.services;
+package com.uitopic.restock.platform.devices.domain.services;
 
 /**
  * A small service inside the resources bounded context that is responsible for disabling telemetry
@@ -13,4 +13,3 @@ public interface DeviceTelemetryService {
     /** Disable telemetry ingestion for all devices attached to the given branch id. */
     void disableTelemetryForBranch(String branchId);
 }
-

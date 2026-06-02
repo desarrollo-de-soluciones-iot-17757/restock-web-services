@@ -2,12 +2,8 @@ package com.uitopic.restock.platform.shared.infrastructure.mongodb.configuration
 
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.AddressReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.AddressWriteConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.ImageURLReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.ImageURLWriteConverter;
-import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.AccountIdReadConverter;
-import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.AccountIdWriteConverter;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -65,15 +61,22 @@ public class MongoConfig {
      */
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
+
         return new MongoCustomConversions(List.of(
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
-                new AccountIdWriteConverter(),
                 new AccountIdReadConverter(),
+                new AccountIdWriteConverter(),
                 new AddressWriteConverter(),
                 new AddressReadConverter(),
                 new ImageURLWriteConverter(),
-                new ImageURLReadConverter()
+                new ImageURLReadConverter(),
+                new MoneyWriteConverter(),
+                new MoneyReadConverter(),
+                new UnitMeasurementWriteConverter(),
+                new UnitMeasurementReadConverter()
+                //new StockWriteConverter(),
+                //new StockReadConverter()
         ));
     }
 }
