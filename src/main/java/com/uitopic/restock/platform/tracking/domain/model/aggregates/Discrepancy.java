@@ -4,10 +4,10 @@ import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomai
 import lombok.Getter;
 
 @Getter
-public class ConciliationTask extends AbstractDomainAggregateRoot<ConciliationTask> {
+public class Discrepancy extends AbstractDomainAggregateRoot<Discrepancy> {
 
     // Default constructor for reconstruction from persistence
-    public ConciliationTask() {
+    public Discrepancy() {
 
     }
 }

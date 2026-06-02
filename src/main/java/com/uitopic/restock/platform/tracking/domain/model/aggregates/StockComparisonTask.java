@@ -1,4 +1,13 @@
 package com.uitopic.restock.platform.tracking.domain.model.aggregates;
 
-public class StockComparisonTask {
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import lombok.Getter;
+
+@Getter
+public class StockComparisonTask extends AbstractDomainAggregateRoot<StockComparisonTask> {
+
+    // Default constructor for reconstruction from persistence
+    public StockComparisonTask() {
+
+    }
 }
