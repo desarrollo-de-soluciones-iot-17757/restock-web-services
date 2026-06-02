@@ -6,6 +6,7 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchStatusCommand;
 import com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
@@ -164,7 +165,7 @@ public class BranchCommandServiceImpl implements BranchCommandService {
      * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
      */
     @Override
-    public Optional<Branch> updateImage(UpdateBranchImageCommand command) {
+    public Optional<Branch> handle(UpdateBranchImageCommand command) {
         log.info("Updating image for branch ID: {}", command.branchId());
         var branch = repository.findById(command.branchId())
                 .orElseThrow(() -> new BranchNotFoundException(command.branchId()));
@@ -200,20 +201,26 @@ public class BranchCommandServiceImpl implements BranchCommandService {
     }
 
     /**
-     * Logically deletes a branch by setting its status to {@link BranchStates#INACTIVE}
-     * and publishing a {@link BranchDeletedEvent}.
+     * Updates the status of a branch. Valid status values are "ACTIVE" and "INACTIVE".
+     * If the status is set to "INACTIVE", the branch is considered logically deleted.
      *
-     * @param branchId the unique identifier of the branch to deactivate
-     * @throws ResponseStatusException with 404 if the branch does not exist
+     * @param command the command containing the branch ID and the new status
+     * @throws ResponseStatusException with 400 if the provided status is invalid
      */
     @Override
-    public void delete(String branchId) {
-        log.info("Deleting (logical) branch ID: {}", branchId);
-        var branch = repository.findById(branchId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found: " + branchId));
-        branch.deactivate();
+    public void handle(UpdateBranchStatusCommand command) {
+        log.info("Updating status of branch ID: {} to {}", command.branchId(), command.status());
+        var branch = repository.findById(command.branchId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Branch not found: " + command.branchId()
+                ));
+        try {
+            branch.updateStatus(command.status());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
         repository.save(branch);
-        eventPublisher.publishEvent(new BranchDeletedEvent(branchId, branch.getAccountId().getAccountId()));
-        log.info("Branch deactivated and event published — ID: {}", branchId);
+        log.info("Branch status updated — ID: {}, status: {}", branch.getId(), branch.getStatus());
     }
 }

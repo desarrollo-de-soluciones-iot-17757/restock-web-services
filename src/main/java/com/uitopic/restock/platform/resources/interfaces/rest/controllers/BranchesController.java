@@ -5,7 +5,9 @@ import com.uitopic.restock.platform.resources.domain.services.BranchQueryService
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.BranchResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchImageResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchInfoResource;
+import com.uitopic.restock.platform.resources.interfaces.rest.resources.UpdateBranchStatusResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.BranchResourceFromEntityAssembler;
+import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchCommandFromResourceAssembler;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchImageCommandFromResourceAssembler;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.UpdateBranchInfoCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -97,22 +99,25 @@ public class BranchesController {
                                                       @ModelAttribute UpdateBranchImageResource resource) {
         log.info("PATCH /api/v1/branches/{}/image", branchId);
         var command = UpdateBranchImageCommandFromResourceAssembler.ToCommandFromResource(resource, branchId);
-        return commandService.updateImage(command)
+        return commandService.handle(command)
                 .map(b -> ResponseEntity.ok(BranchResourceFromEntityAssembler.toResourceFromEntity(b)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Logically deletes a branch by transitioning its status to inactive.
+     * Logically deletes a branch by updating its status to INACTIVE. The branch is not removed from the database,
+     * allowing for potential reactivation in the future.
      *
      * @param branchId the unique identifier of the branch to delete
-     * @return 204 No Content on success
+     * @param resource the resource containing the new status (e.g., "INACTIVE")
+     * @return 204 No Content if successful, or 404 if the branch is not found
      */
     @Operation(summary = "Delete a branch (logical)")
-    @DeleteMapping("/{branchId}")
-    public ResponseEntity<Void> delete(@PathVariable String branchId) {
+    @PatchMapping("/{branchId}")
+    public ResponseEntity<Void> delete(@PathVariable String branchId, @RequestBody UpdateBranchStatusResource resource) {
         log.info("DELETE /api/v1/branches/{}", branchId);
-        commandService.delete(branchId);
+        var updateBranchStatusCommand = UpdateBranchCommandFromResourceAssembler.ToCommandFromResource(branchId, resource);
+        commandService.handle(updateBranchStatusCommand);
         return ResponseEntity.noContent().build();
     }
 }
