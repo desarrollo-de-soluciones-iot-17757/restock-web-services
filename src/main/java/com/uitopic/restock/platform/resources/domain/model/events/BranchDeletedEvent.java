@@ -1,6 +1,13 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
 /**
- * Event published when a branch is logically deleted within the resources bounded context.
+ * Event published when a branch is deleted or deactivated.
+ *
+ * @param branchId deleted branch identifier
+ * @param accountId owner account identifier
  */
-public record BranchDeletedEvent(String branchId, String accountId) {}
+public record BranchDeletedEvent(
+        String branchId,
+        String accountId
+) {
+}
