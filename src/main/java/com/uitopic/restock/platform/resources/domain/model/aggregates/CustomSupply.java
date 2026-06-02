@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.MinimumStock;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.SupplyContent;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -52,6 +53,11 @@ public class CustomSupply extends AuditableAbstractAggregateRoot {
      * The unit of measurement for the custom supply, such as "pieces", "boxes", "liters", etc.
      */
     private UnitMeasurement unitMeasurement;
+
+    /**
+     * The minimum stock level for this custom supply, which can be used for inventory management and restocking purposes.
+     */
+    private MinimumStock minimumStock;
 
     /**
      * Optional picture URL for the custom supply.

@@ -34,6 +34,8 @@ public record CustomSupplyItem(
         double supplyContent,
         @Schema(description = "Unit of measurement for the supply content", example = "grams")
         String unitMeasurement,
+        @Schema(description = "Minimum stock level for the custom supply", example = "10")
+        double minimumStock,
         @Schema(description = "URL of the custom supply's picture", example = "https://example.com/images/premium-coffee-beans.jpg")
         String pictureUrl
 ) {

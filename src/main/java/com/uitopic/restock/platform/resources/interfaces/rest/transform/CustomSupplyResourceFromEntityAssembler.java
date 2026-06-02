@@ -26,6 +26,7 @@ public class CustomSupplyResourceFromEntityAssembler {
                 entity.getUnitPrice().getCurrencyCode(),
                 entity.getSupplyContent().getContent(),
                 entity.getUnitMeasurement().getUnitName(),
+                entity.getMinimumStock().getMinimumStock(),
                 entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null,
                 entity.getAccountId().getAccountId()
         );
