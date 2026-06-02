@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.shared.infrastructure.filestorage.cloudinary.config;
+package com.uitopic.restock.platform.shared.infrastructure.filestorage.cloudinary.configuration;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
