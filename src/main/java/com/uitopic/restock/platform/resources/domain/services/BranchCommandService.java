@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand;
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchStatusCommand;
 
 import java.util.Optional;
 
@@ -44,15 +45,11 @@ public interface BranchCommandService {
      * @param command the command containing the branch ID and the new image data
      * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
      */
-    Optional<Branch> updateImage(UpdateBranchImageCommand command);
+    Optional<Branch> handle(UpdateBranchImageCommand command);
 
     /**
-     * Performs a logical deletion of a branch by transitioning its status to
-     * {@link com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates#INACTIVE}
-     * and publishing a {@link com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent}.
-     *
-     * @param branchId the unique identifier of the branch to deactivate
-     * @throws org.springframework.web.server.ResponseStatusException with 404 if the branch does not exist
+     * Updates the status of a branch.
+     * @param command the command containing the branch ID and the new status
      */
-    void delete(String branchId);
+    void handle(UpdateBranchStatusCommand command);
 }

@@ -106,6 +106,20 @@ public class Branch extends AuditableAbstractAggregateRoot {
     }
 
     /**
+     * Updates the branch's status based on the provided status string. Valid status values are "ACTIVE" and "INACTIVE".
+     *
+     * @param status the new status to set for the branch (case-insensitive)
+     * @throws IllegalArgumentException if the provided status is not valid
+     */
+    public void updateStatus(String status) {
+        switch (status.toLowerCase()) {
+            case "active" -> activate();
+            case "inactive" -> deactivate();
+            default -> throw new IllegalArgumentException("Invalid status: " + status);
+        }
+    }
+
+    /**
      * Transitions the branch to the {@link BranchStates#INACTIVE} state.
      * Used for logical (soft) deletion of a branch.
      */
