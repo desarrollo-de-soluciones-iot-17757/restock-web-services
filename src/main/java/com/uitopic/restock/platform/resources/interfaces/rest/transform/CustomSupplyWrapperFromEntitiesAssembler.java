@@ -21,16 +21,24 @@ public class CustomSupplyWrapperFromEntitiesAssembler {
      * @return A CustomSupplyItem containing the data from the entity, excluding the accountId which is not needed for the item representation in the wrapper.
      */
     private static CustomSupplyItem toItemFromEntity(@NotNull CustomSupply entity) {
+        var supply = entity.getSupply();
+        var supplyDto = supply == null ? null : new CustomSupplyItem.SupplyDto(
+                supply.getId(),
+                supply.getName(),
+                supply.getDescription(),
+                supply.getCategory() != null ? supply.getCategory().name() : null,
+                supply.getIsPerishable()
+        );
         return new CustomSupplyItem(
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getCategory().getName(),
+                supplyDto,
                 entity.getUnitPrice().getAmount().toString(),
                 entity.getUnitPrice().getCurrencyCode(),
-                entity.getSupplyContent().getContent(),
+                entity.getContent().getContent(),
                 entity.getUnitMeasurement().getUnitName(),
-                entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null
+                entity.getImageUrl() != null ? entity.getImageUrl().getUrl() : null
         );
     }
 

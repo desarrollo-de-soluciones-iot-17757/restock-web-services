@@ -6,6 +6,10 @@ import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
 import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.MoneyReadConverter;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.MoneyWriteConverter;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.UnitMeasurementReadConverter;
+import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.UnitMeasurementWriteConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -31,6 +35,10 @@ import java.util.List;
  *       <li>IAM: {@code Email} ↔ {@code String}</li>
  *       <li>Resources: {@code Stock} ↔ {@code Double}</li>
  *       <li>Resources: {@code InventoryState} ↔ {@code String}</li>
+ *       <li>Resources: {@code SupplyContent} ↔ {@code Double}</li>
+ *       <li>Resources: {@code MinimumStock} ↔ {@code String}</li>
+ *       <li>Shared: {@code Money} ↔ {@code String}</li>
+ *       <li>Shared: {@code UnitMeasurement} ↔ {@code String}</li>
  *     </ul>
  *   </li>
  * </ul>
@@ -76,7 +84,15 @@ public class MongoConfig {
                 new AddressWriteConverter(),
                 new AddressReadConverter(),
                 new ImageURLWriteConverter(),
-                new ImageURLReadConverter()
+                new ImageURLReadConverter(),
+                new SupplyContentWriteConverter(),
+                new SupplyContentReadConverter(),
+                new MinimumStockWriteConverter(),
+                new MinimumStockReadConverter(),
+                new MoneyWriteConverter(),
+                new MoneyReadConverter(),
+                new UnitMeasurementWriteConverter(),
+                new UnitMeasurementReadConverter()
                 //new StockWriteConverter(),
                 //new StockReadConverter()
         ));
