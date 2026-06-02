@@ -10,80 +10,94 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of {@link BranchRepository} that uses MongoDB for data storage
- * within the resources bounded context.
+ * MongoDB implementation of the BranchRepository domain port.
  *
- * <p>Acts as a bridge between the domain layer and the MongoDB persistence layer,
- * adapting {@link BranchMongoRepository} to the {@link BranchRepository} port.
- * This keeps the domain layer free of Spring Data dependencies.
+ * Acts as a bridge between the domain repository contract and the Spring Data
+ * MongoDB repository.
  */
 @Repository
 public class BranchRepositoryImpl implements BranchRepository {
 
-    /** The underlying Spring Data MongoDB repository for {@link Branch} documents. */
-    private final BranchMongoRepository mongo;
-
     /**
-     * Constructs a {@code BranchRepositoryImpl} with the given MongoDB repository.
+     * Find all branches.
      *
-     * @param mongo the Spring Data MongoDB repository to delegate to
+     * @return list of branches
      */
-    public BranchRepositoryImpl(BranchMongoRepository mongo) {
-        this.mongo = mongo;
+    @Override
+    public List<Branch> findAll() {
+        return branchMongoRepository.findAll();
     }
 
     /**
-     * Persists a {@link Branch} aggregate to MongoDB.
+     * Spring Data MongoDB repository used to access branch documents.
+     */
+    private final BranchMongoRepository branchMongoRepository;
+
+    /**
+     * Creates a BranchRepositoryImpl with the required MongoDB repository.
      *
-     * @param branch the branch to save
-     * @return the saved branch, including any auto-generated ID
+     * @param branchMongoRepository MongoDB repository for branches
+     */
+    public BranchRepositoryImpl(BranchMongoRepository branchMongoRepository) {
+        this.branchMongoRepository = branchMongoRepository;
+    }
+
+    /**
+     * Saves a branch.
+     *
+     * @param branch branch to save
+     * @return saved branch
      */
     @Override
     public Branch save(Branch branch) {
-        return mongo.save(branch);
+        return branchMongoRepository.save(branch);
     }
 
     /**
-     * Finds a branch by its unique identifier.
+     * Finds a branch by its identifier.
      *
-     * @param id the unique identifier of the branch
-     * @return an {@link Optional} containing the {@link Branch} if found, or empty if not found
+     * @param id branch identifier
+     * @return branch if found
      */
     @Override
     public Optional<Branch> findById(String id) {
-        return mongo.findById(id);
+        return branchMongoRepository.findById(id);
     }
 
     /**
-     * Finds all branches belonging to the specified account.
+     * Finds all branches that belong to an account.
      *
-     * @param accountId the account whose branches are to be retrieved
-     * @return a {@link List} of {@link Branch} aggregates for that account
+     * @param accountId account identifier
+     * @return branches owned by the account
      */
     @Override
     public List<Branch> findByAccountId(AccountId accountId) {
-        return mongo.findByAccountId(accountId);
+        return branchMongoRepository.findByAccountId(accountId);
     }
 
     /**
-     * Removes a branch document from MongoDB by its unique identifier.
+     * Checks whether a branch name already exists in an account.
      *
-     * @param id the unique identifier of the branch to delete
-     */
-    @Override
-    public void deleteById(String id) {
-        mongo.deleteById(id);
-    }
-
-    /**
-     * Checks whether a branch with the given name already exists within the specified account.
-     *
-     * @param name      the branch name to check
-     * @param accountId the account scope for the uniqueness check
-     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
+     * @param name branch name
+     * @param accountId account identifier
+     * @return true if the branch name already exists
      */
     @Override
     public boolean existsByNameAndAccountId(String name, AccountId accountId) {
-        return mongo.existsByNameAndAccountId(name, accountId);
+        return branchMongoRepository.existsByNameAndAccountId(name, accountId);
+    }
+
+    /**
+     * Checks whether another branch with the same name exists in an account,
+     * excluding the current branch.
+     *
+     * @param name branch name
+     * @param accountId account identifier
+     * @param id branch identifier to exclude
+     * @return true if another branch with the same name exists
+     */
+    @Override
+    public boolean existsByNameAndAccountIdAndIdNot(String name, AccountId accountId, String id) {
+        return branchMongoRepository.existsByNameAndAccountIdAndIdNot(name, accountId, id);
     }
 }
