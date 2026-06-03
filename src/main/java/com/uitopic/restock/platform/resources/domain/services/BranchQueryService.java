@@ -1,47 +1,39 @@
 package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllBranchesQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetBranchByIdQuery;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetBranchesByAccountIdQuery;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain service interface defining the query contract for {@link Branch} aggregate retrieval
- * within the resources bounded context.
- *
- * <p>Declares the read-side operations available on branches: lookup by ID and listing
- * by account with optional state filtering and pagination. Implementations live in the
- * application layer
- * ({@link com.uitopic.restock.platform.resources.application.internal.queryservices.BranchQueryServiceImpl}).
+ * Query service contract for Branch read operations.
  */
 public interface BranchQueryService {
 
     /**
-     * Finds a single branch by its unique identifier.
+     * Retrieves all branches .
      *
-     * @param id the unique identifier of the branch
-     * @return an {@link Optional} containing the {@link Branch} if found, or empty if not found
+     * @return list of branches
      */
-    Optional<Branch> findById(String id);
+    List<Branch> handle(GetAllBranchesQuery query);
 
     /**
-     * Retrieves all branches associated with the account specified in the query.
+     * Retrieves a branch by its identifier.
      *
-     * @param query the query containing the account ID
-     * @return a {@link List} of {@link Branch} aggregates for that account
+     * @param query query with the branch identifier
+     * @return branch if found
+     */
+    Optional<Branch> handle(GetBranchByIdQuery query);
+
+    /**
+     * Retrieves all branches from an account.
+     *
+     * @param query query with the account identifier
+     * @return list of branches for the account
      */
     List<Branch> handle(GetBranchesByAccountIdQuery query);
 
-    /**
-     * Retrieves a paginated and optionally filtered list of branches for the account
-     * specified in the query.
-     *
-     * @param query the query containing the account ID
-     * @param state optional status filter (e.g., {@code "ACTIVE"} or {@code "INACTIVE"}); pass {@code null} or blank to return all
-     * @param page  zero-based page index
-     * @param size  maximum number of results per page
-     * @return a {@link List} of {@link Branch} aggregates matching the filter and page window
-     */
-    List<Branch> handle(GetBranchesByAccountIdQuery query, String state, int page, int size);
 }

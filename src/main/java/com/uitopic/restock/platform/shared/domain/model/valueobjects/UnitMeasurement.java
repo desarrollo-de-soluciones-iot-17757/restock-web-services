@@ -1,47 +1,71 @@
 package com.uitopic.restock.platform.shared.domain.model.valueobjects;
 
+import java.util.Map;
+
 /**
- * Value object representing a unit of measurement for supplies.
- * It encapsulates the name of the unit and provides methods to access it.
+ * Value object representing a unit of measurement.
  *
- * @param unitName the name of the unit measurement (e.g., "kilogram", "liter", "piece", "bottles")
+ * The unit name is provided by the request, while the abbreviation is generated
+ * by the backend using known measurement rules.
+ *
+ * @param unitName full unit name
+ * @param abbreviation short unit abbreviation
  */
 public record UnitMeasurement(
-        String unitName
+        String unitName,
+        String abbreviation
 ) {
 
-    // Constructor validation to ensure that unitName is not null or blank
+    private static final Map<String, String> ABBREVIATIONS = Map.ofEntries(
+            Map.entry("unit", "un"),
+            Map.entry("units", "un"),
+            Map.entry("piece", "pc"),
+            Map.entry("pieces", "pcs"),
+            Map.entry("box", "box"),
+            Map.entry("boxes", "box"),
+            Map.entry("kilogram", "kg"),
+            Map.entry("kilograms", "kg"),
+            Map.entry("gram", "g"),
+            Map.entry("grams", "g"),
+            Map.entry("liter", "L"),
+            Map.entry("liters", "L"),
+            Map.entry("milliliter", "ml"),
+            Map.entry("milliliters", "ml")
+    );
+
+    /**
+     * Creates a unit measurement and generates its abbreviation.
+     *
+     * @param unitName full unit name
+     */
+    public UnitMeasurement(String unitName) {
+        this(unitName, buildAbbreviation(unitName));
+    }
+
     public UnitMeasurement {
         if (unitName == null || unitName.isBlank()) {
             throw new IllegalArgumentException("Unit name cannot be null or blank");
         }
+
+        unitName = unitName.trim();
+
+        if (abbreviation == null || abbreviation.isBlank()) {
+            abbreviation = buildAbbreviation(unitName);
+        }
     }
 
-    /**
-     * Factory method to create a new UnitMeasurement instance with the given unit name.
-     *
-     * @param unitName the name of the unit measurement
-     * @return a new UnitMeasurement instance with the given unit name
-     */
-    public static UnitMeasurement of(String unitName) {
-        return new UnitMeasurement(unitName);
-    }
+    private static String buildAbbreviation(String unitName) {
+        if (unitName == null || unitName.isBlank()) {
+            throw new IllegalArgumentException("Unit name cannot be null or blank");
+        }
 
-    /**
-     * Returns the name of the unit measurement.
-     *
-     * @return the name of the unit measurement
-     */
-    public String getUnitName() {
-        return unitName;
-    }
+        String normalized = unitName.trim().toLowerCase();
 
-    /**
-     * Returns the abbreviation of the unit measurement, which is the first three letters of the unit name in uppercase.
-     *
-     * @return the abbreviation of the unit measurement
-     */
-    public String getAbbreviation() {
-        return unitName.substring(0, 3).toUpperCase();
+        return ABBREVIATIONS.getOrDefault(
+                normalized,
+                normalized.length() <= 3
+                        ? normalized
+                        : normalized.substring(0, 3)
+        );
     }
 }

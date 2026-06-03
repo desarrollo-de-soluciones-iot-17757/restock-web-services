@@ -5,27 +5,63 @@ import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * MongoDB repository interface for managing Batch entities, providing methods to query batches based on branch ID, custom supply ID, and account ID.
+ * MongoDB repository for Batch documents.
  */
 @Repository
 public interface BatchMongoRepository extends MongoRepository<Batch, String> {
 
     /**
-     * Finds batches by the custom supply ID, allowing retrieval of all batches associated with a specific supply.
+     * Finds all batches that belong to an account.
      *
-     * @param customSupplyId the custom supply ID for which to find batches
-     * @return a list of Batch entities associated with the specified custom supply ID
+     * @param accountId account identifier
+     * @return batches owned by the account
+     */
+    List<Batch> findByAccountId(AccountId accountId);
+
+    /**
+     * Finds all batches stored in a branch.
+     *
+     * @param branchId branch identifier
+     * @return batches stored in the branch
+     */
+    List<Batch> findByBranchId(String branchId);
+
+    /**
+     * Finds all batches associated with a custom supply.
+     *
+     * @param customSupplyId custom supply identifier
+     * @return batches associated with the custom supply
      */
     List<Batch> findByCustomSupplyId(String customSupplyId);
 
     /**
-     * Finds batches by account ID, allowing retrieval of all batches associated with a specific account, which can be useful for auditing and tracking inventory movements across different accounts.
+     * Finds the first batch of a custom supply stored in a branch.
      *
-     * @param accountId the ID of the account for which to find batches
-     * @return a list of Batch entities associated with the specified account ID
+     * @param branchId branch identifier
+     * @param customSupplyId custom supply identifier
+     * @return compatible batch if found
      */
-    List<Batch> findByAccountId(AccountId accountId);
+    Optional<Batch> findFirstByBranchIdAndCustomSupplyId(String branchId, String customSupplyId);
+
+    /**
+     * Finds the first compatible batch by code, custom supply, branch and expiration date.
+     *
+     * @param code batch code
+     * @param customSupplyId custom supply identifier
+     * @param branchId branch identifier
+     * @param expirationDate expiration date
+     * @return compatible batch if found
+     */
+    Optional<Batch> findFirstByCodeAndCustomSupplyIdAndBranchIdAndExpirationDate(
+            String code,
+            String customSupplyId,
+            String branchId,
+            LocalDate expirationDate
+    );
+
 }

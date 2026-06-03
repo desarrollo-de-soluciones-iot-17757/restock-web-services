@@ -8,31 +8,39 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * MongoDB repository for {@link Branch} aggregates within the resources bounded context.
+ * MongoDB repository for Branch documents.
  *
- * <p>Extends Spring Data's {@link MongoRepository} to provide standard CRUD operations
- * and custom query methods for the {@code branches} collection. Used exclusively by
- * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.BranchRepositoryImpl}
- * as the underlying persistence mechanism.
+ * Extends Spring Data MongoRepository to provide default CRUD operations and
+ * custom query methods for the branches collection.
  */
 @Repository
 public interface BranchMongoRepository extends MongoRepository<Branch, String> {
 
     /**
-     * Finds all branches associated with the specified account ID.
+     * Finds all branches that belong to an account.
      *
-     * @param accountId the account whose branches are to be retrieved
-     * @return a {@link List} of {@link Branch} aggregates for that account
+     * @param accountId account identifier
+     * @return branches owned by the account
      */
     List<Branch> findByAccountId(AccountId accountId);
 
     /**
-     * Checks whether a branch with the given name already exists within the specified account.
-     * Used to enforce name uniqueness per account before creating or renaming a branch.
+     * Checks whether a branch name already exists in an account.
      *
-     * @param name      the branch name to check
-     * @param accountId the account scope for the uniqueness check
-     * @return {@code true} if a branch with that name exists in the account, {@code false} otherwise
+     * @param name branch name
+     * @param accountId account identifier
+     * @return true if the branch name already exists in the account
      */
     boolean existsByNameAndAccountId(String name, AccountId accountId);
+
+    /**
+     * Checks whether another branch with the same name exists in an account,
+     * excluding a specific branch identifier.
+     *
+     * @param name branch name
+     * @param accountId account identifier
+     * @param id branch identifier to exclude
+     * @return true if another branch with the same name exists
+     */
+    boolean existsByNameAndAccountIdAndIdNot(String name, AccountId accountId, String id);
 }

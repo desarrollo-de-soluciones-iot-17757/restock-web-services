@@ -1,79 +1,91 @@
 package com.uitopic.restock.platform.resources.interfaces.rest.controllers;
 
-import com.uitopic.restock.platform.resources.domain.model.commands.SeedSuppliesCommand;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetAllSuppliesQuery;
-import com.uitopic.restock.platform.resources.domain.services.SupplyCommandService;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllSupplyCategoriesQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetSupplyByIdQuery;
 import com.uitopic.restock.platform.resources.domain.services.SupplyQueryService;
-import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateSupplyResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.SupplyResource;
 import com.uitopic.restock.platform.resources.interfaces.rest.transform.SupplyResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Slf4j
+/**
+ * REST controller for supply catalog queries.
+ *
+ * Supplies are base catalog items loaded from a JSON seed and used as templates
+ * for custom supplies.
+ */
 @RestController
 @RequestMapping(value = "/api/v1/supplies", produces = APPLICATION_JSON_VALUE)
-@Tag(name = "Supplies", description = "Supply template management.")
+@Tag(name = "Supplies", description = "Supply catalog queries.")
 public class SuppliesController {
 
-    private final SupplyCommandService commandService;
-    private final SupplyQueryService queryService;
+    private final SupplyQueryService supplyQueryService;
 
-    public SuppliesController(SupplyCommandService commandService, SupplyQueryService queryService) {
-        this.commandService = commandService;
-        this.queryService = queryService;
+    /**
+     * Creates a SuppliesController with the required query service.
+     *
+     * @param supplyQueryService service used to execute supply read operations
+     */
+    public SuppliesController(SupplyQueryService supplyQueryService) {
+        this.supplyQueryService = supplyQueryService;
     }
 
-    @Operation(summary = "Get all supply templates")
+    /**
+     * Gets all supply templates.
+     *
+     * @return list of supply resources
+     */
+    @Operation(summary = "Get all supplies")
     @GetMapping
     public ResponseEntity<List<SupplyResource>> getAll() {
-        var supplies = queryService.handle(new GetAllSuppliesQuery());
-        return ResponseEntity.ok(supplies.stream().map(SupplyResourceFromEntityAssembler::toResourceFromEntity).toList());
+        var supplies = supplyQueryService.handle(new GetAllSuppliesQuery());
+
+        var resources = supplies.stream()
+                .map(SupplyResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+
+        return ResponseEntity.ok(resources);
     }
 
-    @Operation(summary = "Get supply template by ID")
+    /**
+     * Gets all available supply categories.
+     *
+     * @return list of category names
+     */
+    @Operation(summary = "Get all supply categories")
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        var categories = supplyQueryService.handle(new GetAllSupplyCategoriesQuery());
+        return ResponseEntity.ok(categories);
+    }
+
+    /**
+     * Gets a supply template by its identifier.
+     *
+     * If the supply is not found, a ResponseStatusException is thrown so the
+     * GlobalExceptionHandler can return a structured error response.
+     *
+     * @param id supply identifier
+     * @return supply resource
+     */
+    @Operation(summary = "Get supply by ID")
     @GetMapping("/{id}")
     public ResponseEntity<SupplyResource> getById(@PathVariable String id) {
-        return queryService.findById(id)
-                .map(s -> ResponseEntity.ok(SupplyResourceFromEntityAssembler.toResourceFromEntity(s)))
-                .orElse(ResponseEntity.notFound().build());
-    }
+        var supply = supplyQueryService.handle(new GetSupplyByIdQuery(id))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Supply not found: " + id
+                ));
 
-    @Operation(summary = "Create a supply template")
-    @PostMapping
-    public ResponseEntity<SupplyResource> create(@Valid @RequestBody CreateSupplyResource resource) {
-        var command = new SeedSuppliesCommand(resource.name(), resource.description(),
-                resource.category(), resource.isPerishable());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(SupplyResourceFromEntityAssembler.toResourceFromEntity(commandService.handle(command)));
-    }
-
-    @Operation(summary = "Update a supply template")
-    @PutMapping("/{id}")
-    public ResponseEntity<SupplyResource> update(@PathVariable String id,
-                                                  @Valid @RequestBody CreateSupplyResource resource) {
-        var command = new SeedSuppliesCommand(resource.name(), resource.description(),
-                resource.category(), resource.isPerishable());
-        return commandService.update(id, command)
-                .map(s -> ResponseEntity.ok(SupplyResourceFromEntityAssembler.toResourceFromEntity(s)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Delete a supply template")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable String id) {
-        commandService.delete(id);
-        return ResponseEntity.ok(Map.of("id", id, "deletedAt", Instant.now().toString()));
+        return ResponseEntity.ok(SupplyResourceFromEntityAssembler.toResourceFromEntity(supply));
     }
 }

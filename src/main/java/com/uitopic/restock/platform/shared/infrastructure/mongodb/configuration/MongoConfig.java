@@ -3,8 +3,6 @@ package com.uitopic.restock.platform.shared.infrastructure.mongodb.configuration
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateReadConverter;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.InventoryStateWriteConverter;
 import com.uitopic.restock.platform.shared.infrastructure.mongodb.converter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,38 +19,32 @@ import java.util.List;
 /**
  * Global MongoDB configuration shared across all bounded contexts.
  *
- * <p>Responsibilities:
- * <ul>
- *   <li>Suppresses the {@code _class} discriminator field from all documents
- *       by setting a {@code null} type key on the {@link MappingMongoConverter}.</li>
- *   <li>Registers all custom converters so value objects are stored as
- *       primitives instead of embedded documents:
- *     <ul>
- *       <li>IAM: {@code Email} ↔ {@code String}</li>
- *       <li>Resources: {@code Stock} ↔ {@code Double}</li>
- *       <li>Resources: {@code InventoryState} ↔ {@code String}</li>
- *     </ul>
- *   </li>
- * </ul>
+ * Responsibilities:
+ * - Removes the _class discriminator field from MongoDB documents.
+ * - Registers custom converters for value objects that require explicit
+ *   serialization rules.
  */
 @Configuration
 public class MongoConfig {
+
     /**
-     * Overrides the default {@link MappingMongoConverter} to:
-     * <ol>
-     *   <li>Remove the {@code _class} field from every document.</li>
-     *   <li>Apply all custom converters for value object serialization.</li>
-     * </ol>
+     * Creates a customized MongoDB mapping converter.
      *
-     * @param factory        the MongoDB database factory
-     * @param mappingContext the mapping context used to resolve entity metadata
-     * @return a customized {@link MappingMongoConverter}
+     * The converter removes the _class field and applies the custom conversions
+     * registered in mongoCustomConversions().
+     *
+     * @param factory MongoDB database factory
+     * @param mappingContext MongoDB mapping context
+     * @return customized MappingMongoConverter
      */
     @Bean
-    public MappingMongoConverter mappingMongoConverter(MongoDatabaseFactory factory,
-                                                       MongoMappingContext mappingContext) {
+    public MappingMongoConverter mappingMongoConverter(
+            MongoDatabaseFactory factory,
+            MongoMappingContext mappingContext
+    ) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter converter = new MappingMongoConverter(dbRefResolver, mappingContext);
+
         converter.setTypeMapper(new DefaultMongoTypeMapper(null));
         converter.setCustomConversions(mongoCustomConversions());
 
@@ -60,15 +52,17 @@ public class MongoConfig {
     }
 
     /**
-     * Registers all custom converters for value object serialization. This ensures that value objects are stored as primitives in MongoDB, rather than as embedded documents.
+     * Registers custom converters for value object serialization.
      *
-     * @return a {@link MongoCustomConversions} instance containing all registered converters
+     * InventoryState converters were removed because Inventory is no longer
+     * part of the current persistence model.
+     *
+     * @return Mongo custom conversions
      */
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
+
         return new MongoCustomConversions(List.of(
-                new InventoryStateReadConverter(),
-                new InventoryStateWriteConverter(),
                 new EmailWriteConverter(),
                 new EmailReadConverter(),
                 new AccountIdReadConverter(),
@@ -76,7 +70,11 @@ public class MongoConfig {
                 new AddressWriteConverter(),
                 new AddressReadConverter(),
                 new ImageURLWriteConverter(),
-                new ImageURLReadConverter()
+                new ImageURLReadConverter(),
+                new MoneyWriteConverter(),
+                new MoneyReadConverter(),
+                new UnitMeasurementWriteConverter(),
+                new UnitMeasurementReadConverter()
                 //new StockWriteConverter(),
                 //new StockReadConverter()
         ));
