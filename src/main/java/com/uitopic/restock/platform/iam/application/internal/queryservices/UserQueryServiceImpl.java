@@ -16,11 +16,12 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 public class UserQueryServiceImpl implements UserQueryService {
 
+    // Repository for accessing user data
     private final UserRepository userRepository;
 
+    // Constructor injection of the UserRepository
     public UserQueryServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -33,6 +34,7 @@ public class UserQueryServiceImpl implements UserQueryService {
      * @return a {@link List} of {@link User} aggregates for that account
      */
     @Override
+    @Transactional(readOnly = true)
     public List<User> handle(GetAllUsersByAccountIdQuery query) {
         log.debug("Querying all users for account ID: {}", query.accountId());
         var results = userRepository.findAllByAccountId(query.accountId());

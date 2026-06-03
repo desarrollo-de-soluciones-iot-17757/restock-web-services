@@ -1,5 +1,10 @@
 package com.uitopic.restock.platform.iam.interfaces.acl;
 
+/**
+ * Facade interface for the IAM (Identity and Access Management) context.
+ * This interface provides methods for other bounded contexts to interact with the IAM context without exposing its internal implementation details.
+ * It allows for checking user existence and retrieving account information based on user IDs, facilitating integration between the IAM context and other parts of the system while maintaining separation of concerns and encapsulation.
+ */
 public interface IamContextFacade {
 
     /**

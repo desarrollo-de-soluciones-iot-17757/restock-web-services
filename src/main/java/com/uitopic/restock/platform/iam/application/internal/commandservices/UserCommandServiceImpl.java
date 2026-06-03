@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.iam.application.internal.commandservices;
 
+import com.uitopic.restock.platform.iam.application.internal.outboundservices.acl.ExternalProfilesService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.hashing.HashingService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.tokens.TokenService;
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
@@ -32,19 +33,27 @@ import java.util.Optional;
 @Service
 public class UserCommandServiceImpl implements UserCommandService {
 
+    // The user repository is used to persist and retrieve user entities from the database
     private final UserRepository userRepository;
-    private final HashingService hashingService;
-    private final TokenService tokenService;
-    private final ProfilesContextFacade profilesContextFacade;
 
+    // The hashing service is used to encode passwords and verify password matches
+    private final HashingService hashingService;
+
+    // The token service is responsible for generating JWT tokens upon successful authentication
+    private final TokenService tokenService;
+
+    // The external profiles service is used to orchestrate profile creation in the Profiles bounded context via the ACL
+    private final ExternalProfilesService externalProfilesService;
+
+    // Constructor injection of dependencies
     public UserCommandServiceImpl(UserRepository userRepository,
                                   HashingService hashingService,
                                   TokenService tokenService,
-                                  ProfilesContextFacade profilesContextFacade) {
+                                  ExternalProfilesService externalProfilesService) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
-        this.profilesContextFacade = profilesContextFacade;
+        this.externalProfilesService = externalProfilesService;
     }
 
     /**
@@ -115,7 +124,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         log.info("Creating profile for user ID: {} via ProfilesContextFacade ACL", saved.getId());
         try {
-            String profileId = profilesContextFacade.createProfile(
+            String profileId = externalProfilesService.createProfileForNewUser(
                     saved.getId(),
                     command.businessName(),
                     command.email(),

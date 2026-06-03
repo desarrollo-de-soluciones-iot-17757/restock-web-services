@@ -60,4 +60,9 @@ public interface UserRepository {
      * @return a {@link List} of {@link User} aggregates for that account
      */
     List<User> findAllByAccountId(AccountId accountId);
+
+    /**
+     * Deletes all users from the data store.
+     */
+    void deleteAll();
 }

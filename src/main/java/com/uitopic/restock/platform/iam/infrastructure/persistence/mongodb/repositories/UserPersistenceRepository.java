@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories;
 
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
+import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.entities.UserPersistenceEntity;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -19,7 +20,7 @@ import java.util.Optional;
  * custom converters to query parameters, so the value object must be unwrapped here.
  */
 @Repository
-public interface UserMongoRepository extends MongoRepository<User, String> {
+public interface UserPersistenceRepository extends MongoRepository<UserPersistenceEntity, String> {
 
     /**
      * Finds a user by their email address.
@@ -29,7 +30,7 @@ public interface UserMongoRepository extends MongoRepository<User, String> {
      * @return an {@link Optional} containing the {@link User} if found, otherwise empty
      */
     @Query("{ 'email' : ?0 }")
-    Optional<User> findByEmail(String email);
+    Optional<UserPersistenceEntity> findByEmail(String email);
 
     /**
      * Checks if a user with the given email address exists.
@@ -47,7 +48,7 @@ public interface UserMongoRepository extends MongoRepository<User, String> {
      * @param accountId the account ID to search for
      * @return an {@link Optional} containing the {@link User} if found, otherwise empty
      */
-    Optional<User> findByAccountId(AccountId accountId);
+    Optional<UserPersistenceEntity> findByAccountId(AccountId accountId);
 
     /**
      * Finds all users associated with the given account ID.
@@ -56,5 +57,5 @@ public interface UserMongoRepository extends MongoRepository<User, String> {
      * @param accountId the account ID to search for
      * @return a {@link List} of {@link User} aggregates for that account
      */
-    List<User> findAllByAccountId(AccountId accountId);
+    List<UserPersistenceEntity> findAllByAccountId(AccountId accountId);
 }

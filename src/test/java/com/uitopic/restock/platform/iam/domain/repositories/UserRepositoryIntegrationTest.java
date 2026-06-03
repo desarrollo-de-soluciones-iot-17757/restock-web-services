@@ -4,7 +4,7 @@ import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
-import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories.UserMongoRepository;
+import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories.UserPersistenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +21,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserRepositoryIntegrationTest {
 
     @Autowired
-    private UserMongoRepository userMongoRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        userMongoRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
     void save_validUser_persistsAndRetrievableByEmail() {
         User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.CASHIER), null);
 
-        User savedUser = userMongoRepository.save(user);
+        User savedUser = userRepository.save(user);
         assertNotNull(savedUser);
         assertNotNull(savedUser.getId());
 
-        Optional<User> foundUser = userMongoRepository.findByEmail("test@example.com");
+        Optional<User> foundUser = userRepository.findByEmail(new Email("test@example.com"));
         assertTrue(foundUser.isPresent());
         assertEquals("test@example.com", foundUser.get().getEmail().email());
     }
@@ -44,15 +44,15 @@ class UserRepositoryIntegrationTest {
     @Test
     void existsByEmail_existingEmail_returnsTrue() {
         User user = new User(new Email("existing@example.com"), "hashed_password", new Role(RoleType.ADMIN), null);
-        userMongoRepository.save(user);
+        userRepository.save(user);
 
-        boolean exists = userMongoRepository.existsByEmail("existing@example.com");
+        boolean exists = userRepository.existsByEmail(new Email("existing@example.com"));
         assertTrue(exists);
     }
 
     @Test
     void existsByEmail_unknownEmail_returnsFalse() {
-        boolean exists = userMongoRepository.existsByEmail("unknown@example.com");
+        boolean exists = userRepository.existsByEmail(new Email("unknown@example.com"));
         assertFalse(exists);
     }
 
@@ -61,8 +61,8 @@ class UserRepositoryIntegrationTest {
         User user1 = new User(new Email("duplicate@example.com"), "password123", new Role(RoleType.WAREHOUSEMAN), null);
         User user2 = new User(new Email("duplicate@example.com"), "password456", new Role(RoleType.CASHIER), null);
 
-        userMongoRepository.save(user1);
+        userRepository.save(user1);
 
-        assertThrows(DuplicateKeyException.class, () -> userMongoRepository.save(user2));
+        assertThrows(DuplicateKeyException.class, () -> userRepository.save(user2));
     }
 }
