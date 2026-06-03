@@ -3,10 +3,11 @@ package com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.c
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
-import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration.converter.*;
+import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration.converters.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
@@ -78,5 +79,16 @@ public class MongoConfig {
                 //new StockWriteConverter(),
                 //new StockReadConverter()
         ));
+    }
+
+    /**
+     * Configures a MongoDB transaction manager to enable transactional support.
+     *
+     * @param dbFactory MongoDB database factory
+     * @return MongoTransactionManager instance
+     */
+    @Bean
+    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
+        return new MongoTransactionManager(dbFactory);
     }
 }
