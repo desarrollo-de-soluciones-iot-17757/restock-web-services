@@ -90,9 +90,7 @@ public class AuthenticationController {
                         resource.businessName(),
                         resource.email(),
                         resource.password(),
-                        resource.role(),
-                        resource.phone(),
-                        resource.country()
+                        resource.role()
                 )
         );
 
