@@ -67,7 +67,6 @@ public class BatchCommandServiceImpl implements BatchCommandService {
      * @return created batch
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Batch handle(CreateBatchCommand command) {
         log.info(
                 "Creating batch '{}' for customSupplyId='{}' and branchId='{}'",
@@ -112,7 +111,6 @@ public class BatchCommandServiceImpl implements BatchCommandService {
      * @return updated batch, or empty if not found
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Batch> handle(UpdateBatchCommand command) {
         log.info("Updating batch id='{}'", command.batchId());
 
@@ -152,7 +150,6 @@ public class BatchCommandServiceImpl implements BatchCommandService {
      * @param command command with the batch identifier
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void handle(DeleteBatchCommand command) {
         log.info("Deleting batch id='{}'", command.batchId());
         if (batchRepository.findById(command.batchId()).isEmpty()) {
@@ -184,7 +181,6 @@ public class BatchCommandServiceImpl implements BatchCommandService {
      * @return affected batches: source and target
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public List<Batch> handle(TransferBatchStockCommand command) {
         log.info(
                 "Transferring stock from batch id='{}' to branch id='{}'",

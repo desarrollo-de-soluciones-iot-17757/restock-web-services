@@ -8,4 +8,6 @@ import lombok.*;
 @With
 @EqualsAndHashCode
 public class SalesOrderItem {
+
+    private String id;
 }

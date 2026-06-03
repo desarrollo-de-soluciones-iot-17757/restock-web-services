@@ -37,7 +37,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Batch> handle(GetAllBatchesQuery query) {
         log.debug("Querying all batches");
         var results = batchRepository.findAll();
@@ -52,7 +51,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return batch if found
      */
     @Override
-    @Transactional(readOnly = true)
     public Optional<Batch> handle(GetBatchByIdQuery query) {
         log.debug("Querying batch by id='{}'", query.batchId());
         return batchRepository.findById(query.batchId());
@@ -65,7 +63,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByAccountIdQuery query) {
         log.debug("Querying batches by accountId='{}'", query.accountId());
         var results = batchRepository.findByAccountId(query.accountId());
@@ -80,7 +77,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByBranchIdQuery query) {
         log.debug("Querying batches by branchId='{}'", query.branchId());
         var results = batchRepository.findByBranchId(query.branchId());
@@ -95,7 +91,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByCustomSupplyIdQuery query) {
         log.debug("Querying batches by customSupplyId='{}'", query.customSupplyId());
         var results = batchRepository.findByCustomSupplyId(query.customSupplyId());
@@ -104,7 +99,6 @@ public class BatchQueryServiceImpl implements BatchQueryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Batch> findAllByFilters(String accountId, String branchId, String customSupplyId) {
         var batches = batchRepository.findAll();
 

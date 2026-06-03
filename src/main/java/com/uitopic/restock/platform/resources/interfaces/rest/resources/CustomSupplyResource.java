@@ -48,9 +48,6 @@ public record CustomSupplyResource(
         String picturePublicId,
 
         @Schema(description = "Account ID")
-        String accountId,
-
-        @Schema(description = "Creation timestamp")
-        String createdAt
+        String accountId
 ) {
 }

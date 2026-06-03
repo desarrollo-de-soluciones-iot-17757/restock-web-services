@@ -8,4 +8,6 @@ import lombok.*;
 @With
 @EqualsAndHashCode
 public class Plan {
+
+    private String id;
 }

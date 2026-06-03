@@ -23,8 +23,7 @@ public class BranchResourceFromEntityAssembler {
                 location != null ? location.country() : null,
                 entity.getStatus() != null ? entity.getStatus().name() : null,
                 image != null ? image.url() : null,
-                image != null ? image.publicId() : null,
-                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
+                image != null ? image.publicId() : null
         );
     }
 }

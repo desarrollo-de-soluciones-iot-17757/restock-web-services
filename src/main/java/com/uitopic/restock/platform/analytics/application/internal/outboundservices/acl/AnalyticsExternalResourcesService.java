@@ -3,5 +3,5 @@ package com.uitopic.restock.platform.analytics.application.internal.outboundserv
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExternalResourcesService {
+public class AnalyticsExternalResourcesService {
 }

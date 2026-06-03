@@ -78,7 +78,6 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
      * @return created custom supply
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public CustomSupply handle(CreateCustomSupplyCommand command) {
         log.info("Creating custom supply: name='{}', accountId='{}'", command.name(), command.accountId());
         AccountId accountId = new AccountId(command.accountId());
@@ -117,7 +116,6 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
      * @return updated custom supply, or empty if not found
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<CustomSupply> handle(UpdateCustomSupplyCommand command) {
         log.info("Updating custom supply: id='{}'", command.customSupplyId());
         return customSupplyRepository.findById(command.customSupplyId()).map(existing -> {
@@ -163,7 +161,6 @@ public class CustomSupplyCommandServiceImpl implements CustomSupplyCommandServic
      * @param command command with the custom supply identifier
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void handle(DeleteCustomSupplyCommand command) {
         log.info("Deleting custom supply: id='{}'", command.customSupplyId());
         CustomSupply customSupply = customSupplyRepository.findById(command.customSupplyId())

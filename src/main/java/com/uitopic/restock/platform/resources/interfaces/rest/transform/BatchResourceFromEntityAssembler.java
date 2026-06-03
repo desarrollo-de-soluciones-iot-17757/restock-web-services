@@ -28,8 +28,7 @@ public class BatchResourceFromEntityAssembler {
                 entity.getBranchId(),
                 entity.getAccountId().getAccountId(),
                 entity.getExpirationDate() != null ? entity.getExpirationDate().toString() : null,
-                entity.getEntryDate() != null ? entity.getEntryDate().toString() : null,
-                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
+                entity.getEntryDate() != null ? entity.getEntryDate().toString() : null
         );
     }
 }

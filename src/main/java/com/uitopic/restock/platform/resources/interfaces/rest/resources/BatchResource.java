@@ -35,9 +35,6 @@ public record BatchResource(
         String expirationDate,
 
         @Schema(description = "Entry date")
-        String entryDate,
-
-        @Schema(description = "Creation timestamp")
-        String createdAt
+        String entryDate
 ) {
 }

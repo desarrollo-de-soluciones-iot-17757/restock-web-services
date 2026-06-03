@@ -38,9 +38,6 @@ public record BranchResource(
         String imageUrl,
 
         @Schema(description = "Cloudinary public ID")
-        String imagePublicId,
-
-        @Schema(description = "Creation timestamp")
-        String createdAt
+        String imagePublicId
 ) {
 }

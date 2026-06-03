@@ -71,7 +71,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Product handle(CreateProductCommand command) {
         AccountId accountId = new AccountId(command.accountId());
 
@@ -104,7 +103,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(UpdateProductCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
 
@@ -138,7 +136,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(AddIngredientCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
             BigDecimal unitPrice = pricingPort.getUnitPrice(command.customSupplyId())
@@ -176,7 +173,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(RemoveIngredientCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
             try {
@@ -199,7 +195,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         productRepository.findById(id).ifPresentOrElse(
                 product -> {

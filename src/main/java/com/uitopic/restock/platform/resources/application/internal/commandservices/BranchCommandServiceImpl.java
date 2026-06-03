@@ -68,7 +68,6 @@ public class BranchCommandServiceImpl implements BranchCommandService {
      * @return created branch
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Branch handle(CreateBranchCommand command) {
         log.info("Creating branch '{}' for accountId='{}'", command.name(), command.accountId());
         AccountId accountId = new AccountId(command.accountId());
@@ -120,7 +119,6 @@ public class BranchCommandServiceImpl implements BranchCommandService {
      * @return updated branch, or empty if not found
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Branch> handle(UpdateBranchCommand command) {
         log.info("Updating branch id='{}'", command.branchId());
 
@@ -198,7 +196,6 @@ public class BranchCommandServiceImpl implements BranchCommandService {
      * @param command command with the branch identifier
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void handle(DeleteBranchCommand command) {
         log.info("Deactivating branch id='{}'", command.branchId());
 
@@ -235,7 +232,6 @@ public class BranchCommandServiceImpl implements BranchCommandService {
      * @return updated branch, or empty if not found
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Optional<Branch> handle(UpdateBranchStatusCommand command) {
         return branchRepository.findById(command.branchId()).map(branch -> {
             branch.changeStatus(command.status());

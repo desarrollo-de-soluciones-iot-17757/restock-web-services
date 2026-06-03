@@ -34,7 +34,6 @@ public class UserQueryServiceImpl implements UserQueryService {
      * @return a {@link List} of {@link User} aggregates for that account
      */
     @Override
-    @Transactional(readOnly = true)
     public List<User> handle(GetAllUsersByAccountIdQuery query) {
         log.debug("Querying all users for account ID: {}", query.accountId());
         var results = userRepository.findAllByAccountId(query.accountId());
