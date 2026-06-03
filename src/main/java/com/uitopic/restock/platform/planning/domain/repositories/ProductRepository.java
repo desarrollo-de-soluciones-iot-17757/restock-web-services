@@ -12,7 +12,7 @@ import java.util.Optional;
  *
  * <p>Defines the contract for storing and retrieving products, decoupling the domain
  * layer from MongoDB infrastructure. The implementation is provided by
- * {@link com.uitopic.restock.platform.planning.infrastructure.repositories.ProductRepositoryImpl}.</p>
+ * {@link com.uitopic.restock.platform.planning.infrastructure.adapters.ProductRepositoryImpl}.</p>
  */
 public interface ProductRepository {
 

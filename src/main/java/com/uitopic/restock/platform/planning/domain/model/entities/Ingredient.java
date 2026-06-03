@@ -1,12 +1,6 @@
 package com.uitopic.restock.platform.planning.domain.model.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.bson.BsonType;
-import org.bson.codecs.pojo.annotations.BsonRepresentation;
-import org.springframework.data.annotation.Id;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -19,15 +13,14 @@ import java.math.BigDecimal;
  * This entity is never persisted independently; it lives inside the {@code products} collection
  * as an array of sub-documents.</p>
  */
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@With
 public class Ingredient {
 
     /** Unique identifier for this ingredient entry. Generated as an ObjectId string. */
-    @Id
-    @BsonRepresentation(BsonType.OBJECT_ID)
     private String id;
 
     /**

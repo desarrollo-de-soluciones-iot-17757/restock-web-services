@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.planning.domain.model.enums;
+package com.uitopic.restock.platform.planning.domain.model.valueobjects;
 
 /**
  * Enumeration representing the type of a {@link com.uitopic.restock.platform.planning.domain.model.aggregates.Product}.
