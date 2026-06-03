@@ -1,4 +1,15 @@
 package com.uitopic.restock.platform.tracking.domain.model.aggregates;
 
-public class ConciliationTask {
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@NoArgsConstructor
+public class ConciliationTask extends AbstractDomainAggregateRoot<ConciliationTask> {
+
+
 }

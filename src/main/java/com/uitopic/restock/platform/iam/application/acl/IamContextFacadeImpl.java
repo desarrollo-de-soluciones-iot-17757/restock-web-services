@@ -5,6 +5,7 @@ import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the IAM anti-corruption layer facade.
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class IamContextFacadeImpl implements IamContextFacade {
 
+    // The UserRepository is used to query user data without exposing domain entities.
     private final UserRepository userRepository;
 
+    // Constructor injection of the UserRepository dependency.
     public IamContextFacadeImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -28,6 +31,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
      * @return true if a user with that email is registered, false otherwise
      */
     @Override
+    @Transactional(readOnly = true)
     public boolean existsUserByEmail(String email) {
         log.debug("Checking existence of user with email: {}", email);
         boolean exists = userRepository.existsByEmail(new Email(email));
@@ -43,6 +47,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
      * @return the account ID as a string, or empty string if not found
      */
     @Override
+    @Transactional(readOnly = true)
     public String fetchAccountIdByUserId(String userId) {
         log.debug("Fetching account ID for user ID: {}", userId);
         String accountId = userRepository.findById(userId)

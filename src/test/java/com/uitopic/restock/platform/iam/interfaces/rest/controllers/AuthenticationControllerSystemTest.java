@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.iam.interfaces.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories.UserMongoRepository;
+import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.repositories.UserPersistenceRepository;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignInResource;
 import com.uitopic.restock.platform.iam.interfaces.rest.resources.SignUpResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +24,13 @@ class AuthenticationControllerSystemTest {
         private MockMvc mockMvc;
 
         @Autowired
-        private UserMongoRepository userMongoRepository;
+        private UserPersistenceRepository userPersistenceRepository;
 
         private final ObjectMapper objectMapper = new ObjectMapper();
 
         @BeforeEach
         void setUp() {
-                userMongoRepository.deleteAll();
+                userPersistenceRepository.deleteAll();
         }
 
         @Test

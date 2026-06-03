@@ -4,35 +4,31 @@ import com.uitopic.restock.platform.resources.domain.model.commands.CreateCustom
 import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyCommand;
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockRange;
-import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.*;
 
 /**
  * Aggregate root representing a custom supply in the resources bounded context.
- *
  * A custom supply is created from a base supply and stores account-specific
  * information such as name, stock range, unit price, unit measurement,
  * description and optional picture URL.
- *
  * This aggregate stores both the supply identifier and the full supply data.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Document(collection = "custom_supplies")
-public class CustomSupply extends AuditableAbstractAggregateRoot {
+@Builder
+public class CustomSupply extends AbstractDomainAggregateRoot<CustomSupply> {
+
+    /**
+     * Unique identifier of this custom supply.
+     */
+    private String id;
 
     /**
      * Account that owns this custom supply.

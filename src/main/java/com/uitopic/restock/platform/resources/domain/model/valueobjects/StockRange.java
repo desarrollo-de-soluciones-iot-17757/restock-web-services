@@ -42,4 +42,22 @@ public record StockRange(
 
         return value >= minStock && value <= maxStock;
     }
+
+    /**
+     * Returns the minimum allowed stock value.
+     *
+     * @return the minimum allowed stock value
+     */
+    public Double getMinStock() {
+        return minStock;
+    }
+
+    /**
+     * Returns the maximum allowed stock value.
+     *
+     * @return the maximum allowed stock value
+     */
+    public Double getMaxStock() {
+        return maxStock;
+    }
 }

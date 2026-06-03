@@ -1,14 +1,9 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
-import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -20,10 +15,14 @@ import java.time.LocalDate;
  * that own the stock.
  */
 @EqualsAndHashCode(callSuper = true)
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Document(collection = "batches")
-public class Batch extends AuditableAbstractAggregateRoot {
+@Data
+@NoArgsConstructor
+public class Batch extends AbstractDomainAggregateRoot<Batch> {
+
+    /**
+     * Unique identifier of the batch.
+     */
+    private String id;
 
     /**
      * Business code used to identify the batch.

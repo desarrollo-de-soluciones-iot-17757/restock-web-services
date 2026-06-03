@@ -68,4 +68,20 @@ public record Stock(
             throw new IllegalArgumentException("Stock unit measurement does not match");
         }
     }
+
+    /**
+     * Get the current stock quantity.
+     * @return the current stock quantity as an Integer.
+     */
+    public Double getStock() {
+        return this.stock;
+    }
+
+    /**
+     * Get the unit of measurement for the stock quantity.
+     * @return the unit of measurement as a String.
+     */
+    public String getUnit() {
+        return this.unitMeasurement.unitName();
+    }
 }

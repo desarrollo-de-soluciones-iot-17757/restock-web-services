@@ -1,21 +1,23 @@
 package com.uitopic.restock.platform.planning.application.internal.commandservices;
 
+import com.uitopic.restock.platform.planning.domain.exception.*;
 import com.uitopic.restock.platform.planning.domain.model.aggregates.Product;
 import com.uitopic.restock.platform.planning.domain.model.commands.AddIngredientCommand;
 import com.uitopic.restock.platform.planning.domain.model.commands.CreateProductCommand;
 import com.uitopic.restock.platform.planning.domain.model.commands.RemoveIngredientCommand;
 import com.uitopic.restock.platform.planning.domain.model.commands.UpdateProductCommand;
 import com.uitopic.restock.platform.planning.domain.model.entities.Ingredient;
-import com.uitopic.restock.platform.planning.domain.model.enums.ProductType;
+import com.uitopic.restock.platform.planning.domain.model.valueobjects.ProductType;
 import com.uitopic.restock.platform.planning.domain.model.events.ProductDeletedEvent;
 import com.uitopic.restock.platform.planning.domain.repositories.ProductRepository;
 import com.uitopic.restock.platform.planning.domain.services.CustomSupplyPricingPort;
 import com.uitopic.restock.platform.planning.domain.services.ProductCommandService;
+import com.uitopic.restock.platform.resources.domain.exception.CustomSupplyNotFoundException;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.ResourceStatus;
+import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,16 +45,21 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
-@Transactional
 public class ProductCommandServiceImpl implements ProductCommandService {
 
+    // Repository for product aggregates
     private final ProductRepository productRepository;
-    private final CustomSupplyPricingPort pricingPort;
-    private final ApplicationEventPublisher eventPublisher;
 
+    // Port to fetch custom supply pricing from the resources bounded context
+    private final CustomSupplyPricingPort pricingPort;
+
+    // Spring's event publisher to emit domain events after certain operations
+    private final SpringDomainEventPublisher eventPublisher;
+
+    // Constructor injection of dependencies
     public ProductCommandServiceImpl(ProductRepository productRepository,
                                      CustomSupplyPricingPort pricingPort,
-                                     ApplicationEventPublisher eventPublisher) {
+                                     SpringDomainEventPublisher eventPublisher) {
         this.productRepository = productRepository;
         this.pricingPort = pricingPort;
         this.eventPublisher = eventPublisher;
@@ -64,6 +71,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Product handle(CreateProductCommand command) {
         AccountId accountId = new AccountId(command.accountId());
 
@@ -84,8 +92,6 @@ public class ProductCommandServiceImpl implements ProductCommandService {
                 .sellingPrice(command.sellingPrice())
                 .build();
 
-        product.setResourceStatus(ResourceStatus.ACTIVE);
-
         Product saved = productRepository.save(product);
         log.info("Product created: id={}, sku={}, accountId={}",
                 saved.getId(), saved.getSku(), accountId.getAccountId());
@@ -98,6 +104,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(UpdateProductCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
 
@@ -105,8 +112,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             String newSku = command.sku();
             if (newSku != null && !newSku.isBlank() && !newSku.equals(product.getSku())) {
                 if (productRepository.existsByAccountIdAndSku(product.getAccountId(), newSku)) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "A product with SKU '" + newSku + "' already exists for this account.");
+                    throw new ProductAlreadyExistsException(
+                            "A product with SKU '" + newSku + "' already exists for this account."
+                    );
                 }
             }
 
@@ -130,15 +138,15 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(AddIngredientCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
-
             BigDecimal unitPrice = pricingPort.getUnitPrice(command.customSupplyId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                            "Custom supply not found or has no price: " + command.customSupplyId()));
+                    .orElseThrow(() -> new CustomSupplyNotFoundException(
+                            "Custom supply not found or has no price with id: " + command.customSupplyId())
+                    );
 
             BigDecimal totalCost = unitPrice.multiply(BigDecimal.valueOf(command.quantity()));
-
             Ingredient ingredient = Ingredient.builder()
                     .id(new ObjectId().toHexString())
                     .productId(product.getId())
@@ -150,7 +158,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             try {
                 product.addIngredient(ingredient);
             } catch (IllegalArgumentException ex) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
+                throw new IngredientAdditionConflictException(
+                        "Ingredient with customSupplyId '" + command.customSupplyId() + "' already exists in product " + product.getId()
+                );
             }
 
             Product saved = productRepository.save(product);
@@ -166,12 +176,15 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Optional<Product> handle(RemoveIngredientCommand command) {
         return productRepository.findById(command.productId()).map(product -> {
             try {
                 product.removeIngredient(command.customSupplyId());
             } catch (IllegalArgumentException ex) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+                throw new IngredientNotFoundException(
+                        "Ingredient with customSupplyId '" + command.customSupplyId() + "' not found in product " + product.getId()
+                );
             }
             Product saved = productRepository.save(product);
             log.info("Ingredient removed from product {}: customSupplyId={}",
@@ -186,17 +199,17 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     /** {@inheritDoc} */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         productRepository.findById(id).ifPresentOrElse(
                 product -> {
                     String accountId = product.getAccountId().getAccountId();
                     productRepository.deleteById(id);
-                    eventPublisher.publishEvent(new ProductDeletedEvent(id, accountId));
+                    eventPublisher.publish(new ProductDeletedEvent(id, accountId));
                     log.info("Product deleted: id={}, accountId={}", id, accountId);
                 },
                 () -> {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Product not found: " + id);
+                    throw new ProductNotFoundException("Product not found with id: " + id);
                 });
     }
 
@@ -208,8 +221,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         try {
             return ProductType.valueOf(raw.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Invalid product type '" + raw + "'. Accepted values: RECIPE, KIT.");
+            throw new InvalidProductTypeException(
+                    "Invalid product type: " + raw + ". Allowed values are: KIT and RECIPE"
+            );
         }
     }
 }

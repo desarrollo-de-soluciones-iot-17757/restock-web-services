@@ -19,11 +19,12 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 public class ProductQueryServiceImpl implements ProductQueryService {
 
+    // Domain port for accessing Product data
     private final ProductRepository productRepository;
 
+    // Constructor injection of the ProductRepository domain port
     public ProductQueryServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
@@ -32,6 +33,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public Optional<Product> handle(GetProductByIdQuery query) {
         log.debug("Querying product by id: {}", query.productId());
         return productRepository.findById(query.productId());
@@ -41,6 +43,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Product> handle(GetProductsByAccountIdQuery query) {
         log.debug("Querying all products for accountId: {}", query.accountId().getAccountId());
         return productRepository.findByAccountId(query.accountId());
