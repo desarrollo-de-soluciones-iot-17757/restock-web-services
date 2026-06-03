@@ -2,16 +2,38 @@ package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.entities.Supply;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetAllSuppliesQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllSupplyCategoriesQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetSupplyByIdQuery;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain service interface defining the query contract for
- * {@link com.uitopic.restock.platform.resources.domain.model.entities.Supply}
- * retrieval within the resources bounded context.
+ * Query service contract for Supply read operations.
  */
 public interface SupplyQueryService {
+
+    /**
+     * Retrieves all supplies.
+     *
+     * @param query query to get all supplies
+     * @return list of supplies
+     */
     List<Supply> handle(GetAllSuppliesQuery query);
-    Optional<Supply> findById(String id);
+
+    /**
+     * Retrieves a supply by its identifier.
+     *
+     * @param query query with the supply identifier
+     * @return supply if found
+     */
+    Optional<Supply> handle(GetSupplyByIdQuery query);
+
+    /**
+     * Retrieves all available supply categories.
+     *
+     * @param query query to get all supply categories
+     * @return list of supply categories
+     */
+    List<String> handle(GetAllSupplyCategoriesQuery query);
 }

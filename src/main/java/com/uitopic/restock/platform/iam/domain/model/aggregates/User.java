@@ -2,13 +2,12 @@ package com.uitopic.restock.platform.iam.domain.model.aggregates;
 
 import com.uitopic.restock.platform.iam.domain.model.entities.Role;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
-import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Represents the User aggregate root for the IAM bounded context.
@@ -18,17 +17,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * A MongoDB converter handles serialization to/from a plain string value,
  * so it is stored as a primitive in the database — not as an embedded document.
  */
-@Getter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "users")
-public class User extends AuditableAbstractAggregateRoot {
+public class User extends AbstractDomainAggregateRoot<User> {
+
+    /**
+     * The unique identifier for the user, typically generated as a UUID string.
+     */
+    private String id;
 
     /**
      * The email address of the user, which serves as their unique identifier.
-     * Stored as a plain string in MongoDB via a registered converter.
      */
-    @Indexed(unique = true)
     private Email email;
 
     /**
@@ -45,6 +46,14 @@ public class User extends AuditableAbstractAggregateRoot {
      * The associated identifier of the core account linked to this IAM user.
      */
     private AccountId accountId;
+
+    // Constructor for creating a new user with all required fields
+    public User(Email email, String passwordHash, Role role, AccountId accountId) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.accountId = accountId;
+    }
 
     /**
      * Updates the user's hashed password.

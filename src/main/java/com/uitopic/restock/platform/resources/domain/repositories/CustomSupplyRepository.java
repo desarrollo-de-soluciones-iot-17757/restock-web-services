@@ -7,53 +7,83 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain repository port for {@link CustomSupply} aggregate persistence within the resources bounded context.
- *
- * <p>Defines the contract for storing and retrieving custom supplies, decoupling the domain
- * layer from the MongoDB infrastructure. The implementation is provided by
- * {@link com.uitopic.restock.platform.resources.infrastructure.repositories.CustomSupplyRepositoryImpl}.
+ * Repository interface for managing CustomSupply aggregates.
  */
 public interface CustomSupplyRepository {
 
     /**
-     * Finds all custom supplies belonging to the specified account.
+     * Saves a custom supply to the repository.
      *
-     * @param accountId the account whose custom supplies are to be retrieved
-     * @return a {@link List} of {@link CustomSupply} aggregates for that account
+     * @param customSupply the custom supply to save
+     * @return the saved custom supply with any generated fields (e.g., id) populated
+     */
+    CustomSupply save(CustomSupply customSupply);
+
+    /**
+     * Finds all custom supplies that belong to an account.
+     *
+     * @param accountId account identifier
+     * @return custom supplies owned by the account
      */
     List<CustomSupply> findByAccountId(AccountId accountId);
 
     /**
      * Finds a custom supply by its unique identifier.
      *
-     * @param id the unique identifier of the custom supply
-     * @return an {@link Optional} containing the {@link CustomSupply} if found, or empty if not found
+     * @param id custom supply identifier
+     * @return an Optional containing the custom supply if found, or empty if not found
      */
     Optional<CustomSupply> findById(String id);
 
     /**
-     * Checks whether a custom supply with the given name already exists within the specified account.
-     * Used to enforce name uniqueness per account before creating a new custom supply.
+     * Finds a custom supply by its unique identifier.
      *
-     * @param accountId the account scope for the uniqueness check
-     * @param name      the supply name to check
-     * @return {@code true} if a custom supply with that name exists in the account, {@code false} otherwise
+     * @return the custom supply with the given id, or null if not found
      */
-    Boolean existsByAccountIdAndName(AccountId accountId, String name);
+    List<CustomSupply> findAll();
 
     /**
-     * Persists a {@link CustomSupply} aggregate. Creates a new document if the supply has no ID,
-     * or updates the existing document otherwise.
+     * Checks whether a custom supply name already exists within an account.
      *
-     * @param customSupply the custom supply to save
-     * @return the saved custom supply, including any auto-generated ID
+     * @param accountId account identifier
+     * @param name custom supply name
+     * @return true if the name already exists
      */
-    CustomSupply save(CustomSupply customSupply);
+    boolean existsByAccountIdAndName(AccountId accountId, String name);
 
     /**
-     * Removes a custom supply document from the store by its unique identifier.
+     * Checks whether another custom supply with the same name exists in an account.
      *
-     * @param id the unique identifier of the custom supply to delete
+     * @param accountId account identifier
+     * @param name custom supply name
+     * @param id custom supply id to exclude
+     * @return true if another custom supply with the same name exists
+     */
+    boolean existsByAccountIdAndNameAndIdNot(AccountId accountId, String name, String id);
+
+    /**
+     * Checks whether a custom supply already exists for an account and base supply.
+     *
+     * @param accountId account identifier
+     * @param supplyId base supply identifier
+     * @return true if the custom supply exists
+     */
+    boolean existsByAccountIdAndSupplyId(AccountId accountId, String supplyId);
+
+    /**
+     * Checks whether another custom supply already exists for an account and base supply.
+     *
+     * @param accountId account identifier
+     * @param supplyId base supply identifier
+     * @param id current custom supply identifier to exclude
+     * @return true if another custom supply exists
+     */
+    boolean existsByAccountIdAndSupplyIdAndIdNot(AccountId accountId, String supplyId, String id);
+
+    /**
+     * Deletes a custom supply by its unique identifier.
+     *
+     * @param id custom supply identifier
      */
     void deleteById(String id);
 }

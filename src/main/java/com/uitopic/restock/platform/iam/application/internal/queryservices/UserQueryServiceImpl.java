@@ -16,11 +16,12 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 public class UserQueryServiceImpl implements UserQueryService {
 
+    // Repository for accessing user data
     private final UserRepository userRepository;
 
+    // Constructor injection of the UserRepository
     public UserQueryServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

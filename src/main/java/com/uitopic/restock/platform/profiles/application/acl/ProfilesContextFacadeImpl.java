@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.profiles.application.acl;
 import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the Profiles anti-corruption layer facade.
@@ -27,6 +28,7 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
      * @return the ID of the created profile, or empty string if creation failed
      */
     @Override
+    @Transactional
     public String createProfile(String userId, String businessName, String email, String phone, String country) {
         log.info("Creating profile for user ID: {}, businessName: {}, email: {}, phone: {}, country: {}",
                 userId, businessName, email, phone, country);

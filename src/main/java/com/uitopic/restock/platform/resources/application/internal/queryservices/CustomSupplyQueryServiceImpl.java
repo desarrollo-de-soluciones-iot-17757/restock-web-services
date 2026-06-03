@@ -1,44 +1,70 @@
 package com.uitopic.restock.platform.resources.application.internal.queryservices;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetAllCustomSuppliesQuery;
 import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSuppliesByAccountIdQuery;
+import com.uitopic.restock.platform.resources.domain.model.queries.GetCustomSupplyByIdQuery;
 import com.uitopic.restock.platform.resources.domain.repositories.CustomSupplyRepository;
 import com.uitopic.restock.platform.resources.domain.services.CustomSupplyQueryService;
-import com.uitopic.restock.platform.resources.infrastructure.repositories.CustomSupplyRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Implementation of the CustomSupplyQueryService interface that handles queries related to CustomSupply aggregates.
- * This service is responsible for fetching CustomSupply data based on specific query criteria, such as account ID.
+ * Application service for CustomSupply read operations.
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
 
-    // Repository for accessing CustomSupply data from the database
+    // Using the domain repository directly for queries, as it's optimized for read operations.
     private final CustomSupplyRepository customSupplyRepository;
 
-    // Constructor for dependency injection of the CustomSupplyRepositoryImpl
-    public CustomSupplyQueryServiceImpl(CustomSupplyRepositoryImpl customSupplyRepository) {
+    // Constructor injection of the repository
+    public CustomSupplyQueryServiceImpl(CustomSupplyRepository customSupplyRepository) {
         this.customSupplyRepository = customSupplyRepository;
     }
 
     /**
-     * Handles the GetCustomSuppliesByAccountIdQuery and returns a list of CustomSupply aggregates.
+     * Handles the GetAllCustomSuppliesQuery to retrieve all custom supplies.
      *
-     * @param query the query object containing the account ID for which to fetch the custom supplies
-     * @return a list of CustomSupply aggregates that are associated with the specified account ID
+     * @param query query to get all custom supplies
+     * @return list of all custom supplies
+     */
+    @Override
+    public List<CustomSupply> handle(GetAllCustomSuppliesQuery query) {
+        log.debug("Querying all custom supplies");
+        var results = customSupplyRepository.findAll();
+        log.debug("Found {} custom supplies", results.size());
+        return results;
+    }
+
+    /**
+     * Handles the GetCustomSuppliesByAccountIdQuery to retrieve custom supplies for a specific account.
+     *
+     * @param query query with the account identifier
+     * @return list of custom supplies associated with the specified account
      */
     @Override
     public List<CustomSupply> handle(GetCustomSuppliesByAccountIdQuery query) {
-        log.debug("Querying all custom supplies for account ID: {}", query.accountId());
+        log.debug("Querying custom supplies by accountId='{}'", query.accountId());
         var results = customSupplyRepository.findByAccountId(query.accountId());
-        log.debug("Found {} custom supplies for account ID: {}", results.size(), query.accountId());
+        log.debug("Found {} custom supplies for accountId='{}'", results.size(), query.accountId());
         return results;
+    }
+
+    /**
+     * Handles the GetCustomSupplyByIdQuery to retrieve a specific custom supply by its identifier.
+     *
+     * @param query query with the custom supply identifier
+     * @return optional containing the custom supply if found, or empty if not found
+     */
+    @Override
+    public Optional<CustomSupply> handle(GetCustomSupplyByIdQuery query) {
+        log.debug("Querying custom supply by id='{}'", query.customSupplyId());
+        return customSupplyRepository.findById(query.customSupplyId());
     }
 }

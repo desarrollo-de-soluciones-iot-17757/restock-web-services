@@ -2,40 +2,46 @@ package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CreateBranchResource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
- * Assembler to convert {@link CreateBranchResource} to {@link com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand}
- * within the resources bounded context.
+ * Assembler to convert CreateBranchResource into CreateBranchCommand.
  */
 public class CreateBranchCommandFromResourceAssembler {
 
-    /**
-     * Converts a CreateBranchResource object into a CreateBranchCommand object.
-     *
-     * @param resource createBranchResource to be converted
-     * @return a CreateBranchCommand containing the data from the resource
-     * @throws RuntimeException if there is an error during conversion, such as issues with reading the image file
-     */
-    public static CreateBranchCommand ToCommandFromResource(CreateBranchResource resource, String accountId) {
-        try {
+    public static CreateBranchCommand toCommandFromResource(String accountId, CreateBranchResource resource) {
+        return new CreateBranchCommand(
+                accountId,
+                resource.name(),
+                resource.address(),
+                resource.city(),
+                resource.regionOrState(),
+                resource.country(),
+                resource.description(),
+                getBytes(resource.image()),
+                getFileName(resource.image())
+        );
+    }
 
-            if (!resource.hasNewPhoto()) {
-                return new CreateBranchCommand(accountId, resource.name(), resource.address(), resource.city(), resource.stateOrRegion(), resource.country(), resource.description(), null, null);
-            }
-
-            return new CreateBranchCommand(
-                    accountId,
-                    resource.name(),
-                    resource.address(),
-                    resource.city(),
-                    resource.stateOrRegion(),
-                    resource.country(),
-                    resource.description(),
-                    resource.image().getBytes(),
-                    resource.image().getOriginalFilename()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert CreateBranchResource to CreateBranchCommand", e);
+    private static byte[] getBytes(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
         }
+
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read branch image", e);
+        }
+    }
+
+    private static String getFileName(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        return file.getOriginalFilename();
     }
 }

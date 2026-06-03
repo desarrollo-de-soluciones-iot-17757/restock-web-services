@@ -1,219 +1,241 @@
 package com.uitopic.restock.platform.resources.application.internal.commandservices;
 
-import com.uitopic.restock.platform.resources.domain.exception.BranchNotFoundException;
-import com.uitopic.restock.platform.resources.domain.exception.NameAlreadyExist;
+import com.uitopic.restock.platform.resources.domain.exception.BranchAlreadyExistsException;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.commands.CreateBranchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchImageCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchInfoCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.DeleteBranchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBranchStatusCommand;
 import com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent;
-import com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
 import com.uitopic.restock.platform.resources.domain.services.BranchCommandService;
 import com.uitopic.restock.platform.shared.application.internal.outboundservices.filestorage.ImageService;
+import com.uitopic.restock.platform.shared.domain.exceptions.ImageUploadException;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
+import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 /**
- * Implementation of {@link BranchCommandService} for handling write operations on {@link Branch}
- * aggregates within the resources bounded context.
- *
- * <p>Orchestrates branch creation, updates, image changes, and logical deletion.
- * On deletion, the branch is transitioned to {@link BranchStates#INACTIVE} (soft delete)
- * and a {@link BranchDeletedEvent} is published via Spring's {@link ApplicationEventPublisher}
- * to notify other bounded contexts.
+ * Application service for Branch write operations.
+ * <p>
+ * Handles branch creation, update and logical deletion.
+ * Branch images are uploaded through the shared ImageService when provided.
  */
 @Slf4j
 @Service
 public class BranchCommandServiceImpl implements BranchCommandService {
 
-    private final BranchRepository repository;
-    private final ApplicationEventPublisher eventPublisher;
+    // Injecting the BranchRepository to perform persistence operations on Branch aggregates
+    private final BranchRepository branchRepository;
+
+    // Using Spring's ApplicationEventPublisher to emit domain events like BranchDeletedEvent
+    private final SpringDomainEventPublisher eventPublisher;
+
+    // Injecting the ImageService to handle image uploads and deletions for branch photos
     private final ImageService imageService;
 
-    public BranchCommandServiceImpl(BranchRepository repository,
-                                    ApplicationEventPublisher eventPublisher,
-                                    ImageService imageService) {
-        this.repository = repository;
+    /**
+     * Creates a BranchCommandServiceImpl with the required dependencies.
+     *
+     * @param branchRepository repository used to persist branches
+     * @param eventPublisher publisher used to emit branch domain events
+     * @param imageService service used to upload and delete branch images
+     */
+    public BranchCommandServiceImpl(
+            BranchRepository branchRepository,
+            SpringDomainEventPublisher eventPublisher,
+            ImageService imageService
+    ) {
+        this.branchRepository = branchRepository;
         this.eventPublisher = eventPublisher;
         this.imageService = imageService;
     }
 
     /**
-     * Creates a new branch for the account specified in the command.
-     * Validates that the branch name is unique within the account before persisting.
+     * Creates a new branch.
+     * <p>
+     * If the command contains an image, the image is uploaded before creating
+     * the branch. If no image is provided, the Branch aggregate will apply its
+     * default image.
      *
-     * @param command the command containing all data required to create the branch
-     * @return the newly created and persisted {@link Branch} aggregate
-     * @throws ResponseStatusException with 400 if the branch name already exists
+     * @param command command with the branch data
+     * @return created branch
      */
     @Override
     public Branch handle(CreateBranchCommand command) {
-        log.info("Creating branch '{}' for account ID: {}", command.name(), command.accountId());
-        var accountId = new AccountId(command.accountId());
-        if (repository.existsByNameAndAccountId(command.name(), accountId)) {
-            log.warn("Branch name '{}' already exists for account ID: {}", command.name(), command.accountId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Branch name already exists for this account");
+        log.info("Creating branch '{}' for accountId='{}'", command.name(), command.accountId());
+        AccountId accountId = new AccountId(command.accountId());
+
+        if (branchRepository.existsByNameAndAccountId(command.name(), accountId)) {
+            throw new BranchAlreadyExistsException(
+                    "A branch with this name already exists for this account"
+            );
         }
 
-
-        String photoUrl = null;
-        String photoPublicId = null;
-
+        String imageUrl = null;
+        String imagePublicId = null;
         if (command.hasNewPhoto()) {
             try {
                 var uploadResult = imageService.upload(command.image(), command.photoFileName());
-                photoUrl = uploadResult.get("url");
-                photoPublicId = uploadResult.get("publicId");
+                imageUrl = uploadResult.get("url");
+                imagePublicId = uploadResult.get("publicId");
             } catch (Exception e) {
-                throw new IllegalArgumentException("Error uploading photo to storage: " + e.getMessage());
+                throw new ImageUploadException(
+                        "Error uploading branch image: " + e.getMessage()
+                );
             }
         }
 
         Branch branch = new Branch(
                 command.name(),
-                command.description(),
                 command.address(),
                 command.city(),
-                command.country(),
                 command.regionOrState(),
+                command.country(),
+                command.description(),
                 command.accountId(),
-                photoUrl,
-                photoPublicId
+                imageUrl,
+                imagePublicId
         );
 
-        Branch saved = repository.save(branch);
-        log.info("Branch created with ID: {}", saved.getId());
+        Branch saved = branchRepository.save(branch);
+        log.info("Branch created successfully: id='{}'", saved.getId());
         return saved;
     }
 
     /**
-     * Applies a partial or full update to an existing branch.
-     * Validates name uniqueness if the name changes. Replaces the photo if a new one is provided.
+     * Updates an existing branch.
+     * <p>
+     * If a new image is provided, it is uploaded and replaces the previous one.
+     * If no image is provided, the current branch image is preserved.
      *
-     * @param command the command containing the branch ID and the fields to update
-     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
-     * @throws NameAlreadyExist if the new name conflicts with another branch in the same account
+     * @param command command with the updated branch data
+     * @return updated branch, or empty if not found
      */
     @Override
-    public Optional<Branch> handle(UpdateBranchInfoCommand command) {
-        log.info("Updating branch ID: {}", command.branchId());
-        var branch = repository.findById(command.branchId())
-                .orElseThrow(() -> new BranchNotFoundException(command.branchId()));
+    public Optional<Branch> handle(UpdateBranchCommand command) {
+        log.info("Updating branch id='{}'", command.branchId());
 
-        if (command.name() != null && !command.name().equals(branch.getName())) {
-            if (repository.existsByNameAndAccountId(command.name(), branch.getAccountId())) {
-                log.warn("Branch name '{}' already exists for account ID: {}", command.name(), branch.getAccountId());
-                throw new NameAlreadyExist("Branch name already exists for this account");
+        return branchRepository.findById(command.branchId()).map(branch -> {
+            boolean duplicatedName = branchRepository.existsByNameAndAccountIdAndIdNot(
+                    command.name(),
+                    branch.getAccountId(),
+                    command.branchId()
+            );
+
+            if (duplicatedName) {
+                throw new BranchAlreadyExistsException(
+                        "A branch with this name already exists for this account"
+                );
             }
-        }
 
-        String oldPublicId = branch.hasDefaultImage() ? null : branch.getImageUrl().publicId();
-        String newPhotoUrl = null;
-        String newPhotoPublicId = null;
+            String previousPublicId = branch.hasDefaultImage()
+                    ? null
+                    : branch.getImageUrl().publicId();
 
-        if (command.hasNewPhoto()) {
-            try {
-                var uploadResult = imageService.upload(command.image(), command.photoFileName());
-                newPhotoUrl = uploadResult.get("url");
-                newPhotoPublicId = uploadResult.get("publicId");
-                branch.applyImage(newPhotoUrl, newPhotoPublicId);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Error uploading new photo to storage: " + e.getMessage());
+            String imageUrl = branch.getImageUrl() != null
+                    ? branch.getImageUrl().url()
+                    : null;
+
+            String imagePublicId = branch.getImageUrl() != null
+                    ? branch.getImageUrl().publicId()
+                    : null;
+
+            if (command.hasNewPhoto()) {
+                try {
+                    var uploadResult = imageService.upload(command.image(), command.photoFileName());
+                    imageUrl = uploadResult.get("url");
+                    imagePublicId = uploadResult.get("publicId");
+                } catch (Exception e) {
+                    throw new ImageUploadException("Error uploading branch image: " + e.getMessage());
+                }
             }
-        }
 
-        branch.updateBranch(
-                command.name(),
-                command.description(),
-                command.address(),
-                command.city(),
-                command.regionOrState(),
-                command.country(),
-                newPhotoUrl, newPhotoPublicId
+            branch.update(
+                    command.name(),
+                    command.description(),
+                    command.address(),
+                    command.city(),
+                    command.regionOrState(),
+                    command.country(),
+                    imageUrl,
+                    imagePublicId
+            );
+
+            Branch updated = branchRepository.save(branch);
+            if (command.hasNewPhoto() && previousPublicId != null) {
+                try {
+                    imageService.delete(previousPublicId);
+                    log.info("Previous branch image deleted: publicId='{}'", previousPublicId);
+                } catch (Exception e) {
+                    log.warn(
+                            "Could not delete previous branch image: publicId='{}', error='{}'",
+                            previousPublicId,
+                            e.getMessage()
+                    );
+                }
+            }
+
+            log.info("Branch updated successfully: id='{}'", updated.getId());
+            return updated;
+        });
+    }
+
+    /**
+     * Deactivates a branch.
+     * <p>
+     * This method performs a logical deletion by changing the branch status and
+     * publishing a BranchDeletedEvent.
+     *
+     * @param command command with the branch identifier
+     */
+    @Override
+    public void handle(DeleteBranchCommand command) {
+        log.info("Deactivating branch id='{}'", command.branchId());
+
+        Branch branch = branchRepository.findById(command.branchId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Branch not found: " + command.branchId()
+                ));
+        branch.deactivate();
+
+        // Publishing a BranchDeletedEvent to notify other parts of the system about the branch deactivation
+        var branchDeletedEvent = new BranchDeletedEvent(
+                branch.getId(),
+                branch.getAccountId().getAccountId()
         );
 
-        repository.save(branch);
+        // Registering the domain event with the branch aggregate so it can be published after the transaction commits
+        branch.registerDomainEvent(branchDeletedEvent);
 
-        if (oldPublicId != null) {
-            try {
-                imageService.delete(oldPublicId);
-                log.info("Old image deleted from storage — publicId: {}", oldPublicId);
-            } catch (Exception e) {
-                log.warn("Could not delete old photo [{}]: {}", oldPublicId, e.getMessage());
-            }
-        }
+        // Clearing domain events from the aggregate to prevent them from being published multiple times if the aggregate is modified again before the transaction commits
+        branch.clearDomainEvents();
 
-        log.info("Branch updated — ID: {}", branch.getId());
-        return Optional.of(branch);
+        branchRepository.save(branch);
+
+        // The event will be published after the transaction commits, ensuring that other components react to the branch deactivation only if it was successful
+        eventPublisher.publish(branchDeletedEvent);
+        log.info("Branch deactivated successfully: id='{}'", branch.getId());
     }
 
     /**
-     * Updates the image of an existing branch, deleting the old one from storage if it exists.
-     * Can also remove the image if the shouldRemoveImage flag is set.
+     * Updates status of an existing branch.
      *
-     * @param command the command containing the branch ID and new image data
-     * @return an {@link Optional} containing the updated {@link Branch}, or empty if not found
+     * @param command command with the updated status branch
+     * @return updated branch, or empty if not found
      */
     @Override
-    public Optional<Branch> updateImage(UpdateBranchImageCommand command) {
-        log.info("Updating image for branch ID: {}", command.branchId());
-        var branch = repository.findById(command.branchId())
-                .orElseThrow(() -> new BranchNotFoundException(command.branchId()));
-
-        String oldPublicId = branch.hasDefaultImage() ? null : branch.getImageUrl().publicId();
-
-        String newPhotoUrl = null;
-        String newPhotoPublicId = null;
-
-        if (command.hasNewPhoto()) {try {
-                var uploadResult = imageService.upload(command.image(), command.photoFileName());
-                newPhotoUrl = uploadResult.get("url");
-                newPhotoPublicId = uploadResult.get("publicId");
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Error uploading new photo to storage: " + e.getMessage());
-            }
-        }
-        branch.updateBranchImage(newPhotoUrl, newPhotoPublicId);
-
-        repository.save(branch);
-
-        if (oldPublicId != null) {
-            try {
-                imageService.delete(oldPublicId);
-                log.info("Old image deleted from storage — publicId: {}", oldPublicId);
-            } catch (Exception e) {
-                log.warn("Could not delete old photo [{}]: {}", oldPublicId, e.getMessage());
-            }
-        }
-
-        log.info("Branch image updated — ID: {}", branch.getId());
-        return Optional.of(branch);
-    }
-
-    /**
-     * Logically deletes a branch by setting its status to {@link BranchStates#INACTIVE}
-     * and publishing a {@link BranchDeletedEvent}.
-     *
-     * @param branchId the unique identifier of the branch to deactivate
-     * @throws ResponseStatusException with 404 if the branch does not exist
-     */
-    @Override
-    public void delete(String branchId) {
-        log.info("Deleting (logical) branch ID: {}", branchId);
-        var branch = repository.findById(branchId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Branch not found: " + branchId));
-        branch.deactivate();
-        repository.save(branch);
-        eventPublisher.publishEvent(new BranchDeletedEvent(branchId, branch.getAccountId().getAccountId()));
-        log.info("Branch deactivated and event published — ID: {}", branchId);
+    public Optional<Branch> handle(UpdateBranchStatusCommand command) {
+        return branchRepository.findById(command.branchId()).map(branch -> {
+            branch.changeStatus(command.status());
+            return branchRepository.save(branch);
+        });
     }
 }

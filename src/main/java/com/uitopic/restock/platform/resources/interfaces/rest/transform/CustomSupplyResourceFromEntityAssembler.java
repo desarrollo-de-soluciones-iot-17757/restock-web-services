@@ -2,31 +2,30 @@ package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CustomSupplyResource;
-import jakarta.validation.constraints.NotNull;
 
 /**
- * Assembler to convert {@link com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply} entities
- * to {@link CustomSupplyResource} DTOs within the resources bounded context.
+ * Assembler to convert CustomSupply into CustomSupplyResource.
  */
 public class CustomSupplyResourceFromEntityAssembler {
 
-    /**
-     * Static method to transform a CustomSupply entity into a CustomSupplyResource.
-     *
-     * @param entity The CustomSupply entity to be transformed.
-     * @return A CustomSupplyResource containing the data from the entity.
-     */
-    public static CustomSupplyResource toResourceFromEntity(@NotNull CustomSupply entity) {
+    public static CustomSupplyResource toResourceFromEntity(CustomSupply entity) {
+        var supply = entity.getSupply();
+        var pictureUrl = entity.getPictureUrl();
+
         return new CustomSupplyResource(
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getCategory().getName(),
+                entity.getSupplyId(),
+                supply != null ? supply.getName() : null,
+                supply != null ? supply.getCategory() : null,
                 entity.getUnitPrice().getAmount().toString(),
                 entity.getUnitPrice().getCurrencyCode(),
-                entity.getSupplyContent().getContent(),
-                entity.getUnitMeasurement().getUnitName(),
-                entity.getPictureUrl() != null ? entity.getPictureUrl().getUrl() : null,
+                entity.getUnitMeasurement().unitName(),
+                entity.getStockRange() != null ? entity.getStockRange().minStock() : null,
+                entity.getStockRange() != null ? entity.getStockRange().maxStock() : null,
+                pictureUrl != null ? pictureUrl.url() : null,
+                pictureUrl != null ? pictureUrl.publicId() : null,
                 entity.getAccountId().getAccountId()
         );
     }

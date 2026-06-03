@@ -6,15 +6,27 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Event handler for {@link StockTransferredEvent} within the resources bounded context.
+ * Handles stock transfer events.
+ *
+ * This handler only logs the transfer for now. No inventory synchronization is
+ * performed because Inventory is not part of the current flow.
  */
 @Slf4j
 @Component
 public class StockTransferredEventHandler {
 
+    /**
+     * Logs the stock transfer event.
+     *
+     * @param event stock transferred event
+     */
     @EventListener
     public void on(StockTransferredEvent event) {
-        log.info("Stock transferred: transferId={}, from={}, to={}, supplyId={}, qty={}",
-                event.transferId(), event.fromBranchId(), event.toBranchId(), event.supplyId(), event.quantity());
+        log.info(
+                "Stock transferred: sourceBatchId={}, targetBatchId={}, quantity={}",
+                event.getFromBatchId(),
+                event.getToBranchId(),
+                event.getQuantityTransferred()
+        );
     }
 }

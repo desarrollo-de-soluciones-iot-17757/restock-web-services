@@ -1,14 +1,14 @@
 package com.uitopic.restock.platform.resources.application.internal.eventhandlers;
 
+import com.uitopic.restock.platform.devices.domain.services.DeviceTelemetryService;
 import com.uitopic.restock.platform.resources.domain.model.events.BranchDeletedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import com.uitopic.restock.platform.resources.application.internal.services.DeviceTelemetryService;
+
 
 /**
- * Event handler for {@link BranchDeletedEvent} within the resources bounded context.
- * Disables telemetry for devices attached to the deleted branch.
+ * Handles BranchDeletedEvent after a branch is deactivated.
  */
 @Slf4j
 @Component
@@ -20,10 +20,15 @@ public class BranchDeletedEventHandler {
         this.deviceTelemetryService = deviceTelemetryService;
     }
 
+    /**
+     * Disables telemetry for devices attached to the deactivated branch.
+     *
+     * @param event branch deleted event
+     */
     @EventListener
     public void on(BranchDeletedEvent event) {
-        log.info("Branch deleted: branchId={}, accountId={}", event.branchId(), event.accountId());
-        // try to disable telemetry for devices attached to this branch. Implementation is local to resources BC.
+        log.info("Branch deactivated: branchId={}, accountId={}", event.branchId(), event.accountId());
+
         try {
             deviceTelemetryService.disableTelemetryForBranch(event.branchId());
         } catch (Exception ex) {

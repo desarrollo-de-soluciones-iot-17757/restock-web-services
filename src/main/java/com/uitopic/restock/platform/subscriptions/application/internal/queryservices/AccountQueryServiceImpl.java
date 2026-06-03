@@ -1,4 +1,10 @@
 package com.uitopic.restock.platform.subscriptions.application.internal.queryservices;
 
-public class AccountQueryServiceImpl {
+import com.uitopic.restock.platform.subscriptions.domain.services.AccountQueryService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class AccountQueryServiceImpl implements AccountQueryService {
 }
