@@ -18,7 +18,7 @@ public abstract class AbstractDomainAggregateRoot<T extends AbstractDomainAggreg
      *
      * @param event the domain event to register
      */
-    protected void registerDomainEvent(Object event) {
+    public void registerDomainEvent(Object event) {
         super.registerEvent(event);
     }
 

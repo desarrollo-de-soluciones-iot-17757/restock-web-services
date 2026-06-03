@@ -1,8 +1,9 @@
-package com.uitopic.restock.platform.resources.infrastructure.repositories;
+package com.uitopic.restock.platform.resources.infrastructure.adapters;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.BranchMongoRepository;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.assemblers.BranchPersistenceAssembler;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.BranchPersistenceRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.stereotype.Repository;
 
@@ -19,27 +20,30 @@ import java.util.Optional;
 public class BranchRepositoryImpl implements BranchRepository {
 
     /**
+     * Spring Data MongoDB repository used to access branch documents.
+     */
+    private final BranchPersistenceRepository branchPersistenceRepository;
+
+    /**
+     * Creates a BranchRepositoryImpl with the required MongoDB repository.
+     *
+     * @param branchPersistenceRepository MongoDB repository for branches
+     */
+    public BranchRepositoryImpl(BranchPersistenceRepository branchPersistenceRepository) {
+        this.branchPersistenceRepository = branchPersistenceRepository;
+    }
+
+    /**
      * Find all branches.
      *
      * @return list of branches
      */
     @Override
     public List<Branch> findAll() {
-        return branchMongoRepository.findAll();
-    }
-
-    /**
-     * Spring Data MongoDB repository used to access branch documents.
-     */
-    private final BranchMongoRepository branchMongoRepository;
-
-    /**
-     * Creates a BranchRepositoryImpl with the required MongoDB repository.
-     *
-     * @param branchMongoRepository MongoDB repository for branches
-     */
-    public BranchRepositoryImpl(BranchMongoRepository branchMongoRepository) {
-        this.branchMongoRepository = branchMongoRepository;
+        return branchPersistenceRepository.findAll()
+                .stream()
+                .map(BranchPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
     /**
@@ -50,7 +54,8 @@ public class BranchRepositoryImpl implements BranchRepository {
      */
     @Override
     public Branch save(Branch branch) {
-        return branchMongoRepository.save(branch);
+        var saved = branchPersistenceRepository.save(BranchPersistenceAssembler.toPersistenceFromDomain(branch));
+        return BranchPersistenceAssembler.toDomainFromPersistence(saved);
     }
 
     /**
@@ -61,7 +66,8 @@ public class BranchRepositoryImpl implements BranchRepository {
      */
     @Override
     public Optional<Branch> findById(String id) {
-        return branchMongoRepository.findById(id);
+        return branchPersistenceRepository.findById(id)
+                .map(BranchPersistenceAssembler::toDomainFromPersistence);
     }
 
     /**
@@ -72,7 +78,10 @@ public class BranchRepositoryImpl implements BranchRepository {
      */
     @Override
     public List<Branch> findByAccountId(AccountId accountId) {
-        return branchMongoRepository.findByAccountId(accountId);
+        return branchPersistenceRepository.findByAccountId(accountId)
+                .stream()
+                .map(BranchPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
     /**
@@ -84,7 +93,7 @@ public class BranchRepositoryImpl implements BranchRepository {
      */
     @Override
     public boolean existsByNameAndAccountId(String name, AccountId accountId) {
-        return branchMongoRepository.existsByNameAndAccountId(name, accountId);
+        return branchPersistenceRepository.existsByNameAndAccountId(name, accountId);
     }
 
     /**
@@ -98,6 +107,6 @@ public class BranchRepositoryImpl implements BranchRepository {
      */
     @Override
     public boolean existsByNameAndAccountIdAndIdNot(String name, AccountId accountId, String id) {
-        return branchMongoRepository.existsByNameAndAccountIdAndIdNot(name, accountId, id);
+        return branchPersistenceRepository.existsByNameAndAccountIdAndIdNot(name, accountId, id);
     }
 }

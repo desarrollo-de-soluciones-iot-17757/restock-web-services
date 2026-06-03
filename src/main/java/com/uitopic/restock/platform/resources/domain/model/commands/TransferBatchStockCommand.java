@@ -1,12 +1,14 @@
 package com.uitopic.restock.platform.resources.domain.model.commands;
 
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
+
 /**
  * Command to transfer stock from a batch to another branch.
  */
 public record TransferBatchStockCommand(
         String sourceBatchId,
         String targetBranchId,
-        Double quantity,
+        Stock quantity,
         String reason
 ) {
     public TransferBatchStockCommand {
@@ -15,10 +17,6 @@ public record TransferBatchStockCommand(
 
         if (quantity == null) {
             throw new IllegalArgumentException("Quantity cannot be null");
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
         }
     }
 

@@ -1,16 +1,11 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.BranchStates;
-import com.uitopic.restock.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Address;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.*;
 
 /**
  * Aggregate root representing a branch owned by an account.
@@ -18,16 +13,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * A branch stores location, image and operational status information.
  */
 @EqualsAndHashCode(callSuper = true)
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Document(collection = "branches")
-public class Branch extends AuditableAbstractAggregateRoot {
+@Data
+@NoArgsConstructor
+public class Branch extends AbstractDomainAggregateRoot<Branch> {
 
+    // Default image URL and public ID for branches without a custom image
     private static final String DEFAULT_IMAGE_URL =
             "https://res.cloudinary.com/deuy1pr9e/image/upload/v1780190808/restock_deafult_branch_image.jpg";
 
+    // Public ID used to identify the default image in the image hosting service
     private static final String DEFAULT_PUBLIC_ID =
             "restock_deafult_branch_image";
+
+    /**
+     * Unique identifier for the branch.
+     */
+    private String id;
 
     /**
      * Display name of the branch.

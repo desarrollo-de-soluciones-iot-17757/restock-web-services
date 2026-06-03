@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
+import com.uitopic.restock.platform.resources.domain.model.commands.UpdateCustomSupplyCommand;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
 import org.junit.jupiter.api.Test;
 
@@ -131,7 +132,18 @@ public class CustomSupplyTests {
         var newDescription = "Updated description.";
         var newPrice = BigDecimal.valueOf(29.99);
         var newUnitPrice = new Money(newPrice, currency);
-        customSupply.update(newDescription, newUnitPrice, null, null, null);
+        var command = new UpdateCustomSupplyCommand(
+                "customSupplyId",
+                null,
+                newDescription,
+                null,
+                newUnitPrice,
+                null,
+                null,
+                null
+        );
+
+        customSupply.update(command, null);
 
         // Assert
         assertEquals(newDescription, customSupply.getDescription());
@@ -159,7 +171,17 @@ public class CustomSupplyTests {
 
         // Act
         var newDescription = "Updated description.";
-        customSupply.update(newDescription, null, null, null, null);
+        var command = new UpdateCustomSupplyCommand(
+                "customSupplyId",
+                null,
+                newDescription,
+                null,
+                null, // No new unit price provided
+                null,
+                null,
+                null
+        );
+        customSupply.update(command, null);
 
         // Assert
         assertEquals(newDescription, customSupply.getDescription());
@@ -186,7 +208,17 @@ public class CustomSupplyTests {
                 .build();
 
         // Act
-        customSupply.update(null, null, null, null, null);
+        var command = new UpdateCustomSupplyCommand(
+                "customSupplyId",
+                null,
+                null, // Null description provided
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        customSupply.update(command, null);
 
         // Assert
         assertEquals(description, customSupply.getDescription()); // Description should remain unchanged

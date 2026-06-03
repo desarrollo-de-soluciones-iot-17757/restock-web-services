@@ -20,11 +20,12 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 public class BatchQueryServiceImpl implements BatchQueryService {
 
+    // Repository for accessing batch data
     private final BatchRepository batchRepository;
 
+    // Constructor with dependency injection of the batch repository
     public BatchQueryServiceImpl(BatchRepository batchRepository) {
         this.batchRepository = batchRepository;
     }
@@ -36,13 +37,11 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Batch> handle(GetAllBatchesQuery query) {
         log.debug("Querying all batches");
-
         var results = batchRepository.findAll();
-
         log.debug("Found {} batches", results.size());
-
         return results;
     }
 
@@ -53,9 +52,9 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return batch if found
      */
     @Override
+    @Transactional(readOnly = true)
     public Optional<Batch> handle(GetBatchByIdQuery query) {
         log.debug("Querying batch by id='{}'", query.batchId());
-
         return batchRepository.findById(query.batchId());
     }
 
@@ -66,13 +65,11 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByAccountIdQuery query) {
         log.debug("Querying batches by accountId='{}'", query.accountId());
-
         var results = batchRepository.findByAccountId(query.accountId());
-
         log.debug("Found {} batches for accountId='{}'", results.size(), query.accountId());
-
         return results;
     }
 
@@ -83,13 +80,11 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByBranchIdQuery query) {
         log.debug("Querying batches by branchId='{}'", query.branchId());
-
         var results = batchRepository.findByBranchId(query.branchId());
-
         log.debug("Found {} batches for branchId='{}'", results.size(), query.branchId());
-
         return results;
     }
 
@@ -100,17 +95,16 @@ public class BatchQueryServiceImpl implements BatchQueryService {
      * @return list of batches
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Batch> handle(GetBatchesByCustomSupplyIdQuery query) {
         log.debug("Querying batches by customSupplyId='{}'", query.customSupplyId());
-
         var results = batchRepository.findByCustomSupplyId(query.customSupplyId());
-
         log.debug("Found {} batches for customSupplyId='{}'", results.size(), query.customSupplyId());
-
         return results;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Batch> findAllByFilters(String accountId, String branchId, String customSupplyId) {
         var batches = batchRepository.findAll();
 

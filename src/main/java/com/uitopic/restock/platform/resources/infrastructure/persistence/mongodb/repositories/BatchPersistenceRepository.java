@@ -1,6 +1,6 @@
 package com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories;
 
-import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.entities.BatchPersistenceEntity;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -13,7 +13,7 @@ import java.util.Optional;
  * MongoDB repository for Batch documents.
  */
 @Repository
-public interface BatchMongoRepository extends MongoRepository<Batch, String> {
+public interface BatchPersistenceRepository extends MongoRepository<BatchPersistenceEntity, String> {
 
     /**
      * Finds all batches that belong to an account.
@@ -21,7 +21,7 @@ public interface BatchMongoRepository extends MongoRepository<Batch, String> {
      * @param accountId account identifier
      * @return batches owned by the account
      */
-    List<Batch> findByAccountId(AccountId accountId);
+    List<BatchPersistenceEntity> findByAccountId(AccountId accountId);
 
     /**
      * Finds all batches stored in a branch.
@@ -29,7 +29,7 @@ public interface BatchMongoRepository extends MongoRepository<Batch, String> {
      * @param branchId branch identifier
      * @return batches stored in the branch
      */
-    List<Batch> findByBranchId(String branchId);
+    List<BatchPersistenceEntity> findByBranchId(String branchId);
 
     /**
      * Finds all batches associated with a custom supply.
@@ -37,7 +37,7 @@ public interface BatchMongoRepository extends MongoRepository<Batch, String> {
      * @param customSupplyId custom supply identifier
      * @return batches associated with the custom supply
      */
-    List<Batch> findByCustomSupplyId(String customSupplyId);
+    List<BatchPersistenceEntity> findByCustomSupplyId(String customSupplyId);
 
     /**
      * Finds the first batch of a custom supply stored in a branch.
@@ -46,7 +46,7 @@ public interface BatchMongoRepository extends MongoRepository<Batch, String> {
      * @param customSupplyId custom supply identifier
      * @return compatible batch if found
      */
-    Optional<Batch> findFirstByBranchIdAndCustomSupplyId(String branchId, String customSupplyId);
+    Optional<BatchPersistenceEntity> findFirstByBranchIdAndCustomSupplyId(String branchId, String customSupplyId);
 
     /**
      * Finds the first compatible batch by code, custom supply, branch and expiration date.
@@ -57,7 +57,7 @@ public interface BatchMongoRepository extends MongoRepository<Batch, String> {
      * @param expirationDate expiration date
      * @return compatible batch if found
      */
-    Optional<Batch> findFirstByCodeAndCustomSupplyIdAndBranchIdAndExpirationDate(
+    Optional<BatchPersistenceEntity> findFirstByCodeAndCustomSupplyIdAndBranchIdAndExpirationDate(
             String code,
             String customSupplyId,
             String branchId,

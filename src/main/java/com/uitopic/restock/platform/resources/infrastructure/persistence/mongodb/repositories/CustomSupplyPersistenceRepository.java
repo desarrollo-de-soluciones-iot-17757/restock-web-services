@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.entities.CustomSupplyPersistenceEntity;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.List;
  * MongoDB repository for CustomSupply documents.
  */
 @Repository
-public interface CustomSupplyRepository extends MongoRepository<CustomSupply, String> {
+public interface CustomSupplyPersistenceRepository extends MongoRepository<CustomSupplyPersistenceEntity, String> {
 
     /**
      * Finds all custom supplies that belong to an account.
@@ -19,7 +20,7 @@ public interface CustomSupplyRepository extends MongoRepository<CustomSupply, St
      * @param accountId account identifier
      * @return custom supplies owned by the account
      */
-    List<CustomSupply> findByAccountId(AccountId accountId);
+    List<CustomSupplyPersistenceEntity> findByAccountId(AccountId accountId);
 
     /**
      * Checks whether a custom supply name already exists within an account.

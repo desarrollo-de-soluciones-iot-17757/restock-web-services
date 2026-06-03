@@ -1,14 +1,17 @@
-package com.uitopic.restock.platform.resources.infrastructure.repositories;
+package com.uitopic.restock.platform.resources.infrastructure.adapters;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
 import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
-import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.BatchMongoRepository;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.assemblers.BatchPersistenceAssembler;
+import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.repositories.BatchPersistenceRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * MongoDB implementation of the BatchRepository domain port.
@@ -19,15 +22,15 @@ public class BatchRepositoryImpl implements BatchRepository {
     /**
      * Spring Data MongoDB repository used to access batch documents.
      */
-    private final BatchMongoRepository batchMongoRepository;
+    private final BatchPersistenceRepository batchMongoRepository;
 
     /**
      * Creates a BatchRepositoryImpl with the required MongoDB repository.
      *
-     * @param batchMongoRepository MongoDB repository for batches
+     * @param batchPersistenceRepository MongoDB repository for batches
      */
-    public BatchRepositoryImpl(BatchMongoRepository batchMongoRepository) {
-        this.batchMongoRepository = batchMongoRepository;
+    public BatchRepositoryImpl(BatchPersistenceRepository batchPersistenceRepository) {
+        this.batchMongoRepository = batchPersistenceRepository;
     }
 
     /**
@@ -38,7 +41,8 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public Batch save(Batch batch) {
-        return batchMongoRepository.save(batch);
+        var saved = batchMongoRepository.save(BatchPersistenceAssembler.toPersistenceFromDomain(batch));
+        return BatchPersistenceAssembler.toDomainFromPersistence(saved);
     }
 
     /**
@@ -48,7 +52,10 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public List<Batch> findAll() {
-        return batchMongoRepository.findAll();
+        return batchMongoRepository.findAll()
+                .stream()
+                .map(BatchPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
     /**
@@ -59,7 +66,8 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public Optional<Batch> findById(String id) {
-        return batchMongoRepository.findById(id);
+        return batchMongoRepository.findById(id)
+                .map(BatchPersistenceAssembler::toDomainFromPersistence);
     }
 
     /**
@@ -70,7 +78,10 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public List<Batch> findByAccountId(AccountId accountId) {
-        return batchMongoRepository.findByAccountId(accountId);
+        return batchMongoRepository.findByAccountId(accountId)
+                .stream()
+                .map(BatchPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
     /**
@@ -81,7 +92,10 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public List<Batch> findByBranchId(String branchId) {
-        return batchMongoRepository.findByBranchId(branchId);
+        return batchMongoRepository.findByBranchId(branchId)
+                .stream()
+                .map(BatchPersistenceAssembler::toDomainFromPersistence)
+                .collect(toList());
     }
 
     /**
@@ -92,7 +106,10 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public List<Batch> findByCustomSupplyId(String customSupplyId) {
-        return batchMongoRepository.findByCustomSupplyId(customSupplyId);
+        return batchMongoRepository.findByCustomSupplyId(customSupplyId)
+                .stream()
+                .map(BatchPersistenceAssembler::toDomainFromPersistence)
+                .collect(toList());
     }
 
     /**
@@ -114,7 +131,8 @@ public class BatchRepositoryImpl implements BatchRepository {
      */
     @Override
     public Optional<Batch> findFirstByBranchIdAndCustomSupplyId(String branchId, String customSupplyId) {
-        return batchMongoRepository.findFirstByBranchIdAndCustomSupplyId(branchId, customSupplyId);
+        return batchMongoRepository.findFirstByBranchIdAndCustomSupplyId(branchId, customSupplyId)
+                .map(BatchPersistenceAssembler::toDomainFromPersistence);
     }
 
     /**
@@ -138,6 +156,6 @@ public class BatchRepositoryImpl implements BatchRepository {
                 customSupplyId,
                 branchId,
                 expirationDate
-        );
+        ).map(BatchPersistenceAssembler::toDomainFromPersistence);
     }
 }
