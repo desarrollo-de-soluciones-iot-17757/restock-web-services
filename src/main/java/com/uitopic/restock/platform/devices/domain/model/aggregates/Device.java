@@ -1,4 +1,8 @@
 package com.uitopic.restock.platform.devices.domain.model.aggregates;
 
-public class Device {
+import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import lombok.Getter;
+
+@Getter
+public class Device extends AbstractDomainAggregateRoot<Device> {
 }
