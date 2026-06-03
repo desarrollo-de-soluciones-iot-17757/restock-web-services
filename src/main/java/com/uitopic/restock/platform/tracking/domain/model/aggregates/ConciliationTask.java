@@ -4,13 +4,12 @@ import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomai
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class ConciliationTask extends AbstractDomainAggregateRoot<ConciliationTask> {
 
-    // Default constructor for reconstruction from persistence
-    public ConciliationTask() {
 
-    }
 }
