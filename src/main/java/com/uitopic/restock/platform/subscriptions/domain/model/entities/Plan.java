@@ -1,13 +1,11 @@
 package com.uitopic.restock.platform.subscriptions.domain.model.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @With
+@EqualsAndHashCode
 public class Plan {
 }
