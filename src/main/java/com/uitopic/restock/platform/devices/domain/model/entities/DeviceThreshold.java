@@ -10,4 +10,6 @@ import lombok.With;
 @AllArgsConstructor
 @With
 public class DeviceThreshold {
+
+    private String id;
 }

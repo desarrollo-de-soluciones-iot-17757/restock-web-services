@@ -37,7 +37,6 @@ public class SupplyQueryServiceImpl implements SupplyQueryService {
      * @return a list of all supplies in the system
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Supply> handle(GetAllSuppliesQuery query) {
         log.debug("Querying all supplies");
         var results = supplyRepository.findAll();
@@ -52,7 +51,6 @@ public class SupplyQueryServiceImpl implements SupplyQueryService {
      * @return an Optional containing the supply if found, or empty if not found
      */
     @Override
-    @Transactional(readOnly = true)
     public Optional<Supply> handle(GetSupplyByIdQuery query) {
         log.debug("Querying supply by id='{}'", query.supplyId());
         return supplyRepository.findById(query.supplyId());
@@ -65,7 +63,6 @@ public class SupplyQueryServiceImpl implements SupplyQueryService {
      * @return a list of unique supply categories sorted alphabetically
      */
     @Override
-    @Transactional(readOnly = true)
     public List<String> handle(GetAllSupplyCategoriesQuery query) {
         log.debug("Querying all supply categories");
         var categories = supplyRepository.findAll()

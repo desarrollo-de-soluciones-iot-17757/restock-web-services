@@ -14,8 +14,7 @@ public class SupplyResourceFromEntityAssembler {
                 entity.getName(),
                 entity.getDescription(),
                 entity.getCategory(),
-                entity.getIsPerishable() != null && entity.getIsPerishable(),
-                entity.getCreatedAt() != null ? entity.getCreatedAt().toString() : null
+                entity.getIsPerishable() != null && entity.getIsPerishable()
         );
     }
 }

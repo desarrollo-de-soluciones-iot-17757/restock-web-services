@@ -42,7 +42,6 @@ public class SupplyCommandServiceImpl implements SupplyCommandService {
      * @param command command to start the seed process
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void handle(SeedSuppliesCommand command) {
         log.info("Starting supplies seed process");
 

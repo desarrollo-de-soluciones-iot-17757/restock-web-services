@@ -36,7 +36,6 @@ public class ProductResourceFromEntityAssembler {
                 entity.getDescription(),
                 entity.getSku(),
                 entity.getType() != null ? entity.getType().name() : null,
-                entity.getResourceStatus() != null ? entity.getResourceStatus().name() : null,
                 entity.getImageUrl(),
                 entity.getSellingPrice(),
                 ingredientResources

@@ -35,7 +35,6 @@ public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
      * @return list of all custom supplies
      */
     @Override
-    @Transactional(readOnly = true)
     public List<CustomSupply> handle(GetAllCustomSuppliesQuery query) {
         log.debug("Querying all custom supplies");
         var results = customSupplyRepository.findAll();
@@ -50,7 +49,6 @@ public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
      * @return list of custom supplies associated with the specified account
      */
     @Override
-    @Transactional(readOnly = true)
     public List<CustomSupply> handle(GetCustomSuppliesByAccountIdQuery query) {
         log.debug("Querying custom supplies by accountId='{}'", query.accountId());
         var results = customSupplyRepository.findByAccountId(query.accountId());
@@ -65,7 +63,6 @@ public class CustomSupplyQueryServiceImpl implements CustomSupplyQueryService {
      * @return optional containing the custom supply if found, or empty if not found
      */
     @Override
-    @Transactional(readOnly = true)
     public Optional<CustomSupply> handle(GetCustomSupplyByIdQuery query) {
         log.debug("Querying custom supply by id='{}'", query.customSupplyId());
         return customSupplyRepository.findById(query.customSupplyId());

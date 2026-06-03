@@ -23,15 +23,10 @@ public class StockTransferredEventHandler {
     @EventListener
     public void on(StockTransferredEvent event) {
         log.info(
-                "Stock transferred: sourceBatchId={}, targetBatchId={}, sourceBranchId={}, targetBranchId={}, customSupplyId={}, accountId={}, quantity={}, reason={}",
-                event.sourceBatchId(),
-                event.targetBatchId(),
-                event.sourceBranchId(),
-                event.targetBranchId(),
-                event.customSupplyId(),
-                event.accountId(),
-                event.quantity(),
-                event.reason()
+                "Stock transferred: sourceBatchId={}, targetBatchId={}, quantity={}",
+                event.getFromBatchId(),
+                event.getToBranchId(),
+                event.getQuantityTransferred()
         );
     }
 }

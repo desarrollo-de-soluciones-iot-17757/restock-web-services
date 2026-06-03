@@ -14,7 +14,6 @@ import java.util.Optional;
 public class StockComparisonTaskCommandServiceImpl implements StockComparisonTaskCommandService {
 
     @Override
-    @Transactional
     public Optional<StockComparisonTask> handle(CompareStockCommand command) {
         // Always decorate the method with a @Transactional annotation to ensure that any exceptions thrown during the execution of the method will trigger a rollback of the transaction, maintaining data integrity and consistency.
 

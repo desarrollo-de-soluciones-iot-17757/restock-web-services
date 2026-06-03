@@ -3,5 +3,5 @@ package com.uitopic.restock.platform.tracking.application.internal.outboundservi
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExternalResourcesService {
+public class TrackingExternalResourcesService {
 }

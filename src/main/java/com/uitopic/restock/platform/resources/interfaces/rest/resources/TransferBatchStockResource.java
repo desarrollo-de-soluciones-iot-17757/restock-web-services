@@ -17,6 +17,9 @@ public record TransferBatchStockResource(
         @Schema(description = "Quantity to transfer")
         double quantity,
 
+        @Schema(description = "Unit of measurement for the quantity")
+        String unitMeasurement,
+
         @Schema(description = "Transfer reason")
         String reason
 ) {

@@ -41,9 +41,6 @@ public record ProductResource(
         @Schema(description = "Product type", example = "RECIPE")
         String type,
 
-        @Schema(description = "Lifecycle status", example = "ACTIVE")
-        String status,
-
         @Schema(description = "Image URL", example = "https://res.cloudinary.com/demo/image/upload/cafe.jpg")
         String imageUrl,
 
