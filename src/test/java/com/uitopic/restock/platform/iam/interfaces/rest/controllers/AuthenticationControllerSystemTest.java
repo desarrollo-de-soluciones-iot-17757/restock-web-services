@@ -36,7 +36,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signUp_validPayload_returns201WithUserData() throws Exception {
                 SignUpResource resource = new SignUpResource("Valid Business", "signup-valid@example.com",
-                                "password123", "ADMIN", null, null);
+                                "password123", "ADMIN");
 
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -50,7 +50,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signUp_duplicateEmail_returns409WithMessage() throws Exception {
                 SignUpResource resource = new SignUpResource("Dup Business", "dup@example.com", "password123",
-                                "CASHIER", null, null);
+                                "CASHIER");
 
                 // First register
                 mockMvc.perform(post("/api/v1/auth/sign-up")
@@ -68,7 +68,7 @@ class AuthenticationControllerSystemTest {
 
         @Test
         void signUp_missingRequiredFields_returns400() throws Exception {
-                SignUpResource resource = new SignUpResource("", "", "", "", null, null);
+                SignUpResource resource = new SignUpResource("", "", "", "");
 
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signUp_invalidRole_returns400() throws Exception {
                 SignUpResource resource = new SignUpResource("Business", "invalid-role@example.com", "password123",
-                                "UNKNOWN_ROLE", null, null);
+                                "UNKNOWN_ROLE");
 
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +91,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signIn_validCredentials_returns200WithNonBlankToken() throws Exception {
                 SignUpResource signUp = new SignUpResource("SignIn Business", "signin-valid@example.com", "password123",
-                                "WAREHOUSEMAN", null, null);
+                                "WAREHOUSEMAN");
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(signUp)))
@@ -112,7 +112,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signIn_wrongPassword_returns401() throws Exception {
                 SignUpResource signUp = new SignUpResource("Wrong Pwd Business", "wrong-pwd@example.com", "password123",
-                                "CASHIER", null, null);
+                                "CASHIER");
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(signUp)))

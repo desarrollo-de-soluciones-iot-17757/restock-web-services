@@ -11,7 +11,7 @@ class UserTest {
 
     @Test
     void constructor_validFields_buildsUserCorrectly() {
-        Role role = new Role(RoleType.ADMIN);
+        Role role = new Role(RoleType.RESTAURANTADMIN);
         User user = new User(new Email("test@example.com"), "hashed_password", role, null);
 
         assertNotNull(user);
@@ -23,7 +23,7 @@ class UserTest {
 
     @Test
     void update_newPasswordHash_changesOnlyPasswordHash() {
-        Role role = new Role(RoleType.ADMIN);
+        Role role = new Role(RoleType.RESTAURANTADMIN);
         User user = new User(new Email("test@example.com"), "old_hash", role, null);
 
         user.update("new_hash");
@@ -35,7 +35,7 @@ class UserTest {
 
     @Test
     void update_newEmail_changesOnlyEmail() {
-        Role role = new Role(RoleType.ADMIN);
+        Role role = new Role(RoleType.RESTAURANTADMIN);
         User user = new User(new Email("test1@example.com"), "hash", role, null);
 
         user.update(new Email("test2@example.com"));
@@ -47,8 +47,8 @@ class UserTest {
 
     @Test
     void update_newRole_changesOnlyRole() {
-        Role role1 = new Role(RoleType.ADMIN);
-        Role role2 = new Role(RoleType.CASHIER);
+        Role role1 = new Role(RoleType.RESTAURANTADMIN);
+        Role role2 = new Role(RoleType.RETAILADMIN);
         User user = new User(new Email("test@example.com"), "hash", role1, null);
 
         user.update(role2);

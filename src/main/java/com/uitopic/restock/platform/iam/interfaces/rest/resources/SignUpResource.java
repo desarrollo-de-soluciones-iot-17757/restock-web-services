@@ -16,8 +16,6 @@ public record SignUpResource(
         @NotBlank @Schema(description = "Business or company name") String businessName,
         @Email @NotBlank @Schema(description = "User email address") String email,
         @NotBlank @Size(min = 6) @Schema(description = "Password (min 6 characters)") String password,
-        @NotBlank @Schema(description = "Role assigned to the user (e.g. OWNER, WORKER)") String role,
-        @Schema(description = "Phone number for the profile (optional)") String phone,
-        @Schema(description = "Country of the business (optional)") String country
+        @NotBlank @Schema(description = "Role assigned to the user (e.g. OWNER, WORKER)") String role
 ) {
 }

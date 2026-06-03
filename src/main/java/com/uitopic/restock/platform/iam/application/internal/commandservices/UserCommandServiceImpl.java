@@ -127,9 +127,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             String profileId = externalProfilesService.createProfileForNewUser(
                     saved.getId(),
                     command.businessName(),
-                    command.email(),
-                    command.phone(),
-                    command.country()
+                    command.email()
             );
             log.info("Successfully created profile with ID: '{}' for user ID: {}", profileId, saved.getId());
         } catch (Exception e) {
