@@ -2,31 +2,64 @@ package com.uitopic.restock.platform.resources.interfaces.rest.transform;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.interfaces.rest.resources.CustomSupplyResource;
+import jakarta.validation.constraints.NotNull;
 
 /**
- * Assembler to convert CustomSupply into CustomSupplyResource.
+ * Assembler to convert CustomSupply aggregates into CustomSupplyResource responses.
  */
 public class CustomSupplyResourceFromEntityAssembler {
 
-    public static CustomSupplyResource toResourceFromEntity(CustomSupply entity) {
-        var supply = entity.getSupply();
-        var pictureUrl = entity.getPictureUrl();
-
+    /**
+     * Converts a CustomSupply aggregate into a REST resource.
+     *
+     * @param entity custom supply aggregate
+     * @return custom supply resource
+     */
+    public static CustomSupplyResource toResourceFromEntity(@NotNull CustomSupply entity) {
         return new CustomSupplyResource(
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getSupplyId(),
-                supply != null ? supply.getName() : null,
-                supply != null ? supply.getCategory() : null,
-                entity.getUnitPrice().getAmount().toString(),
-                entity.getUnitPrice().getCurrencyCode(),
-                entity.getUnitMeasurement().unitName(),
-                entity.getStockRange() != null ? entity.getStockRange().minStock() : null,
-                entity.getStockRange() != null ? entity.getStockRange().maxStock() : null,
-                pictureUrl != null ? pictureUrl.url() : null,
-                pictureUrl != null ? pictureUrl.publicId() : null,
-                entity.getAccountId().getAccountId()
+
+                entity.getUnitPrice() != null
+                        ? entity.getUnitPrice().getAmount().toString()
+                        : null,
+
+                entity.getUnitPrice() != null
+                        ? entity.getUnitPrice().getCurrencyCode()
+                        : null,
+
+                entity.getStockRange() != null
+                        ? entity.getStockRange().minStock()
+                        : null,
+
+                entity.getStockRange() != null
+                        ? entity.getStockRange().maxStock()
+                        : null,
+
+                entity.getUnitMeasurement() != null
+                        ? entity.getUnitMeasurement().unitName()
+                        : null,
+
+                entity.getUnitMeasurement() != null
+                        ? entity.getUnitMeasurement().abbreviation()
+                        : null,
+
+                entity.getPictureUrl() != null
+                        ? entity.getPictureUrl().url()
+                        : null,
+
+                entity.getPictureUrl() != null
+                        ? entity.getPictureUrl().publicId()
+                        : null,
+
+                entity.getAccountId() != null
+                        ? entity.getAccountId().getAccountId()
+                        : null,
+
+                entity.getSupply() != null
+                        ? SupplyResourceFromEntityAssembler.toResourceFromEntity(entity.getSupply())
+                        : null
         );
     }
 }

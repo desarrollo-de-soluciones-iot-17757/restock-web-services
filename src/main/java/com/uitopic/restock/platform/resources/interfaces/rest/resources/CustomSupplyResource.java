@@ -4,11 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Response resource representing a custom supply.
+ *
+ * Includes the custom supply data and its related base supply.
  */
 @Schema(description = "Response resource representing a custom supply")
 public record CustomSupplyResource(
-
-        @Schema(description = "Custom supply ID")
+        @Schema(description = "Unique identifier of the custom supply")
         String id,
 
         @Schema(description = "Custom supply name")
@@ -17,23 +18,11 @@ public record CustomSupplyResource(
         @Schema(description = "Custom supply description")
         String description,
 
-        @Schema(description = "Base supply ID")
-        String supplyId,
-
-        @Schema(description = "Base supply name")
-        String supplyName,
-
-        @Schema(description = "Base supply category")
-        String categoryName,
-
-        @Schema(description = "Unit price amount")
+        @Schema(description = "Custom supply unit price amount")
         String unitPriceAmount,
 
-        @Schema(description = "Unit price currency code")
+        @Schema(description = "Custom supply unit price currency code")
         String unitPriceCurrencyCode,
-
-        @Schema(description = "Unit of measurement")
-        String unitMeasurement,
 
         @Schema(description = "Minimum stock")
         Double minimumStock,
@@ -41,13 +30,22 @@ public record CustomSupplyResource(
         @Schema(description = "Maximum stock")
         Double maximumStock,
 
-        @Schema(description = "Image URL")
+        @Schema(description = "Unit of measurement")
+        String unitMeasurement,
+
+        @Schema(description = "Unit of measurement abbreviation")
+        String unitMeasurementAbbreviation,
+
+        @Schema(description = "Custom supply picture URL")
         String pictureUrl,
 
-        @Schema(description = "Cloudinary public ID")
+        @Schema(description = "Custom supply picture public ID")
         String picturePublicId,
 
         @Schema(description = "Account ID")
-        String accountId
+        String accountId,
+
+        @Schema(description = "Base supply information")
+        SupplyResource supply
 ) {
 }
