@@ -1,8 +1,8 @@
 package com.uitopic.restock.platform.devices.domain.model.queries;
 
-public record GetDevicesByAccountIdQuery(String accountId) {
+public record GetDeviceThresholdsByAccountIdQuery(String accountId) {
 
-    public GetDevicesByAccountIdQuery {
+    public GetDeviceThresholdsByAccountIdQuery {
         if (accountId == null || accountId.isBlank())
             throw new IllegalArgumentException("Account ID cannot be null or blank");
     }
