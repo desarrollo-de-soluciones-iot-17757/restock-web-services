@@ -6,14 +6,47 @@ import com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.e
 public final class DevicePersistenceAssembler {
 
     private DevicePersistenceAssembler() {
-        // Private constructor to prevent instantiation
+        throw new IllegalStateException("Utility class");
     }
 
     public static Device toDomainFromPersistence(DevicePersistenceEntity entity) {
-        return null;
+        if (entity == null) return null;
+
+        var device = new Device();
+        device.setId(entity.getId());
+        device.setAccountId(entity.getAccountId());
+        device.setBranchId(entity.getBranchId());
+        device.setAssignedBatchId(entity.getAssignedBatchId());
+        device.setSupplyThresholdId(entity.getSupplyThresholdId());
+        device.setMacAddress(entity.getMacAddress());
+        device.setDescription(entity.getDescription());
+        device.setSpecifications(entity.getSpecifications());
+        device.setWeightMeasurement(entity.getWeightMeasurement());
+        device.setJustifiedWithdrawnStock(entity.getJustifiedWithdrawnStock());
+        device.setStatus(entity.getStatus());
+
+        return device;
     }
 
     public static DevicePersistenceEntity toPersistenceFromDomain(Device device) {
-        return null;
+        if (device == null) return null;
+
+        var entity = new DevicePersistenceEntity();
+
+        if (device.getId() != null) {
+            entity.setId(device.getId());
+        }
+        entity.setAccountId(device.getAccountId());
+        entity.setBranchId(device.getBranchId());
+        entity.setAssignedBatchId(device.getAssignedBatchId());
+        entity.setSupplyThresholdId(device.getSupplyThresholdId());
+        entity.setMacAddress(device.getMacAddress());
+        entity.setDescription(device.getDescription());
+        entity.setSpecifications(device.getSpecifications());
+        entity.setWeightMeasurement(device.getWeightMeasurement());
+        entity.setJustifiedWithdrawnStock(device.getJustifiedWithdrawnStock());
+        entity.setStatus(device.getStatus());
+
+        return entity;
     }
 }

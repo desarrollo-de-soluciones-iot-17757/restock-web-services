@@ -1,15 +1,15 @@
 package com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.converters;
 
-import com.uitopic.restock.platform.devices.domain.model.valueobjects.Temperature;
+import com.uitopic.restock.platform.devices.domain.model.valueobjects.Humidity;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 
 @WritingConverter
-public class TemperatureWriteConverter implements Converter<Temperature, String> {
+public class HumidityWriteConverter implements Converter<Humidity, String> {
 
     @Override
-    public String convert(Temperature source) {
+    public String convert(Humidity source) {
         if (source == null) return null;
-        return source.minCelsius() + ":" + source.maxCelsius();
+        return source.minPercentage() + ":" + source.maxPercentage();
     }
 }
