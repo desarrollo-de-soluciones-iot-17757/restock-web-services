@@ -14,9 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -53,18 +52,17 @@ public class DevicesController {
 
     @Operation(summary = "Register a new device (onboarding step 1)")
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<DeviceResource> register(
-            @RequestParam String accountId,
-            @Valid @RequestBody CreateDeviceResource resource
-    ) {
-        var command = new RegisterDeviceCommand(resource.macAddress(), accountId, resource.description());
+    public ResponseEntity<DeviceResource> register(@Valid @RequestBody CreateDeviceResource resource) {
+        var command = new RegisterDeviceCommand(resource.macAddress(), resource.accountId(), resource.description());
         var device = deviceCommandService.handle(command);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
+        var body = DeviceResourceFromEntityAssembler.toResourceFromEntity(device);
+        return ResponseEntity
+                .created(URI.create("/api/v1/devices/" + device.getId()))
+                .body(body);
     }
 
     @Operation(summary = "Add technical specifications to a device (onboarding step 2)")
-    @PostMapping(value = "/{deviceId}/specifications", consumes = APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{deviceId}/specifications", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> addSpecifications(
             @PathVariable String deviceId,
             @Valid @RequestBody AddDeviceSpecificationsResource resource
@@ -133,12 +131,26 @@ public class DevicesController {
         return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
     }
 
-    @Operation(summary = "Confirm device configuration and publish to MQTT (onboarding step 7)")
-    @PatchMapping("/{deviceId}/configuration/confirm")
-    public ResponseEntity<DeviceResource> confirmConfiguration(@PathVariable String deviceId) {
-        var command = new ConfirmDeviceConfigurationCommand(deviceId);
-        var device = deviceCommandService.handle(command)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
+    @Operation(summary = "Transition device status (CONFIGURED: completes onboarding · INACTIVE: deactivates device)")
+    @PatchMapping(value = "/{deviceId}/status", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeviceResource> updateStatus(
+            @PathVariable String deviceId,
+            @Valid @RequestBody UpdateDeviceStatusResource resource
+    ) {
+        var device = switch (resource.status()) {
+            case "CONFIGURED" -> {
+                var command = new ConfirmDeviceConfigurationCommand(deviceId);
+                yield deviceCommandService.handle(command)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
+            }
+            case "INACTIVE" -> {
+                var command = new DeactivateDeviceCommand(deviceId);
+                yield deviceCommandService.handle(command)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
+            }
+            default -> throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Unsupported status transition: " + resource.status());
+        };
         return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
     }
 
@@ -152,17 +164,5 @@ public class DevicesController {
         var device = deviceCommandService.handle(command)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
         return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
-    }
-
-    @Operation(summary = "Deactivate a device")
-    @PatchMapping("/{deviceId}/deactivate")
-    public ResponseEntity<Map<String, String>> deactivate(@PathVariable String deviceId) {
-        var command = new DeactivateDeviceCommand(deviceId);
-        deviceCommandService.handle(command)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
-        return ResponseEntity.ok(Map.of(
-                "id", deviceId,
-                "deactivatedAt", Instant.now().toString()
-        ));
     }
 }

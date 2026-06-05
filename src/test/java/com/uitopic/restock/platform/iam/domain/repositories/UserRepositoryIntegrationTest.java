@@ -30,7 +30,7 @@ class UserRepositoryIntegrationTest {
 
     @Test
     void save_validUser_persistsAndRetrievableByEmail() {
-        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.CASHIER), null);
+        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.RETAILADMIN), null);
 
         User savedUser = userRepository.save(user);
         assertNotNull(savedUser);
@@ -43,7 +43,7 @@ class UserRepositoryIntegrationTest {
 
     @Test
     void existsByEmail_existingEmail_returnsTrue() {
-        User user = new User(new Email("existing@example.com"), "hashed_password", new Role(RoleType.ADMIN), null);
+        User user = new User(new Email("existing@example.com"), "hashed_password", new Role(RoleType.RESTAURANTADMIN), null);
         userRepository.save(user);
 
         boolean exists = userRepository.existsByEmail(new Email("existing@example.com"));
@@ -58,8 +58,8 @@ class UserRepositoryIntegrationTest {
 
     @Test
     void save_duplicateEmail_throwsException() {
-        User user1 = new User(new Email("duplicate@example.com"), "password123", new Role(RoleType.WAREHOUSEMAN), null);
-        User user2 = new User(new Email("duplicate@example.com"), "password456", new Role(RoleType.CASHIER), null);
+        User user1 = new User(new Email("duplicate@example.com"), "password123", new Role(RoleType.RESTAURANTADMIN), null);
+        User user2 = new User(new Email("duplicate@example.com"), "password456", new Role(RoleType.RETAILADMIN), null);
 
         userRepository.save(user1);
 

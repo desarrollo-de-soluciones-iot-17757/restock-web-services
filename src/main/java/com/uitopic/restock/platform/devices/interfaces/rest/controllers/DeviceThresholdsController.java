@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -58,12 +59,9 @@ public class DeviceThresholdsController {
 
     @Operation(summary = "Create a supply threshold for a device")
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<DeviceThresholdResource> create(
-            @RequestParam String accountId,
-            @Valid @RequestBody CreateDeviceThresholdResource resource
-    ) {
+    public ResponseEntity<DeviceThresholdResource> create(@Valid @RequestBody CreateDeviceThresholdResource resource) {
         var command = new CreateDeviceThresholdCommand(
-                accountId,
+                resource.accountId(),
                 resource.customSupplyId(),
                 resource.minStock(),
                 resource.maxStock(),
@@ -74,7 +72,9 @@ public class DeviceThresholdsController {
                 resource.maxHumidityPercentage()
         );
         var threshold = thresholdCommandService.handle(command);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DeviceThresholdResourceFromEntityAssembler.toResourceFromEntity(threshold));
+        var body = DeviceThresholdResourceFromEntityAssembler.toResourceFromEntity(threshold);
+        return ResponseEntity
+                .created(URI.create("/api/v1/device-thresholds/" + threshold.getId()))
+                .body(body);
     }
 }

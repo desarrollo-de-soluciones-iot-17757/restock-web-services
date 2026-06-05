@@ -52,7 +52,7 @@ class IamContextFacadeImplTest {
     void fetchAccountIdByUserId_existingUserWithAccount_returnsAccountId() {
         String userId = "user123";
         AccountId accountId = new AccountId("acc456");
-        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.ADMIN), accountId);
+        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.RESTAURANTADMIN), accountId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
@@ -65,7 +65,7 @@ class IamContextFacadeImplTest {
     @Test
     void fetchAccountIdByUserId_existingUserWithoutAccount_returnsEmptyString() {
         String userId = "user123";
-        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.ADMIN), null);
+        User user = new User(new Email("test@example.com"), "hashed_password", new Role(RoleType.RETAILADMIN), null);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 

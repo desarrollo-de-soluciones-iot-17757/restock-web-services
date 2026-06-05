@@ -8,6 +8,10 @@ import jakarta.validation.constraints.PositiveOrZero;
 @Schema(description = "Request body to create a device supply threshold.")
 public record CreateDeviceThresholdResource(
 
+        @Schema(description = "Account (business owner) ID for this threshold")
+        @NotBlank(message = "Account ID is required")
+        String accountId,
+
         @Schema(description = "Custom supply this threshold applies to")
         @NotBlank(message = "Custom supply ID is required")
         String customSupplyId,

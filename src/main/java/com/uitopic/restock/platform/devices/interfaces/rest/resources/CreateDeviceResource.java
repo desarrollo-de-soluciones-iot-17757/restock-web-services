@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Pattern;
 @Schema(description = "Request body to register a new IoT device.")
 public record CreateDeviceResource(
 
+        @Schema(description = "Account (business owner) ID for this device")
+        @NotBlank(message = "Account ID is required")
+        String accountId,
+
         @Schema(description = "MAC address of the device (format: XX:XX:XX:XX:XX:XX)")
         @NotBlank(message = "MAC address is required")
         @Pattern(regexp = "^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$", message = "Invalid MAC address format")
