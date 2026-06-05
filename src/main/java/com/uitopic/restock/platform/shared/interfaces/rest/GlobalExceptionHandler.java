@@ -133,6 +133,25 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles invalid state transitions in domain aggregates (e.g. confirm before all steps complete).
+     *
+     * @param ex illegal state exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
      * Handles missing query parameters.
      *
      * @param ex missing parameter exception
