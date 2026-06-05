@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration;
 
+import com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.converters.*;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailReadConverter;
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
@@ -75,7 +76,13 @@ public class MongoConfig {
                 new MoneyWriteConverter(),
                 new MoneyReadConverter(),
                 new UnitMeasurementWriteConverter(),
-                new UnitMeasurementReadConverter()
+                new UnitMeasurementReadConverter(),
+                new MacAddressWriteConverter(),
+                new MacAddressReadConverter(),
+                new TemperatureWriteConverter(),
+                new TemperatureReadConverter(),
+                new HumidityWriteConverter(),
+                new HumidityReadConverter()
                 //new StockWriteConverter(),
                 //new StockReadConverter()
         ));
