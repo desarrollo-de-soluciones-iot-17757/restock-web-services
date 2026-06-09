@@ -10,6 +10,4 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class StockComparisonTask extends AbstractDomainAggregateRoot<StockComparisonTask> {
-
-
 }
