@@ -15,6 +15,7 @@ public final class DeviceThresholdPersistenceAssembler {
         var threshold = new DeviceThreshold();
         threshold.setId(entity.getId());
         threshold.setAccountId(entity.getAccountId());
+        threshold.setDeviceId(entity.getDeviceId());
         threshold.setCustomSupplyId(entity.getCustomSupplyId());
         threshold.setMinStock(entity.getMinStock());
         threshold.setMaxStock(entity.getMaxStock());
@@ -34,6 +35,7 @@ public final class DeviceThresholdPersistenceAssembler {
             entity.setId(threshold.getId());
         }
         entity.setAccountId(threshold.getAccountId());
+        entity.setDeviceId(threshold.getDeviceId());
         entity.setCustomSupplyId(threshold.getCustomSupplyId());
         entity.setMinStock(threshold.getMinStock());
         entity.setMaxStock(threshold.getMaxStock());
