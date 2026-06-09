@@ -1,71 +1,324 @@
 package com.uitopic.restock.platform.shared.interfaces.rest;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.uitopic.restock.platform.resources.domain.exception.NameAlreadyExist;
 import com.uitopic.restock.platform.shared.domain.exceptions.InvalidCredentialsException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global exception handler for REST controllers, providing centralized handling of common exceptions.
- * <p>
- * This class uses Spring's {@link ControllerAdvice} to intercept exceptions thrown by any controller and return consistent HTTP responses with appropriate status codes and error messages.
- * <p>
+ * Global exception handler for REST controllers.
+ *
+ * Converts application, validation and request binding errors into consistent
+ * HTTP responses.
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * Handles {@link HttpMessageNotReadableException}, typically caused by malformed JSON input.
-     * <p>
-     * If the root cause is an {@link InvalidFormatException}, it extracts and reports the invalid value and target type.
+     * Handles exceptions with an explicit HTTP status.
      *
-     * @param ex the exception thrown by Spring during deserialization
-     * @return a {@link ResponseEntity} with HTTP 400 status and an error message
+     * @param ex response status exception
+     * @param request HTTP request
+     * @return structured error response
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleJsonParseException(HttpMessageNotReadableException ex) {
-        String message = "Invalid request format";
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
 
-        Throwable cause = ex.getCause();
-        if (cause instanceof InvalidFormatException ife) {
-            var targetType = ife.getTargetType().getSimpleName();
-            var invalidValue = ife.getValue();
-            message = String.format("Invalid value '%s' for type '%s'.", invalidValue, targetType);
+        return ResponseEntity.status(status).body(errorBody(
+                status,
+                ex.getReason(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles validation errors from JSON request bodies.
+     *
+     * @param ex validation exception
+     * @param request HTTP request
+     * @return structured validation error response
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> errors = new HashMap<>();
+
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
         }
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", message));
+        Map<String, Object> body = errorBody(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed",
+                request.getRequestURI()
+        );
+
+        body.put("errors", errors);
+
+        return ResponseEntity.badRequest().body(body);
     }
 
     /**
-     * Handles {@link IllegalArgumentException}, typically thrown from domain or application logic validations.
+     * Handles binding errors from form-data and multipart requests.
      *
-     * @param ex the exception containing a descriptive message
-     * @return a {@link ResponseEntity} with HTTP 400 status and the validation error message
+     * @param ex bind exception
+     * @param request HTTP request
+     * @return structured validation error response
+     */
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<Map<String, Object>> handleBindException(
+            BindException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> errors = new HashMap<>();
+
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            if ("image".equals(error.getField())) {
+                errors.put("image", "Image must be uploaded as a file or omitted");
+            } else {
+                errors.put(error.getField(), error.getDefaultMessage());
+            }
+        }
+
+        Map<String, Object> body = errorBody(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed",
+                request.getRequestURI()
+        );
+
+        body.put("errors", errors);
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    /**
+     * Handles invalid arguments thrown by commands, value objects or assemblers.
+     *
+     * @param ex illegal argument exception
+     * @param request HTTP request
+     * @return structured error response
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI()
+        ));
     }
 
     /**
-     * Handles {@link InvalidCredentialsException}, thrown when authentication fails due to invalid credentials.
+     * Handles invalid state transitions in domain aggregates (e.g. confirm before all steps complete).
      *
-     * @param ex the exception containing a message about the authentication failure
-     * @return a {@link ResponseEntity} with HTTP 401 status and the error message indicating invalid credentials
+     * @param ex illegal state exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles missing query parameters.
+     *
+     * @param ex missing parameter exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingParameterException(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                "Missing required query parameter: " + ex.getParameterName(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles invalid query or path parameter types.
+     *
+     * @param ex type mismatch exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatchException(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                "Invalid value for parameter '" + ex.getName() + "'",
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles malformed JSON or invalid JSON value formats.
+     *
+     * @param ex message not readable exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        InvalidFormatException invalidFormatException = findInvalidFormatException(ex);
+
+        if (invalidFormatException != null) {
+            return ResponseEntity.badRequest().body(errorBody(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid value '" + invalidFormatException.getValue()
+                            + "' for type "
+                            + invalidFormatException.getTargetType().getSimpleName(),
+                    request.getRequestURI()
+            ));
+        }
+
+        return ResponseEntity.badRequest().body(errorBody(
+                HttpStatus.BAD_REQUEST,
+                "Invalid request body",
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles authentication failures caused by invalid credentials.
+     *
+     * @param ex invalid credentials exception
+     * @param request HTTP request
+     * @return structured error response
      */
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(
+            InvalidCredentialsException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles duplicated resource names.
+     *
+     * @param ex name already exists exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(NameAlreadyExist.class)
+    public ResponseEntity<Map<String, Object>> handleNameAlreadyExistException(
+            NameAlreadyExist ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles file upload size errors.
+     *
+     * @param ex max upload size exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(errorBody(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "Uploaded file is too large",
+                request.getRequestURI()
+        ));
+    }
+
+    /**
+     * Handles unexpected errors.
+     *
+     * @param ex exception
+     * @param request HTTP request
+     * @return structured error response
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleUnexpectedException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unexpected server error",
+                request.getRequestURI()
+        ));
+    }
+
+    private Map<String, Object> errorBody(HttpStatus status, String message, String path) {
+        Map<String, Object> body = new HashMap<>();
+
+        body.put("timestamp", Instant.now().toString());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        body.put("path", path);
+
+        return body;
+    }
+
+    private InvalidFormatException findInvalidFormatException(Throwable throwable) {
+        Throwable current = throwable;
+
+        while (current != null) {
+            if (current instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException;
+            }
+
+            current = current.getCause();
+        }
+
+        return null;
     }
 }

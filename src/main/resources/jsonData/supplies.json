@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Papa Amarilla",
+    "description": "Papa amarilla de alta calidad para consumo directo",
+    "isPerishable": true,
+    "category": "Tubérculos"
+  },
+  {
+    "name": "Cebolla Roja",
+    "description": "Cebolla roja fresca para cocina",
+    "isPerishable": true,
+    "category": "Verduras"
+  },
+  {
+    "name": "Pollo Entero",
+    "description": "Pollo fresco sin vísceras",
+    "isPerishable": true,
+    "category": "Carnes"
+  },
+  {
+    "name": "Aceite Vegetal",
+    "description": "Aceite comestible en botella de 1 litro",
+    "isPerishable": false,
+    "category": "Abarrotes"
+  },
+  {
+    "name": "Arroz Extra",
+    "description": "Arroz largo extra para todo tipo de preparación",
+    "isPerishable": false,
+    "category": "Granos"
+  },
+  {
+    "name": "Leche Evaporada",
+    "description": "Leche evaporada en lata de 410 ml",
+    "isPerishable": false,
+    "category": "Lácteos"
+  },
+  {
+    "name": "Zanahoria",
+    "description": "Zanahoria fresca ideal para ensaladas y sopas",
+    "isPerishable": true,
+    "category": "Verduras"
+  },
+  {
+    "name": "Tomate Italiano",
+    "description": "Tomate para salsas y cocina en general",
+    "isPerishable": true,
+    "category": "Verduras"
+  },
+  {
+    "name": "Harina sin preparar",
+    "description": "Harina de trigo sin aditivos, ideal para panadería",
+    "isPerishable": false,
+    "category": "Panadería"
+  },
+  {
+    "name": "Huevo de Gallina",
+    "description": "Huevo fresco categoría A",
+    "isPerishable": true,
+    "category": "Huevos"
+  }
+]

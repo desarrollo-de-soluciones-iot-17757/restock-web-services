@@ -1,0 +1,86 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Analytics Context
+
+top to bottom direction
+
+package "Analytics Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Metric {
+                -id: String
+                -category: MetricCategory
+                -type: MetricType
+                -values: List<Incrementable>
+                -lastRefreshedAt: LocalDateTime
+                -dateRange: DateRange
+                -accountId: AccountId
+                +addValue(value: Incrementable): void
+                +getValues(): List<Incrementable>
+            }
+        }
+
+        package "value objects" {
+            enum MetricCategory {
+                INVENTORY
+                WORKERS
+                NOTIFICATIONS
+                SALES
+            }
+
+            enum MetricType {
+                SUPPLIES_CREATED
+                LOW_STOCK_SUPPLIES
+                ZERO_STOCK_SUPPLIES
+                DEVICES_ACTIVE
+                WORKERS_HIRED
+                WORKERS_FIRED
+                NOTIFICATIONS_RECEIVED
+                SALES_MADE
+                RECIPES_PROFIT
+                KITS_PROFIT
+            }
+
+            record DateRange {
+                -startDate: LocalDate
+                -endDate: LocalDate
+                +getStartDate(): LocalDate
+                +getEndDate(): LocalDate
+
+            }
+
+            abstract Incrementable {
+                -value: Long
+                -resourceId: String
+                +increment(): void
+                +incrementBy(value: Long): void
+                +decrement(): void
+                +decrementBy(value: Long): void
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+Metric "1" *-- "1..*" Incrementable : has
+Metric "1" *-- "1" AccountId : belongs to
+Metric "1" *-- "1" MetricCategory : categorized by
+Metric "1" *-- "1" MetricType : typed by
+Metric "1" *-- "1" DateRange : has
+
+@enduml

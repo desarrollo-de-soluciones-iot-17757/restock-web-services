@@ -1,0 +1,99 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Communications Context
+
+top to bottom direction
+
+package "Communications Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class Notification {
+                -id: String
+                -type: NotificationType
+                -title: String
+                -message: String
+                -priority: NotificationPriority
+                -status: NotificationStatus
+                -isRead: Boolean
+                -sentAt: LocalDateTime
+                -situationDate: SituationData
+                -source: SourceType
+                -accountId: AccountId
+                +markAsRead(): void
+                +markAsFailed(): void
+                +isRead(): boolean
+            }
+        }
+
+        package "entities" {
+            class SituationData {
+                -id: String
+                -resourceId: String
+                -branchId: BranchId
+                -eventType: String
+                -timestamp: LocalDateTime
+            }
+        }
+
+        package "value objects" {
+            enum SourceType {
+                CLOUD_SERVER
+                IOT_SERVER
+            }
+
+            enum NotificationStatus {
+                NOT_READ
+                FAILED
+                READ
+            }
+
+            enum NotificationPriority {
+                LOW
+                MEDIUM
+                CRITICAL
+            }
+
+            enum NotificationType {
+                LOW_STOCK
+                ZERO_STOCK
+                OVERSTOCK
+                STOCK_DISCREPANCY
+                SALE_REGISTERED
+                DEVICE_FAILURE
+                DEVICE_ANOMALY
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record BranchId {
+        -branchId: String
+        +getBranchId(): String
+    }
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+Notification "1" --> "1" SituationData : has a
+Notification "1" --> "1" AccountId : owned by
+Notification "1" --> "1" NotificationType : categorized as
+Notification "1" --> "1" NotificationPriority : prioritized as
+Notification "1" --> "1" NotificationStatus : current status
+Notification "1" --> "1" SourceType : has
+
+SituationData "1" --> "1" BranchId : associated to
+
+@enduml

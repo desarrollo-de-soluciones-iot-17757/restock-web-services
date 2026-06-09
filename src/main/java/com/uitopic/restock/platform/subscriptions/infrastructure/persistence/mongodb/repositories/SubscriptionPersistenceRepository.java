@@ -1,0 +1,9 @@
+package com.uitopic.restock.platform.subscriptions.infrastructure.persistence.mongodb.repositories;
+
+import com.uitopic.restock.platform.subscriptions.infrastructure.persistence.mongodb.entities.SubscriptionPersistenceEntity;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface SubscriptionPersistenceRepository extends MongoRepository<SubscriptionPersistenceEntity, String> {
+}

@@ -1,0 +1,67 @@
+@startuml
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam monochrome false
+skinparam shadowing false
+
+title Restock Web Services - Identity And Access Management Context
+
+top to bottom direction
+
+package "Identity and Access Management Context: Domain Layer" {
+
+    package "model" {
+
+        package "aggregates" {
+            class User {
+                -id: String
+                -email: Email
+                -passwordHash: String
+                -role: Role
+                -accountId: AccountId
+                +update(String passwordHash): void
+                +update(Email email): void
+                +update(Role role): void
+            }
+        }
+
+        package "entities" {
+            class Role {
+                -id: String
+                -type: RoleType
+            }
+        }
+
+        package "value objects" {
+            enum RoleType {
+                ADMIN
+                CASHIER
+                WAREHOUSEMAN
+            }
+
+            class Email {
+                -email: String
+                -isEmailValid(): Boolean
+                +getEmail(): String
+            }
+        }
+    }
+}
+
+package "Shared" {
+
+    record AccountId {
+        -accountId: String
+        +getAccountId(): String
+    }
+}
+
+User "1" --> "1" Email : has a
+User "1" --> "1" AccountId : owned by
+User "1" o-- "1" Role : has a
+
+Role "1" --> "1" RoleType : has a
+
+@enduml
