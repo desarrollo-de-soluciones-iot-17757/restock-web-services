@@ -69,4 +69,12 @@ public class DeviceThresholdRepositoryImpl implements DeviceThresholdRepository 
     public void deleteById(String id) {
         thresholdMongoRepository.deleteById(id);
     }
+
+    /**
+     * @inheritDocs
+     */
+    @Override
+    public Boolean existsByDeviceId(DeviceId deviceId) {
+        return thresholdMongoRepository.existsByDeviceId(deviceId);
+    }
 }

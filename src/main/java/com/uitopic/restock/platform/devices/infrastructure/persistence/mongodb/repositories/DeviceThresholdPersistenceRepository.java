@@ -30,4 +30,12 @@ public interface DeviceThresholdPersistenceRepository extends MongoRepository<De
      * @return an Optional containing the DeviceThresholdPersistenceEntity if found, or empty if not found
      */
     Optional<DeviceThresholdPersistenceEntity> findByDeviceId(DeviceId deviceId);
+
+    /**
+     * Check if a DeviceThresholdPersistenceEntity exists by deviceId.
+     *
+     * @param deviceId the device ID to check for existence
+     * @return true if a DeviceThresholdPersistenceEntity with the given deviceId exists, false otherwise
+     */
+    Boolean existsByDeviceId(DeviceId deviceId);
 }

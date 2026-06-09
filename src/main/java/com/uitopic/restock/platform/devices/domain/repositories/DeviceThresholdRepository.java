@@ -50,4 +50,12 @@ public interface DeviceThresholdRepository {
      * @param id The unique identifier of the DeviceThreshold entity to be deleted.
      */
     void deleteById(String id);
+
+    /**
+     * Checks if a DeviceThreshold entity exists for a given DeviceId.
+     *
+     * @param deviceId The DeviceId to check for existence of a DeviceThreshold entity.
+     * @return true if a DeviceThreshold entity exists for the given DeviceId, false otherwise.
+     */
+    Boolean existsByDeviceId(DeviceId deviceId);
 }
