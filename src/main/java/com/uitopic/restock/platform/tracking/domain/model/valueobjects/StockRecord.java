@@ -9,7 +9,7 @@ import com.uitopic.restock.platform.tracking.domain.exceptions.TelemetryValuesEx
  * @param stock the stock level of the inventory, provided by the request
  */
 public record StockRecord(
-        Integer stock
+        Double stock
 ) {
 
     /**
@@ -45,7 +45,7 @@ public record StockRecord(
      *
      * @return the stock level of the inventory
      */
-    public Integer getStock() {
+    public Double getStock() {
         return stock;
     }
 }
