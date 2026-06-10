@@ -5,6 +5,7 @@ import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.conve
 import com.uitopic.restock.platform.iam.infrastructure.persistence.mongodb.converters.EmailWriteConverter;
 import com.uitopic.restock.platform.resources.infrastructure.persistence.mongodb.converters.*;
 import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.configuration.converters.*;
+import com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.converters.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -82,9 +83,23 @@ public class MongoConfig {
                 new TemperatureWriteConverter(),
                 new TemperatureReadConverter(),
                 new HumidityWriteConverter(),
-                new HumidityReadConverter()
-                //new StockWriteConverter(),
-                //new StockReadConverter()
+                new HumidityReadConverter(),
+                new ComparisonResultWriteConverter(),
+                new ComparisonResultReadConverter(),
+                new DiscrepancyLevelWriteConverter(),
+                new DiscrepancyLevelReadConverter(),
+                new DiscrepancyStatusWriteConverter(),
+                new DiscrepancyStatusReadConverter(),
+                new DiscrepancyStatusWriteConverter(),
+                new DiscrepancyStatusReadConverter(),
+                new HumidityRecordWriteConverter(),
+                new HumidityRecordReadConverter(),
+                new StockRecordWriteConverter(),
+                new StockRecordReadConverter(),
+                new TaskStatusWriteConverter(),
+                new TaskStatusReadConverter(),
+                new TemperatureRecordWriteConverter(),
+                new TemperatureRecordReadConverter()
         ));
     }
 

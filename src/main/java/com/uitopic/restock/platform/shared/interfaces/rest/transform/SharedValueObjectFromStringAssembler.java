@@ -1,9 +1,6 @@
 package com.uitopic.restock.platform.shared.interfaces.rest.transform;
 
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.ImageURL;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.*;
 import jakarta.validation.constraints.NotBlank;
 
 import java.math.BigDecimal;
@@ -22,6 +19,26 @@ public class SharedValueObjectFromStringAssembler {
      */
     public static AccountId toAccountIdFromString(@NotBlank String accountId) {
         return new AccountId(accountId);
+    }
+
+    /**
+     * Converts a string representation of a batch ID into a BatchId value object.
+     *
+     * @param batchId the string representation of the batch ID
+     * @return a BatchId value object constructed from the provided string
+     */
+    public static BatchId toBatchIdFromString(@NotBlank String batchId) {
+        return new BatchId(batchId);
+    }
+
+    /**
+     * Converts a string representation of a device ID into a DeviceId value object.
+     *
+     * @param deviceId the string representation of the device ID
+     * @return a DeviceId value object constructed from the provided string
+     */
+    public static DeviceId toDeviceIdFromString(@NotBlank String deviceId) {
+        return new DeviceId(deviceId);
     }
 
     /**

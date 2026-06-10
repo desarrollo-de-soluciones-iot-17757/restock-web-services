@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.devices.domain.model.entities;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.Humidity;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.Temperature;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.*;
 
 @Data
@@ -14,6 +15,7 @@ public class DeviceThreshold {
 
     private String id;
     private AccountId accountId;
+    private DeviceId deviceId;
     private String customSupplyId;
     private Double minStock;
     private Double maxStock;
@@ -23,6 +25,7 @@ public class DeviceThreshold {
 
     public DeviceThreshold(
             AccountId accountId,
+            DeviceId deviceId,
             String customSupplyId,
             Double minStock,
             Double maxStock,
@@ -32,6 +35,8 @@ public class DeviceThreshold {
     ) {
         if (accountId == null)
             throw new IllegalArgumentException("Account ID cannot be null");
+        if (deviceId == null)
+            throw new IllegalArgumentException("Device ID cannot be null");
         if (customSupplyId == null || customSupplyId.isBlank())
             throw new IllegalArgumentException("Custom supply ID cannot be null or blank");
         if (minStock == null || minStock < 0)
@@ -44,6 +49,7 @@ public class DeviceThreshold {
             throw new IllegalArgumentException("Anomaly threshold cannot be null or negative");
 
         this.accountId = accountId;
+        this.deviceId = deviceId;
         this.customSupplyId = customSupplyId;
         this.minStock = minStock;
         this.maxStock = maxStock;
