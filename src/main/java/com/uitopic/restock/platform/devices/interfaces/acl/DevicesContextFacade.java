@@ -9,6 +9,14 @@ import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 public interface DevicesContextFacade {
 
     /**
+     * Checks if a device with the given device ID exists in the system.
+     *
+     * @param deviceId The unique identifier of the device to check for existence.
+     * @return true if a device with the specified device ID exists, false otherwise.
+     */
+    Boolean existsByDeviceId(DeviceId deviceId);
+
+    /**
      * Retrieves the anomaly threshold for a given device ID.
      *
      * @param deviceId The unique identifier of the device for which to retrieve the anomaly threshold.

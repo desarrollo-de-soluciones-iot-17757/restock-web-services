@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.devices.application.acl;
 
 import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshold;
 import com.uitopic.restock.platform.devices.domain.model.queries.GetDeviceThresholdByDeviceIdQuery;
+import com.uitopic.restock.platform.devices.domain.repositories.DeviceRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceThresholdQueryService;
 import com.uitopic.restock.platform.devices.interfaces.acl.DevicesContextFacade;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
@@ -19,6 +20,17 @@ public class DevicesContextFacadeImpl implements DevicesContextFacade {
 
     // The DeviceThresholdQueryService is injected to handle queries related to device thresholds.
     private final DeviceThresholdQueryService deviceThresholdQueryService;
+
+    // The DeviceRepository is injected to access device data, although it is not currently used in the implemented methods.
+    private final DeviceRepository deviceRepository;
+
+    /**
+     * @inheritDocs
+     */
+    @Override
+    public Boolean existsByDeviceId(DeviceId deviceId) {
+        return deviceRepository.existsByDeviceId(deviceId.getDeviceId());
+    }
 
     /**
      * @inheritDocs
