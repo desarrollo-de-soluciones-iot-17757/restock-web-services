@@ -6,12 +6,14 @@ import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockReco
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Aggregate root representing a stock comparison task, which compares the physical stock obtained from a count against the system stock to identify discrepancies. The task is associated with a specific device that performed the stock count and tracks the result of the comparison.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Setter
 @NoArgsConstructor
 public class StockComparisonTask extends Task {
 
@@ -43,6 +45,7 @@ public class StockComparisonTask extends Task {
             DeviceId deviceId
     ) {
         super(deviceId);
+        this.result = ComparisonResult.IN_PROGRESS;
         this.physicalStock = physicalStock;
         this.systemStock = systemStock;
     }

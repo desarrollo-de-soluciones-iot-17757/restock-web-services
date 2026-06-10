@@ -13,6 +13,7 @@ import java.time.Instant;
  * Entity representing a telemetry reading from a device, containing information about stock levels, temperature, humidity, and the timestamp of the reading. This entity is used to track inventory discrepancies and monitor environmental conditions in real-time.
  */
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @With

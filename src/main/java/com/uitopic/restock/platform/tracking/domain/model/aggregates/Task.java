@@ -25,7 +25,7 @@ public abstract class Task extends AbstractDomainAggregateRoot<Task> {
     /**
      * The current status of the task, used for tracking progress and identifying tasks that are in progress, completed, cancelled, or failed.
      */
-    private TaskStatus status = TaskStatus.IN_PROGRESS;
+    private TaskStatus status;
 
     /**
      * The timestamp when the task was created, used for tracking the age of the task and identifying stale tasks.
@@ -37,7 +37,13 @@ public abstract class Task extends AbstractDomainAggregateRoot<Task> {
      */
     private DeviceId deviceId;
 
+    /**
+     * Creates a new task with the specified device ID and sets the initial status to IN_PROGRESS. The creation timestamp is set to the current time when the task is instantiated.
+     *
+     * @param deviceId the unique identifier of the device associated with the task, provided by the request
+     */
     public Task(DeviceId deviceId) {
+        this.status = TaskStatus.IN_PROGRESS;
         this.createdAt = Instant.now();
         this.deviceId = deviceId;
     }
