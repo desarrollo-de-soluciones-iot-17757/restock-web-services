@@ -16,6 +16,10 @@ public record CreateDeviceThresholdResource(
         @NotBlank(message = "Custom supply ID is required")
         String customSupplyId,
 
+        @Schema(description = "Device ID this threshold applies to")
+        @NotBlank(message = "Device ID is required")
+        String deviceId,
+
         @Schema(description = "Minimum stock level — triggers low-stock alert when breached")
         @NotNull(message = "Min stock is required")
         @PositiveOrZero(message = "Min stock must be zero or positive")

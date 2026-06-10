@@ -32,7 +32,7 @@ public class DiscrepancyPersistenceEntity {
     /**
      * The quantity difference between the physical and system inventory levels, provided by the comparison task. This field captures the magnitude of the discrepancy in inventory levels, which can be used to assess the severity of the issue and prioritize resolution efforts.
      */
-    private Integer quantityDifference;
+    private Double quantityDifference;
 
     /**
      * The status of the discrepancy, which can be "RESOLVED" or "UNRESOLVED". This is used to track the resolution process of the discrepancy. The status is initialized to "UNRESOLVED" when a new discrepancy is created and can be updated to "RESOLVED" once the issue has been addressed.
