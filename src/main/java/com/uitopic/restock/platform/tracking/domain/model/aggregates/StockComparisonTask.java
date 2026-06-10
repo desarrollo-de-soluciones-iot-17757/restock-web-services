@@ -56,7 +56,7 @@ public class StockComparisonTask extends Task {
      * @param threshold the acceptable difference between physical and system stock levels
      * @return true if an anomaly is detected (i.e., the difference exceeds the threshold), false otherwise
      */
-    public Boolean isAnomalyDetected(Integer threshold) {
+    public Boolean isAnomalyDetected(Double threshold) {
         return !systemStock.isInThreshold(physicalStock, threshold);
     }
 

@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.tracking.domain.model.commands;
 
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.exceptions.TelemetryValuesException;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.HumidityRecord;
@@ -12,12 +13,14 @@ import com.uitopic.restock.platform.tracking.domain.model.valueobjects.Temperatu
  * @param physicalStock the physical stock level recorded by the device, provided by the request
  * @param temperatureInCelsius the temperature in Celsius recorded by the device, provided by the request
  * @param humidityPercentage the humidity percentage recorded by the device, provided by the request
+ * @param assignedBatchId the batch ID assigned to the telemetry reading, provided by the request
  * @param deviceId the unique identifier of the device that sent the telemetry reading, provided by the request
  */
 public record ReceiveTelemetryReadingCommand(
         StockRecord physicalStock,
         TemperatureRecord temperatureInCelsius,
         HumidityRecord humidityPercentage,
+        BatchId assignedBatchId,
         DeviceId deviceId
 ) {
 
@@ -30,6 +33,9 @@ public record ReceiveTelemetryReadingCommand(
         }
         if (humidityPercentage == null) {
             throw new TelemetryValuesException("Humidity cannot be null");
+        }
+        if (assignedBatchId == null) {
+            throw new TelemetryValuesException("Batch ID cannot be null");
         }
         if (deviceId == null) {
             throw new TelemetryValuesException("Device ID cannot be null");
