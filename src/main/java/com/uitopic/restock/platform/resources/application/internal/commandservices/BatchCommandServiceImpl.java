@@ -193,6 +193,11 @@ public class BatchCommandServiceImpl implements BatchCommandService {
                         "Source batch not found: " + command.sourceBatchId()
                 ));
 
+        var sourceBranch = branchRepository.findById(sourceBatch.getBranchId())
+                .orElseThrow(() -> new BranchNotFoundException(
+                        "Source branch not found: " + sourceBatch.getBranchId()
+                ));
+
         var targetBranch = branchRepository.findById(command.targetBranchId())
                 .orElseThrow(() -> new BranchNotFoundException(
                         "Target branch not found: " + command.targetBranchId()
@@ -224,6 +229,10 @@ public class BatchCommandServiceImpl implements BatchCommandService {
                 .orElseGet(() -> createTargetBatchFromTransfer(sourceBatch, command, quantity));
 
         sourceBatch.subtract(quantity);
+        sourceBatch.registerBelowMinimumStockEvent(
+                sourceBranch.getName(),
+                customSupply.getStockRange() != null ? customSupply.getStockRange().minStock() : null
+        );
 
         // Create a domain event to represent the stock transfer, capturing relevant information about the source and target batches, the quantity transferred, and the remaining stock at both branches after the transfer. This event can be used to notify other parts of the system about the inventory change and trigger any necessary actions or updates.
         var stockTransferredEvent = StockTransferredEvent.builder()
@@ -242,7 +251,7 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         Batch savedTarget = batchRepository.save(targetBatch);
 
         // Publish a domain event after the transfer is successful, allowing other parts of the system to react to the stock change.
-        eventPublisher.publish(stockTransferredEvent);
+        sourceBatch.domainEvents().forEach(eventPublisher::publish);
 
         // Clear domain events after publishing to prevent duplicate events in case of retries or multiple operations on the same batch within the same transaction.
         sourceBatch.clearDomainEvents();

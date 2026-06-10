@@ -27,7 +27,12 @@ public class PushSubscriptionCommandServiceImpl implements PushSubscriptionComma
         this.pushSubscriptionRepository = pushSubscriptionRepository;
     }
 
-
+    /**
+     * Handles the RegisterPushSubscriptionCommand by either updating an existing push subscription or creating a new one.
+     *
+     * @param command the command containing the details for the push subscription to register
+     * @return an Optional containing the registered PushSubscription, or empty if registration failed
+     */
     @Override
     public Optional<PushSubscription> handle(RegisterPushSubscriptionCommand command) {
         log.info("Registering push subscription. userId={}, platform={}, provider={}",
