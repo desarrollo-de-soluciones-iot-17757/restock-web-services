@@ -23,7 +23,7 @@ import java.util.Date;
 @Getter
 public abstract class AuditableAbstractPersistenceEntity {
 
-    @MongoId(FieldType.OBJECT_ID)
+    @MongoId(FieldType.STRING)
     @Setter
     private String id;
 
