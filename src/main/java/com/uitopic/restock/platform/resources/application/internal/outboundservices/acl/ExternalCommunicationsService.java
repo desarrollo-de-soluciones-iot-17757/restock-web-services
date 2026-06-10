@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.resources.application.internal.outboundservices.acl;
 
 import com.uitopic.restock.platform.communications.interfaces.acl.CommunicationsContextFacade;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.EmailContents;
+import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCommand;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,7 +23,7 @@ public class ExternalCommunicationsService {
      *
      * @param contents The contents of the email notification, encapsulated in an EmailContents object, which includes details such as the resource name, resource count, branch name, source type, notification type, event type, account ID, and timestamp.
      */
-    void sendNotificationToCommunicationsContext(EmailContents contents) {
+    void createNotification(NotificationCommand contents) {
         // This method can be used to send a notification to the communications context, allowing the resources application to trigger notifications or emails based on certain events or conditions related to resources.
         communicationsContextFacade.createNotification(contents);
     }

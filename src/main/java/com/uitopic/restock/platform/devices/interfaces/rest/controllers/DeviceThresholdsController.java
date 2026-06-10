@@ -63,6 +63,7 @@ public class DeviceThresholdsController {
         var command = new CreateDeviceThresholdCommand(
                 resource.accountId(),
                 resource.customSupplyId(),
+                resource.deviceId(),
                 resource.minStock(),
                 resource.maxStock(),
                 resource.anomalyThreshold(),
