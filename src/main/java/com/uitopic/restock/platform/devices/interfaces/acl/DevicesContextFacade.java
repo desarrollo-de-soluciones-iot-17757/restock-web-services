@@ -1,6 +1,6 @@
 package com.uitopic.restock.platform.devices.interfaces.acl;
 
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 
 /**
  * Facade interface for accessing device-related information and operations in the Devices Context.

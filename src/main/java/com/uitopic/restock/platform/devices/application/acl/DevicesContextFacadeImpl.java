@@ -4,7 +4,7 @@ import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshol
 import com.uitopic.restock.platform.devices.domain.model.queries.GetDeviceThresholdByDeviceIdQuery;
 import com.uitopic.restock.platform.devices.domain.services.DeviceThresholdQueryService;
 import com.uitopic.restock.platform.devices.interfaces.acl.DevicesContextFacade;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

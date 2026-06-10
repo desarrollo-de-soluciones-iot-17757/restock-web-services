@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.tracking.domain.model.valueobjects;
+package com.uitopic.restock.platform.shared.domain.model.valueobjects;
 
 /**
  * Value object representing a device ID used for tracking inventory discrepancies.

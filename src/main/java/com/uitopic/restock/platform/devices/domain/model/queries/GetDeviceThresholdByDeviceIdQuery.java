@@ -1,6 +1,6 @@
 package com.uitopic.restock.platform.devices.domain.model.queries;
 
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 
 /**
  * Query object for retrieving the anomaly threshold associated with a specific device ID.

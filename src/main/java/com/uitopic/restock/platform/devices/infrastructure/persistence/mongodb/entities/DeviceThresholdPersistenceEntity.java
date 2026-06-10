@@ -4,7 +4,7 @@ import com.uitopic.restock.platform.devices.domain.model.valueobjects.Humidity;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.Temperature;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.entities.AuditableAbstractPersistenceEntity;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

@@ -7,7 +7,7 @@ import com.uitopic.restock.platform.devices.domain.model.valueobjects.Temperatur
 import com.uitopic.restock.platform.devices.domain.repositories.DeviceThresholdRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceThresholdCommandService;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;

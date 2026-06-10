@@ -5,7 +5,7 @@ import com.uitopic.restock.platform.devices.domain.repositories.DeviceThresholdR
 import com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.assemblers.DeviceThresholdPersistenceAssembler;
 import com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.repositories.DeviceThresholdPersistenceRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
