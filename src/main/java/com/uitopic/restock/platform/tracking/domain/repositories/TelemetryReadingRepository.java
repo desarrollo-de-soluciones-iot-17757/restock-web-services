@@ -1,6 +1,6 @@
 package com.uitopic.restock.platform.tracking.domain.repositories;
 
-import com.uitopic.restock.platform.tracking.domain.model.aggregates.TelemetryReading;
+import com.uitopic.restock.platform.tracking.domain.model.entities.TelemetryReading;
 
 /**
  * Repository interface for managing telemetry readings, providing methods for saving and retrieving telemetry data related to inventory discrepancies. This interface defines the contract for persisting telemetry reading entities, allowing for the storage and retrieval of telemetry data for tracking inventory discrepancies in real-time.
