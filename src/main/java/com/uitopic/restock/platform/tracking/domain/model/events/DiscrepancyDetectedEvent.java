@@ -6,12 +6,14 @@ import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 
 /**
  * Event representing the detection of a discrepancy in inventory tracking. This event captures the details of the physical and system stock records, as well as the associated device ID. It is used to notify the system of a detected discrepancy, allowing for further processing and resolution.
  */
 @Getter
+@Builder
 public class DiscrepancyDetectedEvent implements NotificationEvent {
 
     /**
