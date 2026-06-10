@@ -8,4 +8,10 @@ package com.uitopic.restock.platform.communications.domain.model.commands;
 public record MarkNotificationAsReadCommand(
         String notificationId
 ) {
+
+    public MarkNotificationAsReadCommand {
+        if (notificationId == null || notificationId.isBlank()) {
+            throw new IllegalArgumentException("Notification ID cannot be null or blank");
+        }
+    }
 }

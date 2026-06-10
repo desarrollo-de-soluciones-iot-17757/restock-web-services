@@ -56,8 +56,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.sourceId(),
                 command.message(),
                 command.title(),
-                command.severity(),
-                command.status()
+                command.severity()
         );
         return Optional.of(notificationRepository.save(notification));
     }

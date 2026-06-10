@@ -51,8 +51,7 @@ public class CommunicationsContextFacadeImpl implements CommunicationsContextFac
                     sourceId,
                     title,
                     message,
-                    severity,
-                    NotificationStatus.UNREAD.name()
+                    severity
             ));
 
             notificationCommandService.handle(new SendPushNotificationCommand(
