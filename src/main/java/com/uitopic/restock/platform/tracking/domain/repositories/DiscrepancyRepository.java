@@ -1,4 +1,17 @@
 package com.uitopic.restock.platform.tracking.domain.repositories;
 
+import com.uitopic.restock.platform.tracking.domain.model.entities.Discrepancy;
+
+/**
+ * Repository interface for managing discrepancy entities, providing methods for saving and retrieving inventory discrepancies detected from telemetry readings. This interface abstracts the underlying data storage mechanism, allowing for flexibility in how discrepancies are persisted and accessed within the application.
+ */
 public interface DiscrepancyRepository {
+
+    /**
+     * Saves a discrepancy entity to the repository, allowing for the persistence of inventory discrepancies detected from telemetry readings. This method is responsible for storing the discrepancy information, which can be used for further analysis and reporting.
+     *
+     * @param discrepancy the discrepancy entity to be saved, containing information about the detected inventory discrepancy, including the device ID, physical stock level, temperature, humidity, and timestamp of the reading that triggered the discrepancy
+     * @return the saved discrepancy entity, which may include additional information such as a generated unique identifier or timestamps for when the discrepancy was created and last updated
+     */
+    Discrepancy save(Discrepancy discrepancy);
 }

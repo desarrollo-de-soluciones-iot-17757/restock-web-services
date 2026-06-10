@@ -1,30 +1,58 @@
 package com.uitopic.restock.platform.resources.application.acl;
 
+import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
 import com.uitopic.restock.platform.resources.domain.services.BatchCommandService;
 import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the ResourcesContextFacade interface, providing methods to manage supply stock levels and retrieve stock information based on batch IDs. This class serves as an adapter between the resources bounded context and other bounded contexts that need to interact with inventory data.
+ */
 @Service
+@RequiredArgsConstructor
 public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
 
+    // The BatchCommandService is used to perform operations related to supply stock management, such as subtracting stock, adding stock back, and adjusting stock levels. It encapsulates the business logic for managing inventory and ensures that all stock-related operations are handled consistently across the application.
     private final BatchCommandService batchCommandService;
 
-    public ResourcesContextFacadeImpl(BatchCommandService batchCommandService) {
-        this.batchCommandService = batchCommandService;
-    }
+    // The BatchRepository is used to access batch data from the database, allowing the implementation to retrieve current stock levels for specific batches when requested. It provides methods to query batch information and is essential for implementing the getSupplyStockByBatchId method, which requires access to batch data to return accurate stock levels.
+    private final BatchRepository batchRepository;
 
+    /**
+     * @inheritDocs
+     */
     @Override
     public double subtractSupplyStock(String branchId, String supplyId, Integer quantity) {
         return 0;
     }
 
+    /**
+     * @inheritDocs
+     */
     @Override
     public void addSupplyStockBack(String branchId, String supplyId, Integer quantity, String unit) {
 
     }
 
+    /**
+     * @inheritDocs
+     */
     @Override
     public void adjustStock(String branchId, String supplyId, Integer adjustedQuantity, String unit) {
 
+    }
+
+    /**
+     * @inheritDocs
+     */
+    @Override
+    public Double getSupplyStockByBatchId(BatchId batchId) {
+        var batch = batchRepository.findById(batchId.getBatchId());
+        if (batch.isPresent()) {
+            return batch.get().getCurrentStock().stock();
+        }
+        return 0.0;
     }
 }
