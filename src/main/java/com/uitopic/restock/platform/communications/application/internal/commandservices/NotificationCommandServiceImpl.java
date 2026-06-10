@@ -27,12 +27,17 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     private final PushSubscriptionRepository pushSubscriptionRepository;
 
     /** Service for sending push notifications. */
-    private PushNotificationService pushNotificationService;
+    private final PushNotificationService pushNotificationService;
 
     /** Constructs a NotificationCommandServiceImpl with the required repositories and services. */
-    public NotificationCommandServiceImpl(NotificationRepository notificationRepository, PushSubscriptionRepository pushSubscriptionRepository) {
+    public NotificationCommandServiceImpl(
+            NotificationRepository notificationRepository,
+            PushSubscriptionRepository pushSubscriptionRepository,
+            PushNotificationService pushNotificationService
+    ) {
         this.notificationRepository = notificationRepository;
         this.pushSubscriptionRepository = pushSubscriptionRepository;
+        this.pushNotificationService = pushNotificationService;
     }
 
     /**
@@ -49,8 +54,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         var notification = new Notification(
                 command.recipientUserId(),
                 command.sourceId(),
-                command.title(),
                 command.message(),
+                command.title(),
                 command.severity(),
                 command.status()
         );
