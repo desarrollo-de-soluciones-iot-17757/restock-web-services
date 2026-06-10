@@ -84,11 +84,14 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             // Evaluate the result of the anomaly detection and log the appropriate message. If an anomaly is detected, it indicates a significant discrepancy between the physical stock and system stock, which may require further investigation or corrective actions. If no anomaly is detected, it indicates that the physical stock is within an acceptable range of the system stock, suggesting that there are no immediate issues with inventory levels for the device.
             if (isAnomaly) {
                 task.stockMismatch();
-                log.warn("Anomaly detected for device {}: physical stock {} differs from system stock {} by more than the threshold of {}", deviceId, physicalStock.getStock(), systemStock.getStock(), discrepancyThreshold);
                 // TODO: Register an event for when an anomaly is detected, which can be used to trigger alerts or further investigations.
             } else {
                 task.stockMatch();
-                log.info("No anomaly detected for device {}: physical stock {} is within the threshold of system stock {}", deviceId, physicalStock.getStock(), systemStock.getStock());
+                log.info(
+                        "No anomaly detected for device {}: physical stock {} is within the threshold of system stock {}",
+                        deviceId.getDeviceId(),
+                        physicalStock.getStock(),
+                        systemStock.getStock());
             }
 
             // Save the stock comparison task to the repository. This allows for tracking and analyzing stock comparisons over time, and can be used for reporting or further investigations if anomalies are detected. If saving the task fails, log an error message and throw a TelemetryValuesException to indicate the failure.
