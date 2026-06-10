@@ -1,11 +1,13 @@
 package com.uitopic.restock.platform.tracking.application.internal.commandservices;
 
+import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import com.uitopic.restock.platform.tracking.application.internal.outboundservices.acl.ExternalDevicesService;
 import com.uitopic.restock.platform.tracking.application.internal.outboundservices.acl.ExternalResourcesService;
 import com.uitopic.restock.platform.tracking.domain.exceptions.TelemetryValuesException;
 import com.uitopic.restock.platform.tracking.domain.model.aggregates.StockComparisonTask;
 import com.uitopic.restock.platform.tracking.domain.model.commands.ReceiveTelemetryReadingCommand;
 import com.uitopic.restock.platform.tracking.domain.model.entities.TelemetryReading;
+import com.uitopic.restock.platform.tracking.domain.model.events.DiscrepancyDetectedEvent;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import com.uitopic.restock.platform.tracking.domain.repositories.StockComparisonTaskRepository;
 import com.uitopic.restock.platform.tracking.domain.repositories.TelemetryReadingRepository;
@@ -33,6 +35,9 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
 
     // The ExternalResourcesService is used to retrieve resource information, such as stock levels, for performing stock comparisons based on telemetry readings.
     private final ExternalResourcesService externalResourcesService;
+
+    // The SpringDomainEventPublisher is used to publish domain events related to telemetry readings and stock comparisons, allowing for decoupled communication between different parts of the application and enabling event-driven architecture patterns.
+    private final SpringDomainEventPublisher domainEventPublisher;
 
     @Override
     public void handle(ReceiveTelemetryReadingCommand command) {
@@ -86,7 +91,14 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             // Evaluate the result of the anomaly detection and log the appropriate message. If an anomaly is detected, it indicates a significant discrepancy between the physical stock and system stock, which may require further investigation or corrective actions. If no anomaly is detected, it indicates that the physical stock is within an acceptable range of the system stock, suggesting that there are no immediate issues with inventory levels for the device.
             if (isAnomaly) {
                 task.stockMismatch();
-                // TODO: Register an event for when an anomaly is detected, which can be used to trigger alerts or further investigations.
+                var event = DiscrepancyDetectedEvent.builder()
+                        .physicalStock(physicalStock)
+                        .systemStock(systemStock)
+                        .thresholdUsed(discrepancyThreshold)
+                        .deviceId(deviceId)
+                        .accountId(accountId)
+                        .build();
+                domainEventPublisher.publish(event);
             } else {
                 task.stockMatch();
                 log.info(
