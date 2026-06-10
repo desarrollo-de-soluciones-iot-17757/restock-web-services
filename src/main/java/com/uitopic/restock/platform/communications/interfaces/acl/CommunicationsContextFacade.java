@@ -9,9 +9,9 @@ import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCom
 public interface CommunicationsContextFacade {
 
     /**
-     * Creates a notification based on the provided email contents. This method is responsible for generating a notification that can be sent to users or other systems, based on the information contained in the EmailContents object.
+     * Processes a notification event according to its delivery type.
      *
-     * @param command the command containing the necessary information to create a notification, including the email contents and any additional metadata required for processing the notification
+     * @param command command containing the account, delivery type, and event payload
      */
-    void createNotification(NotificationCommand command);
+    void processNotification(NotificationCommand command);
 }

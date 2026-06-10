@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
+import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class InventoryBelowMinimumStockEvent {
+public class InventoryBelowMinimumStockEvent implements NotificationEvent {
 
     /**
      * The name of the branch where the inventory is located. This provides context about the location of the inventory that is below the minimum stock level, allowing for better identification and management of the issue.

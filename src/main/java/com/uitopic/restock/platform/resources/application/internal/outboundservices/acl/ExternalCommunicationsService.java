@@ -2,29 +2,29 @@ package com.uitopic.restock.platform.resources.application.internal.outboundserv
 
 import com.uitopic.restock.platform.communications.interfaces.acl.CommunicationsContextFacade;
 import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCommand;
+import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.NotificationType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
  * This service is responsible for interacting with the communications context, allowing the resources application to send notifications or emails related to resources without being tightly coupled to the communications context's implementation.
  */
-@Service
+@Service(value = "ResourcesExternalCommunicationsService")
 public class ExternalCommunicationsService {
 
-    // This service acts as an adapter to the communications context, allowing the resources application to interact with it without being tightly coupled to its implementation.
+    /** The CommunicationsContextFacade is injected into this service, allowing it to interact with the communications context without needing to know about its internal workings. This promotes loose coupling between the resources application and the communications context. */
     private final CommunicationsContextFacade communicationsContextFacade;
 
-    // This service can be used to interact with the communications context, for example to send notifications or emails related to resources.
+    /** Constructs an ExternalCommunicationsService with the required CommunicationsContextFacade. This constructor is used for dependency injection, allowing the communications context to be injected into this service when it is created. */
     public ExternalCommunicationsService(CommunicationsContextFacade communicationsContextFacade) {
         this.communicationsContextFacade = communicationsContextFacade;
     }
 
-    /**
-     * Sends a notification to the communications context with the provided email contents. This method can be used to trigger notifications or emails based on certain events or conditions related to resources, such as when inventory falls below minimum stock levels or when a custom supply is deleted.
-     *
-     * @param contents The contents of the email notification, encapsulated in an EmailContents object, which includes details such as the resource name, resource count, branch name, source type, notification type, event type, account ID, and timestamp.
-     */
-    void createNotification(NotificationCommand contents) {
-        // This method can be used to send a notification to the communications context, allowing the resources application to trigger notifications or emails based on certain events or conditions related to resources.
-        communicationsContextFacade.createNotification(contents);
+    /** This method creates a notification by constructing a NotificationCommand with the provided event and account ID, and then processing it through the CommunicationsContextFacade. The notification type is set to ALL, indicating that the notification should be delivered through all available channels (e.g., in-app, email, push). This method allows the resources application to send notifications related to resources without needing to know about the specific implementation details of how notifications are created and delivered in the communications context. */
+    public void createNotification(NotificationEvent event, AccountId accountId) {
+        var command = new NotificationCommand(accountId, NotificationType.ALL, event);
+        communicationsContextFacade.processNotification(command);
     }
 }

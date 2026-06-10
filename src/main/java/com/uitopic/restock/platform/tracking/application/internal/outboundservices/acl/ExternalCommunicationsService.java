@@ -26,6 +26,6 @@ public class ExternalCommunicationsService {
      */
     public void createNotification(NotificationEvent event, AccountId accountId) {
         var command = new NotificationCommand(accountId, NotificationType.ALL, event);
-        communicationsContextFacade.createNotification(command);
+        communicationsContextFacade.processNotification(command);
     }
 }
