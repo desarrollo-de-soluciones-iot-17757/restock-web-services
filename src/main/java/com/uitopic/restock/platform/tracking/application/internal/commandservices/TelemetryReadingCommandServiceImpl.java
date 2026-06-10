@@ -69,7 +69,9 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             var physicalStock = command.physicalStock();
             var systemStock = new StockRecord(externalResourcesService.getCustomSupplyStockByBatchId(command.assignedBatchId()));
             var deviceId = command.deviceId();
-            var discrepancyThreshold = externalDevicesService.getAnomalyThreshold(deviceId);
+            var pair = externalDevicesService.getAnomalyThreshold(deviceId);
+            var discrepancyThreshold = pair.getLeft();
+            var accountId = pair.getRight();
 
             // Register a new stock comparison task using the retrieved physical stock, system stock, device ID, and discrepancy threshold. If any exception occurs during this process, log the error and throw a TelemetryValuesException with details about the failure.
             var task = new StockComparisonTask(

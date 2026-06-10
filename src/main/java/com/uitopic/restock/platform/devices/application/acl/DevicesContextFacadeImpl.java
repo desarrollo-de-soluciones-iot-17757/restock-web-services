@@ -5,9 +5,11 @@ import com.uitopic.restock.platform.devices.domain.model.queries.GetDeviceThresh
 import com.uitopic.restock.platform.devices.domain.repositories.DeviceRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceThresholdQueryService;
 import com.uitopic.restock.platform.devices.interfaces.acl.DevicesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,9 +38,12 @@ public class DevicesContextFacadeImpl implements DevicesContextFacade {
      * @inheritDocs
      */
     @Override
-    public Double getAnomalyThresholdByDeviceId(DeviceId deviceId) {
+    public Pair<Double, AccountId> getAnomalyThresholdByDeviceId(DeviceId deviceId) {
         var getDeviceThresholdByDeviceIdQuery = new GetDeviceThresholdByDeviceIdQuery(deviceId);
         var deviceThreshold = deviceThresholdQueryService.handle(getDeviceThresholdByDeviceIdQuery);
-        return deviceThreshold.map(DeviceThreshold::getAnomalyThreshold).orElse(null);
+        return Pair.of(
+                deviceThreshold.map(DeviceThreshold::getAnomalyThreshold).orElse(null),
+                deviceThreshold.map(DeviceThreshold::getAccountId).orElse(null)
+        );
     }
 }

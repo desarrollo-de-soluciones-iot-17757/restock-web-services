@@ -1,8 +1,10 @@
 package com.uitopic.restock.platform.tracking.application.internal.outboundservices.acl;
 
 import com.uitopic.restock.platform.devices.interfaces.acl.DevicesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,7 +33,7 @@ public class ExternalDevicesService {
      * @param deviceId The unique identifier of the device for which to retrieve the anomaly threshold.
      * @return The anomaly threshold value associated with the specified device ID. This value is used to determine when a device's behavior is considered anomalous.
      */
-    public Double getAnomalyThreshold(DeviceId deviceId) {
+    public Pair<Double, AccountId> getAnomalyThreshold(DeviceId deviceId) {
         return devicesContextFacade.getAnomalyThresholdByDeviceId(deviceId);
     }
 }
