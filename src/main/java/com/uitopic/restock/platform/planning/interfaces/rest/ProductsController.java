@@ -45,7 +45,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/api/v1/products", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Products", description = "Planning BC – Product (recipe / kit) management")
+@Tag(name = "Products", description = "Product management – create and manage recipes and kits with their ingredients")
 public class ProductsController {
 
     private final ProductCommandService commandService;
