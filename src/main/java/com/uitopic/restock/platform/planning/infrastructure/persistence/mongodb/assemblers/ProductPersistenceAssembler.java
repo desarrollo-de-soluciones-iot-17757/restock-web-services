@@ -3,6 +3,8 @@ package com.uitopic.restock.platform.planning.infrastructure.persistence.mongodb
 import com.uitopic.restock.platform.planning.domain.model.aggregates.Product;
 import com.uitopic.restock.platform.planning.infrastructure.persistence.mongodb.entities.ProductPersistenceEntity;
 
+import java.util.ArrayList;
+
 /**
  * Utility class for converting between {@link Product} domain objects and {@link ProductPersistenceEntity} persistence entities.
  * <p>
@@ -35,9 +37,9 @@ public final class ProductPersistenceAssembler {
         product.setImageUrl(entity.getImageUrl());
         product.setSellingPrice(entity.getSellingPrice());
 
-        var ingredients = entity.getIngredients().stream()
+        var ingredients = new ArrayList<>(entity.getIngredients().stream()
                 .map(IngredientPersistenceAssembler::toDomainFromPersistence)
-                .toList();
+                .toList());
         product.setIngredients(ingredients);
 
         return product;
