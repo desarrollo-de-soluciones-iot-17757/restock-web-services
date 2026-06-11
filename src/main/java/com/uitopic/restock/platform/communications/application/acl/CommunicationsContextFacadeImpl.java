@@ -3,7 +3,6 @@ package com.uitopic.restock.platform.communications.application.acl;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationSeverity;
-import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationStatus;
 import com.uitopic.restock.platform.communications.domain.services.NotificationCommandService;
 import com.uitopic.restock.platform.communications.interfaces.acl.CommunicationsContextFacade;
 import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCommand;

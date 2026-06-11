@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.communications.application.internal.command
 import com.uitopic.restock.platform.communications.application.internal.outboundservices.pushprovider.PushNotificationService;
 import com.uitopic.restock.platform.communications.domain.model.aggregates.Notification;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
+import com.uitopic.restock.platform.communications.domain.model.commands.SendEmailNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.repositories.NotificationRepository;
 import com.uitopic.restock.platform.communications.domain.repositories.PushSubscriptionRepository;
@@ -95,5 +96,10 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.message()
 
         ));
+    }
+
+    @Override
+    public void handle(SendEmailNotificationCommand command) {
+
     }
 }

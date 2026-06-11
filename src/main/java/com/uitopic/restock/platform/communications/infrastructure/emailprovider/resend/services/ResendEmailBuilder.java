@@ -8,22 +8,73 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class for building email options for different email templates using the Resend email service.
+ */
 public final class ResendEmailBuilder {
 
     private ResendEmailBuilder() {
         // Private constructor to prevent instantiation
     }
 
-    public static CreateEmailOptions createDiscrepancyEmail(String userDirection, List<Pair<String, String>> htmlVariables) {
+    /**
+     * Adds variables to the email template based on the provided list of key-value pairs and variable names.
+     *
+     * @param htmlVariables A list of key-value pairs representing the variables to be added to the email template.
+     * @param variableNames A list of variable names that need to be extracted from the htmlVariables and added to the email template.
+     * @param variables A map that will be populated with the variable names and their corresponding values extracted from the htmlVariables list. The variable names are used as keys, and the values are extracted based on matching keys in the htmlVariables list. If a variable name is not found in the htmlVariables, it defaults to "N/A".
+     */
+    private static void addVariable(
+            List<Pair<String, String>> htmlVariables,
+            List<String> variableNames,
+            Map<String, Object> variables
+    ) {
+        for (String variableName : variableNames) {
+            String value = htmlVariables.stream()
+                    .filter(pair -> variableName.equals(pair.getKey()))
+                    .map(Pair::getValue)
+                    .findFirst()
+                    .orElse("N/A");
+            variables.put(variableName, value);
+        }
+    }
 
+    /**
+     * Builds the email options for the discrepancy detected email template.
+     *
+     * @param userDirection The recipient email address.
+     * @param htmlVariables A list of key-value pairs to be used as variables in the email template.
+     * @return CreateEmailOptions object containing the email configuration for the discrepancy detected email.
+     */
+    public static CreateEmailOptions createDiscrepancyEmail(
+            String userDirection,
+            List<Pair<String, String>> htmlVariables
+    ) {
+        // Template id for the discrepancy detected email template in Resend
+        String templateId = "c67e6aeb-7dae-4b6b-98de-4a52e243f63c";
+
+        // Initialize a map to hold the variables for the email template
         Map<String, Object> variables = new HashMap<>();
-        variables.put("CUSTOM_SUPPLY_NAME", htmlVariables);
 
+        // List of variable names that we want to extract from the htmlVariables and add to the email template
+        List<String> variableNames = List.of(
+                "CUSTOM_SUPPLY_NAME",
+                "DEVICE_ID",
+                "PHYSICAL_STOCK",
+                "SYSTEM_STOCK",
+                "THRESHOLD_CONFIGURED"
+        );
+
+        // Populate the variables map with the values extracted from the htmlVariables list based on the variable names
+        addVariable(htmlVariables, variableNames, variables);
+
+        // Build the email template using the template ID and the variables map
         var discrepancyDetectedTemplate = Template.builder()
-                .id("discrepancy_detected_email")
+                .id(templateId)
                 .variables(variables)
                 .build();
 
+        // Build and return the CreateEmailOptions object with the email configuration, including the sender, recipient, subject, and the email template
         return CreateEmailOptions.builder()
                 .from("onboarding@onboarding.resend.dev")
                 .to(userDirection)
