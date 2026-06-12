@@ -3,9 +3,12 @@ package com.uitopic.restock.platform.iam.application.acl;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
 import com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Implementation of the IAM anti-corruption layer facade.
@@ -55,5 +58,20 @@ public class IamContextFacadeImpl implements IamContextFacade {
                 .orElse("");
         log.debug("Account ID for user ID {}: '{}'", userId, accountId);
         return accountId;
+    }
+
+    /**
+     * Retrieves the usernames associated with the given account ID.
+     *
+     * @param accountId the ID of the account
+     * @return a list of usernames (email addresses) associated with the account, or an empty list if none found
+     */
+    @Override
+    public List<String> getUsernamesByAccountId(AccountId accountId) {
+        var users = userRepository.findByAccountId(accountId);
+
+        return users.stream()
+                .map(user -> user.getEmail().getEmail())
+                .toList();
     }
 }

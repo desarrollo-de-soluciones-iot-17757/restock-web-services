@@ -5,7 +5,6 @@ public record CreateNotificationCommand(
         String sourceId,
         String title,
         String message,
-        String severity,
-        String status
+        String severity
 ) {
 }

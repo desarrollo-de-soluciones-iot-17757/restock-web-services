@@ -1,5 +1,9 @@
 package com.uitopic.restock.platform.iam.interfaces.acl;
 
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+
+import java.util.List;
+
 /**
  * Facade interface for the IAM (Identity and Access Management) context.
  * This interface provides methods for other bounded contexts to interact with the IAM context without exposing its internal implementation details.
@@ -26,4 +30,12 @@ public interface IamContextFacade {
      * @return the account ID as a string, or empty string if not found
      */
     String fetchAccountIdByUserId(String userId);
+
+    /**
+     * Retrieves the usernames associated with the given account ID.
+     *
+     * @param accountId the ID of the account
+     * @return the username as a string, or empty string if not found
+     */
+    List<String> getUsernamesByAccountId(AccountId accountId);
 }

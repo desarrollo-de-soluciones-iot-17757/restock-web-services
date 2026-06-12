@@ -7,5 +7,6 @@ package com.uitopic.restock.platform.shared.domain.model.valueobjects;
 public enum NotificationType {
     EMAIL,
     PUSH,
-    ALL
+    ALL,
+    NONE
 }

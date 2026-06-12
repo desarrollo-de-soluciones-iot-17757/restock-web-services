@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.communications.domain.services;
 
 import com.uitopic.restock.platform.communications.domain.model.aggregates.Notification;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
+import com.uitopic.restock.platform.communications.domain.model.commands.SendEmailNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 
 import java.util.Optional;
@@ -26,4 +27,11 @@ public interface NotificationCommandService {
      * @param command The command containing the details for sending the push notification.
      */
     void handle(SendPushNotificationCommand command);
+
+    /**
+     * Handles the sending of an email notification based on the provided command.
+     *
+     * @param command The command containing the details for sending the email notification.
+     */
+    void handle(SendEmailNotificationCommand command);
 }
