@@ -7,6 +7,7 @@ import com.resend.services.emails.model.CreateEmailResponse;
 import com.uitopic.restock.platform.communications.infrastructure.emailprovider.resend.ResendService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +21,19 @@ import java.util.List;
 public class ResendServiceImpl implements ResendService {
 
     /**
+     * The API key for authenticating with the Resend email service, injected from the application configuration. This key is essential for initializing the Resend client and authorizing email sending operations.
+     */
+    @Value("${resend.api.key}")
+    String resendApiKey;
+
+    /**
      * @inheritDocs
      */
     @Override
     public void sendEmail(String to, List<Pair<String, String>> htmlVariables, String alertType) {
 
         // Initialize the Resend email client with the API key.
-        Resend resend = new Resend("");
+        Resend resend = new Resend(resendApiKey);
 
         // Initialize the CreateEmailOptions object to null. This will be populated based on the alert type.
         CreateEmailOptions params = null;
