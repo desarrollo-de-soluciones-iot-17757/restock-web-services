@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.resources.interfaces.acl;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Inbound ACL facade — exposes resources bounded context inventory operations to other bounded contexts.
@@ -16,5 +17,5 @@ public interface ResourcesContextFacade {
      * @param batchId the unique identifier of the batch for which to retrieve the supply stock level
      * @return the current supply stock level for the specified batch ID, represented as a double value. This value indicates the quantity of stock available for that batch, which can be used to determine if restocking is necessary or to manage inventory levels effectively.
      */
-    Double getSupplyStockByBatchId(BatchId batchId);
+    Pair<Double, String> getSupplyStockAndNameByBatchId(BatchId batchId);
 }
