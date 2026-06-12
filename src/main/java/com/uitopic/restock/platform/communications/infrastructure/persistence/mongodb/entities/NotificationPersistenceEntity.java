@@ -18,9 +18,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "notifications")
 public class NotificationPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    /** Unique identifier for the notification. */
-    private String id;
-
     /** Identifier of the user who is the recipient of the notification. */
     private String recipientId;
 
