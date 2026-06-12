@@ -51,4 +51,14 @@ public class DiscrepancyDetectedEvent implements NotificationEvent {
      */
     @NotNull
     private AccountId accountId;
+
+    @Override
+    public String notificationTitle() {
+        return "Inventory Discrepancy Detected";
+    }
+
+    @Override
+    public String notificationMessage() {
+        return "A difference is detected between the physical stock and the recorded stock.";
+    }
 }

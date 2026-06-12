@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.resources.domain.model.aggregates;
 
 import com.uitopic.restock.platform.resources.domain.model.events.InventoryBelowMinimumStockEvent;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockAlertLevel;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import lombok.*;
@@ -123,10 +124,10 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
      * @param branchName branch display name
      * @param minimumStock configured minimum stock
      */
-    public void registerBelowMinimumStockEvent(String branchName, Double minimumStock) {
+    public void registerBelowMinimumStockEvent(String branchName, Double minimumStock, StockAlertLevel alertLevel) {
         validateText(branchName, "Branch name");
 
-        if (minimumStock == null || this.currentStock.stock() >= minimumStock) {
+        if (minimumStock == null || alertLevel == null || alertLevel == StockAlertLevel.OK) {
             return;
         }
 
@@ -139,7 +140,25 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
                 .minimumStock(minimumStock)
                 .unitMeasurement(this.currentStock.unitMeasurement().unitName())
                 .accountId(this.accountId.getAccountId())
+                .alertLevel(alertLevel)
                 .build());
+    }
+
+    public void registerStockAlertIfEscalated(String branchName, Double minimumStock, Double previousStock) {
+        validateText(branchName, "Branch name");
+
+        if (minimumStock == null || previousStock == null) {
+            return;
+        }
+
+        var previousLevel = StockAlertLevel.from(previousStock, minimumStock);
+        var currentLevel = StockAlertLevel.from(this.currentStock.stock(), minimumStock);
+
+        if (currentLevel == StockAlertLevel.OK || !currentLevel.isMoreSevereThan(previousLevel)) {
+            return;
+        }
+
+        registerBelowMinimumStockEvent(branchName, minimumStock, currentLevel);
     }
 
     /**
