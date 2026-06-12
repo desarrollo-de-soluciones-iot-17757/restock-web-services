@@ -17,6 +17,12 @@ import lombok.Getter;
 public class DiscrepancyDetectedEvent implements NotificationEvent {
 
     /**
+     * The custom supply name associated with the discrepancy, provided by the comparison task. This is used to identify the specific supply item that has a discrepancy between the physical and system stock records.
+     */
+    @NotEmpty
+    private String customSupplyName;
+
+    /**
      * The physical stock record, provided by the comparison task. This represents the actual inventory level detected during the physical count.
      */
     @NotNull

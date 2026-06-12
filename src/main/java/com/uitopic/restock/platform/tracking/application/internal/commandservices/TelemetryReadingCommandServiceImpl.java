@@ -72,7 +72,9 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
         try {
             // Get the physical stock from the telemetry reading and the system stock from the external resources service using the assigned batch ID. Also, retrieve the device ID and the discrepancy threshold for anomaly detection.
             var physicalStock = command.physicalStock();
-            var systemStock = new StockRecord(externalResourcesService.getCustomSupplyStockByBatchId(command.assignedBatchId()));
+            var systemStockAndName = externalResourcesService.getCustomSupplyStockAndNameByBatchId(command.assignedBatchId());
+            var systemStock = new StockRecord(systemStockAndName.getLeft());
+            var customSupplyName = systemStockAndName.getRight();
             var deviceId = command.deviceId();
             var pair = externalDevicesService.getAnomalyThreshold(deviceId);
             var discrepancyThreshold = pair.getLeft();
@@ -92,6 +94,7 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             if (isAnomaly) {
                 task.stockMismatch();
                 var event = DiscrepancyDetectedEvent.builder()
+                        .customSupplyName(customSupplyName)
                         .physicalStock(physicalStock)
                         .systemStock(systemStock)
                         .thresholdUsed(discrepancyThreshold)
