@@ -4,8 +4,6 @@ import com.uitopic.restock.platform.communications.interfaces.acl.Communications
 import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCommand;
 import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.NotificationType;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +22,7 @@ public class ExternalCommunicationsService {
 
     /** This method creates a notification by constructing a NotificationCommand with the provided event and account ID, and then processing it through the CommunicationsContextFacade. The notification type is set to ALL, indicating that the notification should be delivered through all available channels (e.g., in-app, email, push). This method allows the resources application to send notifications related to resources without needing to know about the specific implementation details of how notifications are created and delivered in the communications context. */
     public void createNotification(NotificationEvent event, AccountId accountId) {
-        var command = new NotificationCommand(accountId, NotificationType.ALL, event);
+        var command = new NotificationCommand(accountId, event);
         communicationsContextFacade.processNotification(command);
     }
 }

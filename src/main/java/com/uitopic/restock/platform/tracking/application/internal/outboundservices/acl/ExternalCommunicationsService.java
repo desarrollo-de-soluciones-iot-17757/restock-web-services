@@ -4,7 +4,6 @@ import com.uitopic.restock.platform.communications.interfaces.acl.Communications
 import com.uitopic.restock.platform.shared.domain.model.commands.NotificationCommand;
 import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ public class ExternalCommunicationsService {
      * @param accountId the account ID associated with the notification, which can be used to determine the recipients of the notification and any additional context needed for processing the notification
      */
     public void createNotification(NotificationEvent event, AccountId accountId) {
-        var command = new NotificationCommand(accountId, NotificationType.ALL, event);
+        var command = new NotificationCommand(accountId, event);
         communicationsContextFacade.processNotification(command);
     }
 }

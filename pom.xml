@@ -189,11 +189,19 @@
             <version>2.0.0</version>
         </dependency>
 
+        <!-- Firebase Cloud Messaging for sending Push Notifications to the Mobile Application -->
         <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
             <version>9.8.0</version>
+        </dependency>
+
+        <!-- Resend for sending Emails about alerts -->
+        <dependency>
+            <groupId>com.resend</groupId>
+            <artifactId>resend-java</artifactId>
+            <version>LATEST</version>
         </dependency>
 
     </dependencies>

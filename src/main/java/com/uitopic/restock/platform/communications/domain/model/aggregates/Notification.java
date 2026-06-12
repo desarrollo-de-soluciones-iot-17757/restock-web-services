@@ -44,15 +44,14 @@ public class Notification extends AbstractDomainAggregateRoot<Notification> {
             String sourceId,
             String message,
             String title,
-            String severity,
-            String status
+            String severity
     ) {
         this.recipientId = recipientId;
         this.sourceId = sourceId;
         this.message = message;
         this.title = title;
         this.severity = NotificationSeverity.valueOf(severity);
-        this.status = NotificationStatus.valueOf(status);
+        this.status = NotificationStatus.UNREAD;
     }
 
     public void markAsRead() {
