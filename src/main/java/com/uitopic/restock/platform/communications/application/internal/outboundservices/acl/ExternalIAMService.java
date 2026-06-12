@@ -24,7 +24,7 @@ public class ExternalIAMService {
      * @param accountId the ID of the account for which to fetch associated usernames
      * @return a list of usernames associated with the given account ID, or an empty list if no users are found
      */
-    List<String> getUsernamesByAccountId(AccountId accountId) {
+    public List<String> getUsernamesByAccountId(AccountId accountId) {
         return iamContextFacade.getUsernamesByAccountId(accountId);
     }
 }

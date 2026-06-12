@@ -4,9 +4,7 @@ import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.Template;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility class for building email options for different email templates using the Resend email service.
@@ -29,14 +27,13 @@ public final class ResendEmailBuilder {
             List<String> variableNames,
             Map<String, Object> variables
     ) {
-        for (String variableName : variableNames) {
-            String value = htmlVariables.stream()
-                    .filter(pair -> variableName.equals(pair.getKey()))
-                    .map(Pair::getValue)
-                    .findFirst()
-                    .orElse("N/A");
-            variables.put(variableName, value);
-        }
+        // Create a set of allowed variable names for quick lookup
+        Set<String> allowedNames = new HashSet<>(variableNames);
+
+        // Iterate through the htmlVariables list and add the variables to the map if their keys match the allowed variable names
+        htmlVariables.stream()
+                .filter(pair -> allowedNames.contains(pair.getKey()))
+                .forEach(pair -> variables.put(pair.getKey(), pair.getValue()));
     }
 
     /**

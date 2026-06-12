@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.communications.application.internal.commandservices;
 
+import com.uitopic.restock.platform.communications.application.internal.outboundservices.acl.ExternalIAMService;
 import com.uitopic.restock.platform.communications.application.internal.outboundservices.pushprovider.PushNotificationService;
 import com.uitopic.restock.platform.communications.domain.model.aggregates.Notification;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
@@ -8,6 +9,8 @@ import com.uitopic.restock.platform.communications.domain.model.commands.SendPus
 import com.uitopic.restock.platform.communications.domain.repositories.NotificationRepository;
 import com.uitopic.restock.platform.communications.domain.repositories.PushSubscriptionRepository;
 import com.uitopic.restock.platform.communications.domain.services.NotificationCommandService;
+import com.uitopic.restock.platform.communications.infrastructure.emailprovider.resend.ResendService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class NotificationCommandServiceImpl implements NotificationCommandService {
 
     /** Repositories for managing notifications and push subscriptions. */
@@ -30,16 +34,11 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     /** Service for sending push notifications. */
     private final PushNotificationService pushNotificationService;
 
-    /** Constructs a NotificationCommandServiceImpl with the required repositories and services. */
-    public NotificationCommandServiceImpl(
-            NotificationRepository notificationRepository,
-            PushSubscriptionRepository pushSubscriptionRepository,
-            PushNotificationService pushNotificationService
-    ) {
-        this.notificationRepository = notificationRepository;
-        this.pushSubscriptionRepository = pushSubscriptionRepository;
-        this.pushNotificationService = pushNotificationService;
-    }
+    /** Service for sending email notifications through Resend. */
+    private final ResendService resendService;
+
+    /** Service for interacting with external IAM systems, if needed for notification processing. */
+    private final ExternalIAMService externalIAMService;
 
     /**
      * Handles the CreateNotificationCommand by creating and saving a new notification.
@@ -87,19 +86,39 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.title());
 
         activeDevices.forEach(device -> pushNotificationService.sendPushNotification(
-
                 command.recipientUserId(),
                 device.getProviderToken(),
                 command.severity(),
                 command.sourceId(),
                 command.title(),
                 command.message()
-
         ));
     }
 
+    /**
+     * Handles the SendEmailNotificationCommand by sending an email notification to the user associated with the given account ID.
+     *
+     * @param command The command containing the details for sending the email notification.
+     */
     @Override
     public void handle(SendEmailNotificationCommand command) {
+        var userEmails = externalIAMService.getUsernamesByAccountId(command.accountId());
 
+        log.info("Preparing email notifications for account with id {}, about {}",
+                command.accountId(),
+                command.type());
+
+        if (userEmails.isEmpty()) return;
+
+        log.info("Sending email notifications through Resend. accountId={}, receiversNumber={}, about={}",
+                command.accountId(),
+                userEmails.size(),
+                command.type());
+
+        userEmails.forEach(email -> resendService.sendEmail(
+                email,
+                command.htmlVariables(),
+                command.type()
+        ));
     }
 }
