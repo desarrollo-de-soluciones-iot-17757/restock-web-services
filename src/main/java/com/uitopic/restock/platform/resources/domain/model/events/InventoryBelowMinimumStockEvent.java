@@ -1,8 +1,10 @@
 package com.uitopic.restock.platform.resources.domain.model.events;
 
 import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
+import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockAlertLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -63,4 +65,30 @@ public class InventoryBelowMinimumStockEvent implements NotificationEvent {
      */
     @NotBlank
     private String accountId;
+
+    /**
+     * The alert level indicating the severity of the stock situation, which can be used to determine the appropriate actions to take (e.g., restocking, sending notifications). This field is essential for categorizing the inventory event and ensuring that the right level of attention is given to the issue based on its severity.
+     */
+    @NotNull
+    private StockAlertLevel alertLevel;
+
+    /**
+     * The title of the notification, which is dynamically generated based on the alert level and branch name. This title provides a clear indication of the nature of the notification, making it easier to identify and address the issue.
+      * @return String
+     */
+    @Override
+    public String notificationTitle() {
+        return alertLevel == StockAlertLevel.CRITICAL
+                ? "Critical Stock in " + branchName
+                : "Low Stock in " + branchName;
+    }
+
+    /**
+     * The message of the notification, which provides details about the current stock level, the minimum stock level, and the batch information. This message is designed to give recipients a clear understanding of the inventory situation and the necessary actions to take.
+     * @return String
+     */
+    @Override
+    public String notificationMessage() {
+        return "The bath " + batchCode + " has " + currentStock.intValue() + " stock" + ". The minimum stock is " + minimumStock.intValue() + ".";
+    }
 }

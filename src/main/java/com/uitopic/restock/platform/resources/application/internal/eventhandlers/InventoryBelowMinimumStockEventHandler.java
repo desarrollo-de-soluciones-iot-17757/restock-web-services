@@ -38,10 +38,11 @@ public class InventoryBelowMinimumStockEventHandler {
     @EventListener
     public void on(InventoryBelowMinimumStockEvent event) {
         log.info(
-                "Inventory below minimum stock: batchId={}, currentStock={}, minimumStock={}",
+                "Inventory stock alert triggered: batchId={}, currentStock={}, minimumStock={}, alertLevel={}",
                 event.getBatchId(),
                 event.getCurrentStock(),
-                event.getMinimumStock()
+                event.getMinimumStock(),
+                event.getAlertLevel()
         );
 
         externalCommunicationsService.createNotification(event, new AccountId(event.getAccountId()));
