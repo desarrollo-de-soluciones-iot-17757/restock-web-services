@@ -126,12 +126,23 @@ public class BatchCommandServiceImpl implements BatchCommandService {
             }
 
             if (command.currentStock() != null) {
+                var previousStock = batch.getCurrentStock().stock();
                 validateStockRange(command.currentStock(), customSupply);
 
                 batch.changeCurrentStock(new Stock(
                         command.currentStock(),
                         customSupply.getUnitMeasurement()
                 ));
+
+                var branch = branchRepository.findById(batch.getBranchId())
+                        .orElseThrow(() -> new BranchNotFoundException(
+                                "Branch not found: " + batch.getBranchId()
+                        ));
+                batch.registerStockAlertIfEscalated(
+                        branch.getName(),
+                        minimumStockOf(customSupply),
+                        previousStock
+                );
             }
 
             if (command.expirationDate() != null) {
@@ -139,6 +150,8 @@ public class BatchCommandServiceImpl implements BatchCommandService {
             }
 
             Batch updated = batchRepository.save(batch);
+            batch.domainEvents().forEach(eventPublisher::publish);
+            batch.clearDomainEvents();
             log.info("Batch updated successfully: id='{}'", updated.getId());
             return updated;
         });
@@ -228,10 +241,12 @@ public class BatchCommandServiceImpl implements BatchCommandService {
                 })
                 .orElseGet(() -> createTargetBatchFromTransfer(sourceBatch, command, quantity));
 
+        var previousSourceStock = sourceBatch.getCurrentStock().stock();
         sourceBatch.subtract(quantity);
-        sourceBatch.registerBelowMinimumStockEvent(
+        sourceBatch.registerStockAlertIfEscalated(
                 sourceBranch.getName(),
-                customSupply.getStockRange() != null ? customSupply.getStockRange().minStock() : null
+                minimumStockOf(customSupply),
+                previousSourceStock
         );
 
         // Create a domain event to represent the stock transfer, capturing relevant information about the source and target batches, the quantity transferred, and the remaining stock at both branches after the transfer. This event can be used to notify other parts of the system about the inventory change and trigger any necessary actions or updates.
@@ -376,15 +391,25 @@ public class BatchCommandServiceImpl implements BatchCommandService {
             return;
         }
 
-        if (!customSupply.getStockRange().isInRange(currentStock)) {
+        if (currentStock > customSupply.getStockRange().maxStock()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Current stock must be between "
-                            + customSupply.getStockRange().minStock()
-                            + " and "
+                    "Current stock must be less than or equal to "
                             + customSupply.getStockRange().maxStock()
             );
         }
+    }
+
+    /**
+     * Retrieves the minimum stock level from the custom supply's stock range, if defined. This value is used for inventory management and restocking purposes, allowing the system to determine when stock levels are low and trigger appropriate actions, such as sending notifications or generating restock orders.
+     *
+     * @param customSupply custom supply from which to retrieve the minimum stock level
+     * @return minimum stock level if defined, otherwise null
+     */
+    private Double minimumStockOf(CustomSupply customSupply) {
+        return customSupply.getStockRange() != null
+                ? customSupply.getStockRange().minStock()
+                : null;
     }
 
     /**

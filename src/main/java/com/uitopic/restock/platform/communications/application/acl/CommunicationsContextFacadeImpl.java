@@ -84,8 +84,8 @@ public class CommunicationsContextFacadeImpl implements CommunicationsContextFac
         CreateNotificationCommand createNotificationCommand = new CreateNotificationCommand(
                 command.accountId().getAccountId(),
                 command.event().getClass().getSimpleName(),
-                "",
-                "",
+                command.event().notificationTitle(),
+                command.event().notificationMessage(),
                 NotificationSeverity.INFO.name()
         );
 
@@ -100,8 +100,8 @@ public class CommunicationsContextFacadeImpl implements CommunicationsContextFac
     private void sendPushNotification(NotificationCommand command) {
         var recipientAccount = command.accountId();
         var sourceId = command.event().getClass().getSimpleName();
-        var title = "";
-        var message = "";
+        var title = command.event().notificationTitle();
+        var message = command.event().notificationMessage();
         var severity = NotificationSeverity.INFO.name();
 
         SendPushNotificationCommand sendPushCommand = new SendPushNotificationCommand(
