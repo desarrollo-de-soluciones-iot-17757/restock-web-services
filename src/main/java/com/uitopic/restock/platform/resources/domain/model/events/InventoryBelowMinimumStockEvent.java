@@ -89,6 +89,6 @@ public class InventoryBelowMinimumStockEvent implements NotificationEvent {
      */
     @Override
     public String notificationMessage() {
-        return "The bath " + batchCode + " has " + currentStock.intValue() + " stock" + ". The minimum stock is " + minimumStock.intValue() + ".";
+        return "The batch " + batchCode + " has " + currentStock.intValue() + " stock" + ". The minimum stock is " + minimumStock.intValue() + ".";
     }
 }
