@@ -1,10 +1,12 @@
 package com.uitopic.restock.platform.resources.application.acl;
 
 import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
+import com.uitopic.restock.platform.resources.domain.repositories.CustomSupplyRepository;
 import com.uitopic.restock.platform.resources.domain.services.BatchCommandService;
 import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFacade;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,6 +21,9 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
 
     // The BatchRepository is used to access batch data from the database, allowing the implementation to retrieve current stock levels for specific batches when requested. It provides methods to query batch information and is essential for implementing the getSupplyStockByBatchId method, which requires access to batch data to return accurate stock levels.
     private final BatchRepository batchRepository;
+
+    /** The CustomSupplyRepository is used to access custom supply data from the database, which may be necessary for certain stock management operations or for retrieving additional information about supplies when needed. It provides methods to query custom supply information and can be used in conjunction with the BatchRepository to provide comprehensive inventory management capabilities within the resources context. */
+    private final CustomSupplyRepository customSupplyRepository;
 
     /**
      * @inheritDocs
@@ -48,11 +53,21 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
      * @inheritDocs
      */
     @Override
-    public Double getSupplyStockByBatchId(BatchId batchId) {
+    public Pair<Double, String> getSupplyStockAndNameByBatchId(BatchId batchId) {
         var batch = batchRepository.findById(batchId.getBatchId());
-        if (batch.isPresent()) {
-            return batch.get().getCurrentStock().stock();
+        if (batch.isEmpty()) {
+            return Pair.of(0.0, "");
         }
-        return 0.0;
+
+        var customSupply = customSupplyRepository.findById(batch.get().getCustomSupplyId());
+        if (customSupply.isEmpty()) {
+            return Pair.of(0.0, "");
+        }
+
+        return Pair.of(
+                batch.get().getCurrentStock().stock(),
+                customSupply.get().getName()
+        );
+
     }
 }
