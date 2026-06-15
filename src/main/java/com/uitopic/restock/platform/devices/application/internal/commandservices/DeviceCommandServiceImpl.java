@@ -7,6 +7,7 @@ import com.uitopic.restock.platform.devices.domain.model.valueobjects.WeightMeas
 import com.uitopic.restock.platform.devices.domain.repositories.DeviceRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceCommandService;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
+import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,11 @@ import java.util.Optional;
 public class DeviceCommandServiceImpl implements DeviceCommandService {
 
     private final DeviceRepository deviceRepository;
+    private final SpringDomainEventPublisher eventPublisher;
 
-    public DeviceCommandServiceImpl(DeviceRepository deviceRepository) {
+    public DeviceCommandServiceImpl(DeviceRepository deviceRepository, SpringDomainEventPublisher eventPublisher) {
         this.deviceRepository = deviceRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -119,6 +122,8 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
         return deviceRepository.findById(command.deviceId()).map(device -> {
             device.confirmConfiguration();
             var saved = deviceRepository.save(device);
+            device.domainEvents().forEach(eventPublisher::publish);
+            device.clearDomainEvents();
             log.info("Configuration confirmed for device id='{}', status='{}'", saved.getId(), saved.getStatus());
             return saved;
         });

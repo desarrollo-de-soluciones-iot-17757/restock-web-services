@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.devices.domain.model.aggregates;
 
+import com.uitopic.restock.platform.devices.domain.model.events.DeviceConfiguredEvent;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.*;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -72,6 +73,7 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
             throw new IllegalStateException("Measurement must be configured before confirming configuration");
 
         this.status = DeviceStatus.CONFIGURED;
+        this.registerDomainEvent(new DeviceConfiguredEvent(this.macAddress.address()));
     }
 
     public void activate() {
