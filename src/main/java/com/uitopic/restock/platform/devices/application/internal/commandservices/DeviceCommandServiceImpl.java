@@ -2,10 +2,13 @@ package com.uitopic.restock.platform.devices.application.internal.commandservice
 
 import com.uitopic.restock.platform.devices.domain.model.aggregates.Device;
 import com.uitopic.restock.platform.devices.domain.model.commands.*;
+import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshold;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.MacAddress;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.WeightMeasurement;
 import com.uitopic.restock.platform.devices.domain.repositories.DeviceRepository;
+import com.uitopic.restock.platform.devices.domain.repositories.DeviceThresholdRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceCommandService;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
 import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +23,13 @@ import java.util.Optional;
 public class DeviceCommandServiceImpl implements DeviceCommandService {
 
     private final DeviceRepository deviceRepository;
+    private final DeviceThresholdRepository deviceThresholdRepository;
     private final SpringDomainEventPublisher eventPublisher;
 
-    public DeviceCommandServiceImpl(DeviceRepository deviceRepository, SpringDomainEventPublisher eventPublisher) {
+    public DeviceCommandServiceImpl(DeviceRepository deviceRepository, SpringDomainEventPublisher eventPublisher, DeviceThresholdRepository deviceThresholdRepository) {
         this.deviceRepository = deviceRepository;
         this.eventPublisher = eventPublisher;
+        this.deviceThresholdRepository = deviceThresholdRepository;
     }
 
     @Override
@@ -119,8 +124,11 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
     public Optional<Device> handle(ConfirmDeviceConfigurationCommand command) {
         log.info("Confirming configuration for device id='{}'", command.deviceId());
 
+        var deviceThreshold = (deviceThresholdRepository.findByDeviceId(new DeviceId(command.deviceId()))
+                .orElseThrow(() -> new IllegalArgumentException("Supply threshold not found: " + command.deviceId())));
+
         return deviceRepository.findById(command.deviceId()).map(device -> {
-            device.confirmConfiguration();
+            device.confirmConfiguration(deviceThreshold);
             var saved = deviceRepository.save(device);
             device.domainEvents().forEach(eventPublisher::publish);
             device.clearDomainEvents();

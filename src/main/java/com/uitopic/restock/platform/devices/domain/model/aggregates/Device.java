@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.devices.domain.model.aggregates;
 
+import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshold;
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceConfiguredEvent;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.*;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
@@ -60,7 +61,7 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
         this.weightMeasurement = weightMeasurement;
     }
 
-    public void confirmConfiguration() {
+    public void confirmConfiguration(DeviceThreshold deviceThreshold) {
         if (specifications == null)
             throw new IllegalStateException("Specifications must be added before confirming configuration");
         if (branchId == null)
@@ -73,7 +74,7 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
             throw new IllegalStateException("Measurement must be configured before confirming configuration");
 
         this.status = DeviceStatus.CONFIGURED;
-        this.registerDomainEvent(new DeviceConfiguredEvent(this.macAddress.address()));
+        this.registerDomainEvent(new DeviceConfiguredEvent(this.macAddress.address(), deviceThreshold));
     }
 
     public void activate() {

@@ -28,7 +28,7 @@ public class EdgeServiceImpl implements EdgeService {
     }
 
     @Override
-    public void registerDevice(String macAddress) {
+    public void registerDevice(String macAddress, Double minStock, Double maxStock, Double minPercentage, Double maxPercentage, Double minCelsius, Double maxCelsius) {
         try {
             restClient.post()
                     .uri(settings.devicesUrl())

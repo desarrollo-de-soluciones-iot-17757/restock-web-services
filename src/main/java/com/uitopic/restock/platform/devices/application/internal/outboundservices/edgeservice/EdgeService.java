@@ -5,10 +5,6 @@ package com.uitopic.restock.platform.devices.application.internal.outboundservic
  */
 public interface EdgeService {
 
-    /**
-     * Registers a device with the given MAC address. This method is responsible for adding the device to the system's registry, allowing it to be recognized and managed as part of the edge device network. The implementation of this method will handle the necessary logic to ensure that the device is properly registered and can communicate with the rest of the system.
-     *
-     * @param macAddress The MAC address of the device to be registered. This unique identifier is used to distinguish the device from others in the network and allows for proper management and communication within the system.
-     */
-    void registerDevice(String macAddress);
+
+    void registerDevice(String macAddress, Double minStock, Double maxStock, Double minPercentage, Double maxPercentage,Double minCelsius, Double maxCelsius);
 }

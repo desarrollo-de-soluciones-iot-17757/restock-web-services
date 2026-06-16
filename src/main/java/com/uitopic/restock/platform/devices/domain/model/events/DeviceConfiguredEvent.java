@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.devices.domain.model.events;
 
+import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshold;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -11,7 +12,9 @@ public class DeviceConfiguredEvent {
     @NotEmpty
     private String macAddress;
 
-    public DeviceConfiguredEvent(String macAddress) {
+    private DeviceThreshold deviceThreshold;
+
+    public DeviceConfiguredEvent(String macAddress, DeviceThreshold deviceThreshold) {
         this.macAddress = macAddress;
     }
 }

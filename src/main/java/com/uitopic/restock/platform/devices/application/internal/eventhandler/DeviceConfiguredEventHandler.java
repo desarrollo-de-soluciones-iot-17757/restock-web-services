@@ -19,6 +19,6 @@ public class DeviceConfiguredEventHandler {
     @EventListener
     public void on(DeviceConfiguredEvent event) {
         log.info("Handling DeviceConfiguredEvent for device with MAC address='{}'", event.getMacAddress());
-        edgeService.registerDevice(event.getMacAddress());
+        edgeService.registerDevice(event.getMacAddress(), event.getDeviceThreshold().getMinStock(), event.getDeviceThreshold().getMaxStock(), event.getDeviceThreshold().getTemperature().minCelsius(), event.getDeviceThreshold().getTemperature().maxCelsius(), event.getDeviceThreshold().getHumidity().minPercentage(), event.getDeviceThreshold().getHumidity().maxPercentage());
     }
 }
