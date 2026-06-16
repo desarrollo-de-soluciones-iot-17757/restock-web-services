@@ -22,5 +22,6 @@ public record UpdateProductCommand(
         String description,
         String sku,
         String imageUrl,
-        BigDecimal sellingPrice
+        BigDecimal sellingPrice,
+        String status
 ) {}

@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.planning.domain.model.entities.Ingredient;
 import com.uitopic.restock.platform.planning.domain.model.valueobjects.ProductType;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.ResourceStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -65,6 +66,10 @@ public class Product extends AbstractDomainAggregateRoot<Product> {
 
     /** Selling price of the finished product. Currency semantics are defined externally. */
     private BigDecimal sellingPrice;
+
+    /** Lifecycle status of the product (ACTIVE, INACTIVE, DELETED). */
+    @Builder.Default
+    private ResourceStatus status = ResourceStatus.ACTIVE;
 
     /**
      * Embedded list of ingredients/components that make up this product.
@@ -154,10 +159,26 @@ public class Product extends AbstractDomainAggregateRoot<Product> {
      */
     public void update(String name, String description, String sku,
                        String imageUrl, BigDecimal sellingPrice) {
+        update(name, description, sku, imageUrl, sellingPrice, null);
+    }
+
+    /**
+     * Updates the mutable product fields including status.
+     *
+     * @param name          new product name (ignored if {@code null})
+     * @param description   new description (ignored if {@code null})
+     * @param sku           new SKU (ignored if {@code null})
+     * @param imageUrl      new image URL (ignored if {@code null})
+     * @param sellingPrice  new selling price (ignored if {@code null})
+     * @param status        new status (ignored if {@code null})
+     */
+    public void update(String name, String description, String sku,
+                       String imageUrl, BigDecimal sellingPrice, ResourceStatus status) {
         if (name != null && !name.isBlank())        this.name = name;
         if (description != null)                     this.description = description;
         if (sku != null && !sku.isBlank())           this.sku = sku;
         if (imageUrl != null)                        this.imageUrl = imageUrl;
         if (sellingPrice != null)                    this.sellingPrice = sellingPrice;
+        if (status != null)                          this.status = status;
     }
 }

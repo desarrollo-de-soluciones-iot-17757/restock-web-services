@@ -26,7 +26,8 @@ public class UpdateProductCommandFromResourceAssembler {
                 resource.description(),
                 resource.sku(),
                 resource.imageUrl(),
-                resource.sellingPrice()
+                resource.sellingPrice(),
+                resource.status()
         );
     }
 }

@@ -121,7 +121,8 @@ public class ProductCommandServiceImpl implements ProductCommandService {
                     command.description(),
                     command.sku(),
                     command.imageUrl(),
-                    command.sellingPrice()
+                    command.sellingPrice(),
+                    parseResourceStatus(command.status())
             );
 
             Product saved = productRepository.save(product);
@@ -218,6 +219,19 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         } catch (IllegalArgumentException e) {
             throw new InvalidProductTypeException(
                     "Invalid product type: " + raw + ". Allowed values are: KIT and RECIPE"
+            );
+        }
+    }
+
+    private ResourceStatus parseResourceStatus(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return ResourceStatus.valueOf(raw.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid product status: " + raw + ". Allowed values are: ACTIVE, INACTIVE, DELETED"
             );
         }
     }
