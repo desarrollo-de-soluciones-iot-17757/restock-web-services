@@ -22,8 +22,8 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/v1/products", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Product Analytics", description = "Analytics endpoints for product inventory monitoring.")
+@RequestMapping(value = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "System Analytics", description = "Analytics endpoints for system-wide monitoring.")
 public class ProductsAnalyticsController {
 
     private final AnalyticsReportingQueryServiceImpl analyticsReportingQueryService;
@@ -47,11 +47,11 @@ public class ProductsAnalyticsController {
      */
     @Operation(summary = "Get products with low stock (critical products)",
                description = "Returns a list of products whose stock is below the configured minimum threshold, ordered by stock deficit descending.")
-    @GetMapping("/critical-products")
+    @GetMapping("/accounts/{accountId}/critical-products")
     public ResponseEntity<List<CriticalProductResource>> getCriticalProducts(
-            @RequestParam String accountId
+            @PathVariable String accountId
     ) {
-        log.info("GET /api/v1/products/critical-products?accountId='{}'", accountId);
+        log.info("GET /api/v1/accounts/{}/critical-products", accountId);
         var criticalProducts = analyticsReportingQueryService.getCriticalProducts(accountId);
         var resources = criticalProducts.stream()
                 .map(CriticalProductResourceFromEntityAssembler::toResourceFromEntity)
@@ -70,12 +70,12 @@ public class ProductsAnalyticsController {
      */
     @Operation(summary = "Get stock discrepancies for a specific product",
                description = "Returns the physical stock, digital stock, and calculated difference for a product. Returns conciliated status when no discrepancies exist.")
-    @GetMapping("/{productId}/stock-discrepancies")
+    @GetMapping("/custom-supplies/{id}/stock-discrepancies")
     public ResponseEntity<List<StockDiscrepancyResource>> getStockDiscrepancies(
-            @PathVariable String productId
+            @PathVariable String id
     ) {
-        log.info("GET /api/v1/products/{}/stock-discrepancies", productId);
-        var discrepancies = analyticsReportingQueryService.getStockDiscrepancies(productId);
+        log.info("GET /api/v1/custom-supplies/{}/stock-discrepancies", id);
+        var discrepancies = analyticsReportingQueryService.getStockDiscrepancies(id);
         if (discrepancies.isEmpty()) {
             return ResponseEntity.ok(List.of(
                     new StockDiscrepancyResource(null, 0.0, 0.0, 0.0, null, null, true)

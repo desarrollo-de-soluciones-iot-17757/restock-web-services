@@ -22,8 +22,8 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/v1/sales", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Sales Analytics", description = "Analytics endpoints for sales history and trends.")
+@RequestMapping(value = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "System Analytics", description = "Analytics endpoints for system-wide monitoring.")
 public class SalesAnalyticsController {
 
     private final AnalyticsReportingQueryServiceImpl analyticsReportingQueryService;
@@ -49,13 +49,13 @@ public class SalesAnalyticsController {
      */
     @Operation(summary = "Get recent sales history",
                description = "Returns a chronological list of recent sales, optionally filtered by date range. Each record includes branch origin, amount, and supplies sold.")
-    @GetMapping("/recent-sales")
+    @GetMapping("/accounts/{accountId}/recent-sales")
     public ResponseEntity<List<RecentSaleResource>> getRecentSales(
-            @RequestParam String accountId,
+            @PathVariable String accountId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        log.info("GET /api/v1/sales/recent-sales?accountId='{}'&startDate='{}'&endDate='{}'", accountId, startDate, endDate);
+        log.info("GET /api/v1/accounts/{}/recent-sales?startDate='{}'&endDate='{}'", accountId, startDate, endDate);
         var recentSales = analyticsReportingQueryService.getRecentSales(accountId, startDate, endDate);
         var resources = recentSales.stream()
                 .map(RecentSaleResourceFromEntityAssembler::toResourceFromEntity)
