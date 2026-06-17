@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.communications.domain.model.aggregates;
 
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationSeverity;
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationStatus;
+import com.uitopic.restock.platform.communications.domain.model.valueobjects.SourceType;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,8 +24,11 @@ public class Notification extends AbstractDomainAggregateRoot<Notification> {
     /** Identifier of the user who is the recipient of the notification. */
     private String recipientId;
 
-    /** Identifier of the source of the notification. */
+    /** Optional identifier of the source entity that triggered the notification (e.g., device ID, batch ID). */
     private String sourceId;
+
+    /** Type of the source that triggered the notification (e.g., DEVICE, BATCH, INVENTORY). */
+    private SourceType sourceType;
 
     /** Content of the notification message. */
     private String message;
@@ -42,18 +46,23 @@ public class Notification extends AbstractDomainAggregateRoot<Notification> {
     public Notification(
             String recipientId,
             String sourceId,
+            SourceType sourceType,
             String message,
             String title,
             String severity
     ) {
         this.recipientId = recipientId;
         this.sourceId = sourceId;
+        this.sourceType = sourceType;
         this.message = message;
         this.title = title;
         this.severity = NotificationSeverity.valueOf(severity);
         this.status = NotificationStatus.UNREAD;
     }
 
+    /**
+     * Marks the notification as read by updating its status.
+     */
     public void markAsRead() {
         this.status = NotificationStatus.READ;
     }

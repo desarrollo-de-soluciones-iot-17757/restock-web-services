@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.entities;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyLevel;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +27,7 @@ public class DiscrepancyPersistenceEntity {
     /**
      * The risk level of the discrepancy, provided by the request. This indicates the severity of the inventory discrepancy and can be used to prioritize resolution efforts. The risk level is determined based on the quantity difference and other factors related to the inventory tracking process.
      */
-    private DiscrepancyLevel riskLevel;
+    private DiscrepancyAlertLevel riskLevel;
 
     /**
      * The quantity difference between the physical and system inventory levels, provided by the comparison task. This field captures the magnitude of the discrepancy in inventory levels, which can be used to assess the severity of the issue and prioritize resolution efforts.

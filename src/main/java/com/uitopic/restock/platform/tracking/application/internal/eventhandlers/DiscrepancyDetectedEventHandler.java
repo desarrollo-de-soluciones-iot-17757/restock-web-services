@@ -28,14 +28,14 @@ public class DiscrepancyDetectedEventHandler {
         log.warn(
                 "Anomaly detected for device {}: physical stock {} differs from system stock {} by more than the threshold of {}",
                 event.getDeviceId().getDeviceId(),
-                event.getPhysicalStock().getStock(),
-                event.getSystemStock().getStock(),
+                event.getPhysicalStock(),
+                event.getSystemStock(),
                 event.getThresholdUsed()
         );
 
         // Create a discrepancy object based on the details of the detected anomaly, such as the difference between physical and system stock levels and the device ID associated with the discrepancy. This will allow us to register the discrepancy in the system using the DiscrepancyCommandService, ensuring that it is properly recorded for further analysis and resolution.
-        var difference = Math.abs(event.getPhysicalStock().getStock() - event.getSystemStock().getStock());
-        var registerDiscrepancyCommand = new RegisterDiscrepancyCommand(difference, event.getDeviceId());
+        var difference = Math.abs(event.getPhysicalStock() - event.getSystemStock());
+        var registerDiscrepancyCommand = new RegisterDiscrepancyCommand(difference, event.getAlertLevel(), event.getDeviceId());
 
         // Creates a discrepancy object and a conciliation task based on the details of the detected anomaly, such as the difference between physical and system stock levels and the device ID associated with the discrepancy. This will allow us to register the discrepancy in the system using the DiscrepancyCommandService, ensuring that it is properly recorded for further analysis and resolution.
         discrepancyCommandService.handle(registerDiscrepancyCommand);

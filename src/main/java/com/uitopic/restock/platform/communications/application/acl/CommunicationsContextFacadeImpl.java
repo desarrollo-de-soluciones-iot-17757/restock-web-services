@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.communications.domain.model.commands.CreateN
 import com.uitopic.restock.platform.communications.domain.model.commands.SendEmailNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationSeverity;
+import com.uitopic.restock.platform.communications.domain.model.valueobjects.SourceType;
 import com.uitopic.restock.platform.communications.domain.services.NotificationCommandService;
 import com.uitopic.restock.platform.communications.infrastructure.emailprovider.resend.services.ResendEmailBuilder;
 import com.uitopic.restock.platform.communications.interfaces.acl.CommunicationsContextFacade;
@@ -81,12 +82,17 @@ public class CommunicationsContextFacadeImpl implements CommunicationsContextFac
      * @param command the NotificationCommand containing the account ID and the notification event for which the in-app notification is to be created. The method extracts necessary information from the command to create a CreateNotificationCommand, which is then processed by the NotificationCommandService to create and persist the in-app notification for the appropriate recipient.
      */
     private void createInAppNotification(NotificationCommand command) {
+        var sourceType = analyzeAlertType(command.event());
+        if (sourceType.isEmpty()) return;
+        var parsedSourceType = SourceType.valueOf(sourceType.toUpperCase());
+
         CreateNotificationCommand createNotificationCommand = new CreateNotificationCommand(
                 command.accountId().getAccountId(),
-                command.event().getClass().getSimpleName(),
+                command.event().getSourceId(),
+                parsedSourceType,
                 command.event().notificationTitle(),
                 command.event().notificationMessage(),
-                NotificationSeverity.INFO.name()
+                command.event().getAlertLevelName()
         );
 
         notificationCommandService.handle(createNotificationCommand);
@@ -102,7 +108,7 @@ public class CommunicationsContextFacadeImpl implements CommunicationsContextFac
         var sourceId = command.event().getClass().getSimpleName();
         var title = command.event().notificationTitle();
         var message = command.event().notificationMessage();
-        var severity = NotificationSeverity.INFO.name();
+        var severity = command.event().getAlertLevelName();
 
         SendPushNotificationCommand sendPushCommand = new SendPushNotificationCommand(
                 recipientAccount.getAccountId(),
