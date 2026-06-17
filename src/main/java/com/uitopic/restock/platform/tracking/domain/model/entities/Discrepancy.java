@@ -2,7 +2,6 @@ package com.uitopic.restock.platform.tracking.domain.model.entities;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyLevel;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyStatus;
 import lombok.*;
 
