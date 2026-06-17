@@ -4,13 +4,13 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Base64;
 
 /**
  * Configuration class for setting up Firebase Cloud Messaging (FCM) integration.
@@ -28,11 +28,13 @@ public class FirebaseCloudMessagingConfiguration {
     private String projectId;
 
     /**
-     * The path to the Firebase service account credentials JSON file, read from the application properties.
-     * This is required for initializing the FirebaseApp and must point to a valid JSON file when FCM integration is enabled.
+     * The Firebase service account credentials encoded as a Base64 string.
+     * This value is read from the application properties and is required when
+     * FCM integration is enabled. The decoded content must represent a valid
+     * Firebase service account JSON.
      */
-    @Value("${firebase.credentials.path:}")
-    private String credentialsPath;
+    @Value("${firebase.credentials.base64:}")
+    private String credentialsBase64;
 
     /**
      * Flag indicating whether FCM integration is enabled, read from the application properties.
@@ -42,65 +44,72 @@ public class FirebaseCloudMessagingConfiguration {
     private boolean enabled;
 
     /**
-     * Creates a bean for FirebaseCloudMessagingSettings, which encapsulates the configuration properties for FCM integration.
-     * This bean will be used to provide the necessary settings for initializing the FirebaseApp.
+     * Creates a bean for FirebaseCloudMessagingSettings, which encapsulates the
+     * configuration properties required for FCM integration.
      *
-     * @return a new instance of FirebaseCloudMessagingSettings with the configured properties
+     * @return a new instance of FirebaseCloudMessagingSettings with the configured
+     * project ID, Base64-encoded credentials, and enabled flag
      */
     @Bean
     FirebaseCloudMessagingSettings firebaseMessagingSettings() {
-        return new FirebaseCloudMessagingSettings(projectId, credentialsPath, enabled);
+        return new FirebaseCloudMessagingSettings(projectId, credentialsBase64, enabled);
     }
 
     /**
-     * Creates a bean for FirebaseApp, which is the main entry point for interacting with Firebase services.
-     * This bean will only be created if FCM integration is enabled. It validates the configuration properties
-     * and initializes the FirebaseApp with the provided credentials and project ID.
+     * Creates a FirebaseApp bean, which is the main entry point for interacting
+     * with Firebase services.
+     * This bean is only created when FCM integration is enabled. It validates the
+     * configured settings, decodes the Firebase service account credentials from
+     * Base64, and initializes FirebaseApp with the decoded credentials and project ID.
      *
-     * @param settings the FirebaseCloudMessagingSettings containing the necessary configuration properties
-     * @return an initialized FirebaseApp instance if FCM integration is enabled; otherwise, no bean is created
-     * @throws IOException if there is an error reading the credentials file
+     * @param settings the FirebaseCloudMessagingSettings containing the required
+     *                 FCM configuration values
+     * @return an initialized FirebaseApp instance
+     * @throws IOException if the decoded credentials cannot be read as valid
+     *                     Google credentials
      */
     @Bean
+    @ConditionalOnProperty(
+            name = "integrations.fcm.enabled",
+            havingValue = "true"
+    )
     FirebaseApp firebaseApp(FirebaseCloudMessagingSettings settings) throws IOException {
-        if (!settings.enabled()) {
-            throw new IllegalStateException("FirebaseApp should not be created when FCM integration is disabled.");
+        validateSettings(settings);
+
+        if (!FirebaseApp.getApps().isEmpty()) {
+            return FirebaseApp.getInstance();
         }
 
-        validateCredentialsPath(settings.credentialsPath());
+        byte[] decodedCredentials = Base64.getDecoder()
+                .decode(settings.credentialsBase64().replaceAll("\\s", ""));
 
-        if (FirebaseApp.getApps().isEmpty()) {
-            try (var serviceAccount = new FileInputStream(settings.credentialsPath())) {
-                var options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setProjectId(settings.projectId())
-                        .build();
+        try (var serviceAccount = new ByteArrayInputStream(decodedCredentials)) {
+            var options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setProjectId(settings.projectId())
+                    .build();
 
-                return FirebaseApp.initializeApp(options);
-            }
+            return FirebaseApp.initializeApp(options);
         }
-        return FirebaseApp.getInstance();
     }
 
     /**
-     * Validates that the configured Firebase credentials path points to one concrete existing file.
+     * Validates that the Firebase settings required to initialize FCM are present.
+     * When FCM integration is enabled, both the Firebase project ID and the
+     * Base64-encoded service account credentials must be provided.
      *
-     * @param credentialsPath configured credentials path
+     * @param settings the FirebaseCloudMessagingSettings to validate
      */
-    private void validateCredentialsPath(String credentialsPath) {
-        if (credentialsPath == null || credentialsPath.isBlank()) {
-            throw new IllegalStateException("firebase.credentials.path is required when integrations.fcm.enabled=true.");
-        }
-        if (credentialsPath.contains("*") || credentialsPath.contains("?")) {
+    private void validateSettings(FirebaseCloudMessagingSettings settings) {
+        if (settings.projectId() == null || settings.projectId().isBlank()) {
             throw new IllegalStateException(
-                    "firebase.credentials.path must point to one concrete JSON file. Wildcards are not supported: " + credentialsPath
+                    "firebase.project.id is required when integrations.fcm.enabled=true."
             );
         }
 
-        var path = Path.of(credentialsPath);
-        if (!Files.exists(path) || !Files.isRegularFile(path)) {
+        if (settings.credentialsBase64() == null || settings.credentialsBase64().isBlank()) {
             throw new IllegalStateException(
-                    "firebase.credentials.path must point to an existing JSON file. Current value: " + credentialsPath
+                    "firebase.credentials.base64 is required when integrations.fcm.enabled=true."
             );
         }
     }
