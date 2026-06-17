@@ -47,6 +47,9 @@ public record ProductResource(
         @Schema(description = "Selling price", example = "8.50")
         BigDecimal sellingPrice,
 
+        @Schema(description = "Lifecycle status (ACTIVE, INACTIVE, DELETED)", example = "ACTIVE")
+        String status,
+
         @Schema(description = "List of ingredients")
         List<IngredientResource> ingredients
 ) {}

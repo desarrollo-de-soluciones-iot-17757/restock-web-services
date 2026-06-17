@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.planning.infrastructure.persistence.mongodb
 
 import com.uitopic.restock.platform.planning.domain.model.valueobjects.ProductType;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.ResourceStatus;
 import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.entities.AuditableAbstractPersistenceEntity;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -51,6 +52,9 @@ public class ProductPersistenceEntity extends AuditableAbstractPersistenceEntity
 
     /** Selling price of the finished product. Currency semantics are defined externally. */
     private BigDecimal sellingPrice;
+
+    /** Lifecycle status of the product. */
+    private ResourceStatus status;
 
     /**
      * Embedded list of ingredients/components that make up this product.

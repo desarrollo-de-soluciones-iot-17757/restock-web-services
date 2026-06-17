@@ -70,4 +70,15 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
         );
 
     }
+
+    /**
+     * @inheritDocs
+     */
+    @Override
+    public double getTotalStockByCustomSupplyIdAndBranchId(String customSupplyId, String branchId) {
+        return batchRepository.findByCustomSupplyId(customSupplyId).stream()
+                .filter(batch -> batch.getBranchId().equals(branchId))
+                .mapToDouble(batch -> batch.getCurrentStock().stock())
+                .sum();
+    }
 }

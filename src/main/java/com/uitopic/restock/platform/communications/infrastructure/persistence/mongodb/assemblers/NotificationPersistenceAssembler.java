@@ -29,6 +29,7 @@ public final class NotificationPersistenceAssembler {
         notification.setId(entity.getId());
         notification.setRecipientId(entity.getRecipientId());
         notification.setSourceId(entity.getSourceId());
+        notification.setSourceType(entity.getSourceType());
         notification.setMessage(entity.getMessage());
         notification.setTitle(entity.getTitle());
         notification.setSeverity(entity.getSeverity());
@@ -55,6 +56,7 @@ public final class NotificationPersistenceAssembler {
 
         entity.setRecipientId(notification.getRecipientId());
         entity.setSourceId(notification.getSourceId());
+        entity.setSourceType(notification.getSourceType());
         entity.setMessage(notification.getMessage());
         entity.setTitle(notification.getTitle());
         entity.setSeverity(notification.getSeverity());

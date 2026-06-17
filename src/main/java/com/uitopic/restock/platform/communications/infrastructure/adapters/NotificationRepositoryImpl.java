@@ -66,4 +66,15 @@ public class NotificationRepositoryImpl implements NotificationRepository {
                 .map(NotificationPersistenceAssembler::toDomainFromPersistence)
                 .orElse(null);
     }
+
+    /**
+     * Checks if a notification exists by its unique identifier.
+     *
+     * @param notificationId The unique identifier of the notification to check for existence.
+     * @return true if a notification with the specified ID exists, false otherwise.
+     */
+    @Override
+    public Boolean existsById(String notificationId) {
+        return notificationMongoRepository.existsById(notificationId);
+    }
 }
