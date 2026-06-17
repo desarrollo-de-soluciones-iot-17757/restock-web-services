@@ -44,7 +44,7 @@ public class ResendServiceImpl implements ResendService {
                 params = ResendEmailBuilder.createDiscrepancyEmail(to, htmlVariables);
                 break;
             case "INVENTORY": // INVENTORY alert type for inventory-related notifications about stocks and batches
-
+                params = ResendEmailBuilder.createInventoryEmail(to, htmlVariables);
                 break;
             case "DEVICE": // DEVICE alert type for device-health related notifications
 

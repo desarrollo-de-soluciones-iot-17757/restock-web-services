@@ -79,4 +79,50 @@ public final class ResendEmailBuilder {
                 .template(discrepancyDetectedTemplate)
                 .build();
     }
+
+    /**
+     * Builds the email options for the inventory stock event detected email template.
+     * It can be used for Zero Stock Event, Low Stock Event, and Overstock Event email templates since they share the same variables and template structure.
+     *
+     * @param userDirection The recipient email address.
+     * @param htmlVariables A list of key-value pairs to be used as variables in the email template.
+     * @return CreateEmailOptions object containing the email configuration for the inventory stock event detected email.
+     */
+    public static CreateEmailOptions createInventoryEmail(
+            String userDirection,
+            List<Pair<String, String>> htmlVariables
+    ) {
+        // Template id for the inventory stock event detected email template in Resend
+        String templateId = "e0e57b93-6281-48dd-9155-e0616850fa7b";
+
+        // Initialize a map to hold the variables for the email template
+        Map<String, Object> variables = new HashMap<>();
+
+        // List of variable names that we want to extract from the htmlVariables and add to the email template
+        List<String> variableNames = List.of(
+                "BRANCH_NAME",
+                "CUSTOM_SUPPLY_NAME",
+                "MINIMUM_STOCK",
+                "STOCK_EVENT_TYPE",
+                "CURRENT_STOCK",
+                "UNIT_MEASUREMENT"
+        );
+
+        // Populate the variables map with the values extracted from the htmlVariables list based on the variable names
+        addVariable(htmlVariables, variableNames, variables);
+
+        // Build the email template using the template ID and the variables map
+        var inventoryEventDetectedTemplate = Template.builder()
+                .id(templateId)
+                .variables(variables)
+                .build();
+
+        // Build and return the CreateEmailOptions object with the email configuration, including the sender, recipient, subject, and the email template
+        return CreateEmailOptions.builder()
+                .from("onboarding@onboarding.resend.dev")
+                .to(userDirection)
+                .subject("Restock - Inventory Event Detected")
+                .template(inventoryEventDetectedTemplate)
+                .build();
+    }
 }

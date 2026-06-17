@@ -139,6 +139,7 @@ public class BatchCommandServiceImpl implements BatchCommandService {
                                 "Branch not found: " + batch.getBranchId()
                         ));
                 batch.registerStockAlertIfEscalated(
+                        customSupply.getName(),
                         branch.getName(),
                         minimumStockOf(customSupply),
                         previousStock
@@ -244,6 +245,7 @@ public class BatchCommandServiceImpl implements BatchCommandService {
         var previousSourceStock = sourceBatch.getCurrentStock().stock();
         sourceBatch.subtract(quantity);
         sourceBatch.registerStockAlertIfEscalated(
+                customSupply.getName(),
                 sourceBranch.getName(),
                 minimumStockOf(customSupply),
                 previousSourceStock

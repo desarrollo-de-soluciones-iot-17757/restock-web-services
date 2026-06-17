@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.profiles.application.acl;
 
 import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.UserId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,17 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
                 userId, businessName, email);
         // TODO: delegate to ProfileCommandService once domain is complete
         log.warn("ProfileCommandService not yet implemented — profile creation skipped for user ID: {}", userId);
+        return "";
+    }
+
+    /**
+     * Retrieves the notification preference for a given user ID.
+     *
+     * @param userId the ID of the user whose notification preference is being queried
+     * @return the notification preference as a string (e.g., "EMAIL", "PUSH", "ALL", "NONE"), or empty string if not found
+     */
+    @Override
+    public String getNotificationPreferenceByUserId(UserId userId) {
         return "";
     }
 }
