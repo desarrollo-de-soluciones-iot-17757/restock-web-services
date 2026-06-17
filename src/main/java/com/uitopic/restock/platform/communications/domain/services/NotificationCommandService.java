@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.communications.domain.services;
 
 import com.uitopic.restock.platform.communications.domain.model.aggregates.Notification;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
+import com.uitopic.restock.platform.communications.domain.model.commands.MarkNotificationAsReadCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendEmailNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 
@@ -20,6 +21,14 @@ public interface NotificationCommandService {
      * @return An Optional containing the created Notification if successful, or empty if creation failed.
      */
     Optional<Notification> handle(CreateNotificationCommand command);
+
+    /**
+     * Handles marking a notification as read based on the provided command.
+     *
+     * @param command The command containing the details for marking the notification as read.
+     * @return An Optional containing the updated Notification if successful, or empty if the operation failed.
+     */
+    Optional<Notification> handle(MarkNotificationAsReadCommand command);
 
     /**
      * Handles the sending of a push notification based on the provided command.

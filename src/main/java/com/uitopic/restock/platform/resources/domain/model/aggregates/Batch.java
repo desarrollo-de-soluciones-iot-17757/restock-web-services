@@ -124,7 +124,7 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
      * @param branchName branch display name
      * @param minimumStock configured minimum stock
      */
-    public void registerBelowMinimumStockEvent(String branchName, Double minimumStock, StockAlertLevel alertLevel) {
+    public void registerBelowMinimumStockEvent(String customSupplyName, String branchName, Double minimumStock, StockAlertLevel alertLevel) {
         validateText(branchName, "Branch name");
 
         if (minimumStock == null || alertLevel == null || alertLevel == StockAlertLevel.OK) {
@@ -132,6 +132,7 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
         }
 
         registerDomainEvent(InventoryBelowMinimumStockEvent.builder()
+                .customSupplyName(customSupplyName)
                 .branchName(branchName)
                 .branchId(this.branchId)
                 .batchCode(this.code)
@@ -141,10 +142,11 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
                 .unitMeasurement(this.currentStock.unitMeasurement().unitName())
                 .accountId(this.accountId.getAccountId())
                 .alertLevel(alertLevel)
+                .stockEventType("BELOW MINIMUM STOCK")
                 .build());
     }
 
-    public void registerStockAlertIfEscalated(String branchName, Double minimumStock, Double previousStock) {
+    public void registerStockAlertIfEscalated(String customSupplyName, String branchName, Double minimumStock, Double previousStock) {
         validateText(branchName, "Branch name");
 
         if (minimumStock == null || previousStock == null) {
@@ -158,7 +160,7 @@ public class Batch extends AbstractDomainAggregateRoot<Batch> {
             return;
         }
 
-        registerBelowMinimumStockEvent(branchName, minimumStock, currentLevel);
+        registerBelowMinimumStockEvent(customSupplyName, branchName, minimumStock, currentLevel);
     }
 
     /**

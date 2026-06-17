@@ -18,4 +18,14 @@ public interface ResourcesContextFacade {
      * @return the current supply stock level for the specified batch ID, represented as a double value. This value indicates the quantity of stock available for that batch, which can be used to determine if restocking is necessary or to manage inventory levels effectively.
      */
     Pair<Double, String> getSupplyStockAndNameByBatchId(BatchId batchId);
+
+    /**
+     * Returns the total aggregated stock for a given custom supply in a specific branch.
+     * Sums the currentStock of all batches matching the customSupplyId and branchId.
+     *
+     * @param customSupplyId the custom supply identifier
+     * @param branchId       the branch identifier
+     * @return total stock available (sum of all batch quantities), or 0.0 if none found
+     */
+    double getTotalStockByCustomSupplyIdAndBranchId(String customSupplyId, String branchId);
 }

@@ -8,6 +8,7 @@ import com.uitopic.restock.platform.tracking.domain.model.aggregates.StockCompar
 import com.uitopic.restock.platform.tracking.domain.model.commands.ReceiveTelemetryReadingCommand;
 import com.uitopic.restock.platform.tracking.domain.model.entities.TelemetryReading;
 import com.uitopic.restock.platform.tracking.domain.model.events.DiscrepancyDetectedEvent;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import com.uitopic.restock.platform.tracking.domain.repositories.StockComparisonTaskRepository;
 import com.uitopic.restock.platform.tracking.domain.repositories.TelemetryReadingRepository;
@@ -93,13 +94,15 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             // Evaluate the result of the anomaly detection and log the appropriate message. If an anomaly is detected, it indicates a significant discrepancy between the physical stock and system stock, which may require further investigation or corrective actions. If no anomaly is detected, it indicates that the physical stock is within an acceptable range of the system stock, suggesting that there are no immediate issues with inventory levels for the device.
             if (isAnomaly) {
                 task.stockMismatch();
+                var riskLevel = DiscrepancyAlertLevel.from(physicalStock.getStock(), systemStock.getStock(), discrepancyThreshold);
                 var event = DiscrepancyDetectedEvent.builder()
                         .customSupplyName(customSupplyName)
-                        .physicalStock(physicalStock)
-                        .systemStock(systemStock)
+                        .physicalStock(physicalStock.getStock())
+                        .systemStock(systemStock.getStock())
                         .thresholdUsed(discrepancyThreshold)
                         .deviceId(deviceId)
                         .accountId(accountId)
+                        .alertLevel(riskLevel)
                         .build();
                 domainEventPublisher.publish(event);
             } else {

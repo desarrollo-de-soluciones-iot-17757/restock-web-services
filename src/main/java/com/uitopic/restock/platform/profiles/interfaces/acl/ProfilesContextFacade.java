@@ -1,5 +1,7 @@
 package com.uitopic.restock.platform.profiles.interfaces.acl;
 
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.UserId;
+
 /**
  * Anti-corruption layer facade for the Profiles bounded context.
  * Exposes profile operations to other bounded contexts using primitive types only.
@@ -16,4 +18,12 @@ public interface ProfilesContextFacade {
      * @return the ID of the created profile, or empty string if creation failed
      */
     String createProfile(String userId, String businessName, String email);
+
+    /**
+     * Retrieves the notification preference for a given user ID.
+     *
+     * @param userId the ID of the user whose notification preference is being queried
+     * @return the notification preference as a string (e.g., "EMAIL", "SMS", "PUSH"), or empty string if not found
+     */
+    String getNotificationPreferenceByUserId(UserId userId);
 }
