@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.communications.infrastructure.persistence.m
 
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationSeverity;
 import com.uitopic.restock.platform.communications.domain.model.valueobjects.NotificationStatus;
+import com.uitopic.restock.platform.communications.domain.model.valueobjects.SourceType;
 import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.entities.AuditableAbstractPersistenceEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,9 @@ public class NotificationPersistenceEntity extends AuditableAbstractPersistenceE
 
     /** Identifier of the source of the notification. */
     private String sourceId;
+
+    /** Type of the source that generated the notification (e.g., Order, Inventory, etc.). */
+    private SourceType sourceType;
 
     /** Content of the notification message. */
     private String message;

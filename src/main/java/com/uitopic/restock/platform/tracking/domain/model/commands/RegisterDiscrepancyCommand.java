@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.tracking.domain.model.commands;
 
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.exceptions.DiscrepancyResolutionException;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 
 /**
  * Command representing the registration of a discrepancy in inventory tracking.
@@ -11,6 +12,7 @@ import com.uitopic.restock.platform.tracking.domain.exceptions.DiscrepancyResolu
  */
 public record RegisterDiscrepancyCommand(
         Double reportedQuantity,
+        DiscrepancyAlertLevel riskLevel,
         DeviceId deviceId
 ) {
 

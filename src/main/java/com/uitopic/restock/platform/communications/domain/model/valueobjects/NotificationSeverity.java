@@ -6,8 +6,7 @@ package com.uitopic.restock.platform.communications.domain.model.valueobjects;
  * This enum is used to categorize notifications based on their importance and urgency.
  */
 public enum NotificationSeverity {
-    INFO,
+    OK,
     WARNING,
-    ERROR,
-    CRITICAL
+    CRITICAL;
 }
