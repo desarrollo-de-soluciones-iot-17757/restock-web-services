@@ -2,9 +2,11 @@ package com.uitopic.restock.platform.planning.domain.services;
 
 import com.uitopic.restock.platform.planning.domain.model.aggregates.Product;
 import com.uitopic.restock.platform.planning.domain.model.queries.GetProductByIdQuery;
+import com.uitopic.restock.platform.planning.domain.model.queries.GetProductsAvailabilityQuery;
 import com.uitopic.restock.platform.planning.domain.model.queries.GetProductsByAccountIdQuery;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,4 +33,13 @@ public interface ProductQueryService {
      * @return a {@link List} of {@link Product} aggregates for that account
      */
     List<Product> handle(GetProductsByAccountIdQuery query);
+
+    /**
+     * Retrieves all products for the given account with the maximum assemblable
+     * quantity based on ingredient stock available in the specified branch.
+     *
+     * @param query the query containing account ID and branch ID
+     * @return list of products paired with their max assemblable count
+     */
+    List<Map.Entry<Product, Integer>> handle(GetProductsAvailabilityQuery query);
 }

@@ -33,5 +33,8 @@ public record UpdateProductResource(
         String imageUrl,
 
         @Schema(description = "New selling price", example = "9.50")
-        BigDecimal sellingPrice
+        BigDecimal sellingPrice,
+
+        @Schema(description = "New product status (ACTIVE, INACTIVE, DELETED)", example = "INACTIVE")
+        String status
 ) {}

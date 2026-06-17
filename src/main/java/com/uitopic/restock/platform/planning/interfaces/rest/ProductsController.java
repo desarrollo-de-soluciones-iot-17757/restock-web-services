@@ -2,15 +2,18 @@ package com.uitopic.restock.platform.planning.interfaces.rest;
 
 import com.uitopic.restock.platform.planning.domain.model.commands.RemoveIngredientCommand;
 import com.uitopic.restock.platform.planning.domain.model.queries.GetProductByIdQuery;
+import com.uitopic.restock.platform.planning.domain.model.queries.GetProductsAvailabilityQuery;
 import com.uitopic.restock.platform.planning.domain.model.queries.GetProductsByAccountIdQuery;
 import com.uitopic.restock.platform.planning.domain.services.ProductCommandService;
 import com.uitopic.restock.platform.planning.domain.services.ProductQueryService;
 import com.uitopic.restock.platform.planning.interfaces.rest.resources.AddIngredientResource;
 import com.uitopic.restock.platform.planning.interfaces.rest.resources.CreateProductResource;
+import com.uitopic.restock.platform.planning.interfaces.rest.resources.ProductAvailabilityResource;
 import com.uitopic.restock.platform.planning.interfaces.rest.resources.ProductResource;
 import com.uitopic.restock.platform.planning.interfaces.rest.resources.UpdateProductResource;
 import com.uitopic.restock.platform.planning.interfaces.rest.transform.AddIngredientCommandFromResourceAssembler;
 import com.uitopic.restock.platform.planning.interfaces.rest.transform.CreateProductCommandFromResourceAssembler;
+import com.uitopic.restock.platform.planning.interfaces.rest.transform.ProductAvailabilityResourceFromEntityAssembler;
 import com.uitopic.restock.platform.planning.interfaces.rest.transform.ProductResourceFromEntityAssembler;
 import com.uitopic.restock.platform.planning.interfaces.rest.transform.UpdateProductCommandFromResourceAssembler;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -209,5 +212,32 @@ public class ProductsController {
                 .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Returns all products for the given account with their maximum assemblable
+     * quantity based on available ingredient stock in the specified branch.
+     */
+    @Operation(summary = "Get products availability by branch",
+               description = "Returns all products for the account with the max number of units "
+                           + "that can be assembled from the current ingredient stock in the branch.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Availability calculated"),
+            @ApiResponse(responseCode = "400", description = "Missing or blank accountId or branchId parameter")
+    })
+    @GetMapping("/availability")
+    public ResponseEntity<List<ProductAvailabilityResource>> getProductsAvailability(
+            @Parameter(description = "Tenant account ID", required = true)
+            @RequestParam String accountId,
+            @Parameter(description = "Branch ID for stock lookup", required = true)
+            @RequestParam String branchId) {
+
+        var query = new GetProductsAvailabilityQuery(new AccountId(accountId), branchId);
+        var results = queryService.handle(query);
+        var resources = results.stream()
+                .map(entry -> ProductAvailabilityResourceFromEntityAssembler
+                        .toResourceFromEntity(entry.getKey(), entry.getValue()))
+                .toList();
+        return ResponseEntity.ok(resources);
     }
 }
