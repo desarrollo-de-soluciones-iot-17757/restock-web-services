@@ -104,7 +104,7 @@ public final class ResendEmailBuilder {
                 "CUSTOM_SUPPLY_NAME",
                 "MINIMUM_STOCK",
                 "STOCK_EVENT_TYPE",
-                "SYSTEM_STOCK",
+                "CURRENT_STOCK",
                 "UNIT_MEASUREMENT"
         );
 
@@ -121,7 +121,7 @@ public final class ResendEmailBuilder {
         return CreateEmailOptions.builder()
                 .from("onboarding@onboarding.resend.dev")
                 .to(userDirection)
-                .subject("Restock - Discrepancy Detected")
+                .subject("Restock - Inventory Event Detected")
                 .template(inventoryEventDetectedTemplate)
                 .build();
     }
