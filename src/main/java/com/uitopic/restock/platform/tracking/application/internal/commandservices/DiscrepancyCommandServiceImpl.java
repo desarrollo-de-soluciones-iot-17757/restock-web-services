@@ -34,6 +34,7 @@ public class DiscrepancyCommandServiceImpl implements DiscrepancyCommandService 
         // Create a new discrepancy entity based on the command data
         var discrepancy = new Discrepancy(
                 command.reportedQuantity(),
+                command.riskLevel(),
                 command.deviceId()
         );
 
