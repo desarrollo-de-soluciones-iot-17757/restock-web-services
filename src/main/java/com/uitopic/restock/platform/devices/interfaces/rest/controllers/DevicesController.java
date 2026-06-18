@@ -119,7 +119,7 @@ public class DevicesController {
     ) {
         var command = new UpdateDeviceMeasurementCommand(
                 deviceId,
-                resource.netWeight(),
+                resource.unitStockWeight(),
                 resource.tareWeight(),
                 resource.grossWeight(),
                 resource.calibrationDate(),
@@ -131,14 +131,14 @@ public class DevicesController {
         return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
     }
 
-    @Operation(summary = "Transition device status (CONFIGURED: completes onboarding · INACTIVE: deactivates device)")
+    @Operation(summary = "Transition device status (CALIBRATED: completes onboarding · INACTIVE: deactivates device)")
     @PatchMapping(value = "/{deviceId}/status", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> updateStatus(
             @PathVariable String deviceId,
             @Valid @RequestBody UpdateDeviceStatusResource resource
     ) {
         var device = switch (resource.status()) {
-            case "CONFIGURED" -> {
+            case "CALIBRATED" -> {
                 var command = new ConfirmDeviceConfigurationCommand(deviceId);
                 yield deviceCommandService.handle(command)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));

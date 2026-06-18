@@ -45,6 +45,7 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
 
         var device = new Device(command.macAddress(), command.accountId(), command.description());
         var saved = deviceRepository.save(device);
+        publishDeviceEvents(device);
         log.info("Device registered successfully: id='{}'", saved.getId());
         return saved;
     }
@@ -79,7 +80,9 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
 
         return deviceRepository.findById(command.deviceId()).map(device -> {
             device.assignBatch(command.batchId());
+            findThresholdFor(device).ifPresent(device::confirmConfiguration);
             var saved = deviceRepository.save(device);
+            publishDeviceEvents(device);
             log.info("Batch id='{}' assigned to device id='{}'", command.batchId(), saved.getId());
             return saved;
         });
@@ -91,7 +94,9 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
 
         return deviceRepository.findById(command.deviceId()).map(device -> {
             device.assignSupplyThreshold(command.supplyThresholdId());
+            findThresholdFor(device).ifPresent(device::confirmConfiguration);
             var saved = deviceRepository.save(device);
+            publishDeviceEvents(device);
             log.info("Threshold id='{}' assigned to device id='{}'", command.supplyThresholdId(), saved.getId());
             return saved;
         });
@@ -107,14 +112,18 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
                     : new UnitMeasurement(command.weightUnitName());
 
             var measurement = new WeightMeasurement(
-                    command.netWeight(),
+                    command.unitStockWeight(),
                     command.tareWeight(),
                     command.grossWeight(),
                     command.calibrationDate(),
                     weightUnit
             );
             device.updateMeasurement(measurement);
+            var deviceThreshold = findThresholdFor(device)
+                    .orElseThrow(() -> new IllegalStateException("Device must be CONFIGURED before calibration"));
+            device.confirmCalibration(deviceThreshold);
             var saved = deviceRepository.save(device);
+            publishDeviceEvents(device);
             log.info("Measurement updated for device id='{}'", saved.getId());
             return saved;
         });
@@ -122,17 +131,15 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
 
     @Override
     public Optional<Device> handle(ConfirmDeviceConfigurationCommand command) {
-        log.info("Confirming configuration for device id='{}'", command.deviceId());
-
-        var deviceThreshold = (deviceThresholdRepository.findByDeviceId(new DeviceId(command.deviceId()))
-                .orElseThrow(() -> new IllegalArgumentException("Supply threshold not found: " + command.deviceId())));
+        log.info("Confirming calibration for device id='{}'", command.deviceId());
 
         return deviceRepository.findById(command.deviceId()).map(device -> {
-            device.confirmConfiguration(deviceThreshold);
+            var deviceThreshold = findThresholdFor(device)
+                    .orElseThrow(() -> new IllegalArgumentException("Supply threshold not found: " + command.deviceId()));
+            device.confirmCalibration(deviceThreshold);
             var saved = deviceRepository.save(device);
-            device.domainEvents().forEach(eventPublisher::publish);
-            device.clearDomainEvents();
-            log.info("Configuration confirmed for device id='{}', status='{}'", saved.getId(), saved.getStatus());
+            publishDeviceEvents(device);
+            log.info("Calibration confirmed for device id='{}', status='{}'", saved.getId(), saved.getStatus());
             return saved;
         });
     }
@@ -159,5 +166,18 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
             log.info("Device id='{}' deactivated", saved.getId());
             return saved;
         });
+    }
+
+    private Optional<DeviceThreshold> findThresholdFor(Device device) {
+        if (device.getId() == null || device.getAssignedBatchId() == null || device.getSupplyThresholdId() == null) {
+            return Optional.empty();
+        }
+        return deviceThresholdRepository.findByDeviceId(new DeviceId(device.getId()))
+                .filter(threshold -> device.getSupplyThresholdId().equals(threshold.getId()));
+    }
+
+    private void publishDeviceEvents(Device device) {
+        device.domainEvents().forEach(eventPublisher::publish);
+        device.clearDomainEvents();
     }
 }

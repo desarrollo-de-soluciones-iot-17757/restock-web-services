@@ -4,10 +4,12 @@ import com.uitopic.restock.platform.devices.domain.model.commands.CreateDeviceTh
 import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshold;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.Humidity;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.Temperature;
+import com.uitopic.restock.platform.devices.domain.repositories.DeviceRepository;
 import com.uitopic.restock.platform.devices.domain.repositories.DeviceThresholdRepository;
 import com.uitopic.restock.platform.devices.domain.services.DeviceThresholdCommandService;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.shared.infrastructure.eventpublisher.spring.SpringDomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -23,6 +25,8 @@ public class DeviceThresholdCommandServiceImpl implements DeviceThresholdCommand
 
     // Repository for managing device thresholds
     private final DeviceThresholdRepository thresholdRepository;
+    private final DeviceRepository deviceRepository;
+    private final SpringDomainEventPublisher eventPublisher;
 
     /**
      * @inheritDocs
@@ -38,8 +42,19 @@ public class DeviceThresholdCommandServiceImpl implements DeviceThresholdCommand
         }
 
         var threshold = getDeviceThreshold(command, temperature);
+        thresholdRepository.findByDeviceId(new DeviceId(command.deviceId()))
+                .ifPresent(existing -> threshold.setId(existing.getId()));
 
         var saved = thresholdRepository.save(threshold);
+        deviceRepository.findById(command.deviceId()).ifPresent(device -> {
+            device.assignSupplyThreshold(saved.getId());
+            if (device.getAssignedBatchId() != null) {
+                device.confirmConfiguration(saved);
+            }
+            deviceRepository.save(device);
+            device.domainEvents().forEach(eventPublisher::publish);
+            device.clearDomainEvents();
+        });
         log.info("Device threshold created successfully: id='{}'", saved.getId());
         return saved;
     }

@@ -62,8 +62,8 @@ public class DeviceThresholdsController {
     public ResponseEntity<DeviceThresholdResource> create(@Valid @RequestBody CreateDeviceThresholdResource resource) {
         var command = new CreateDeviceThresholdCommand(
                 resource.accountId(),
-                resource.customSupplyId(),
                 resource.deviceId(),
+                resource.customSupplyId(),
                 resource.minStock(),
                 resource.maxStock(),
                 resource.anomalyThreshold(),
