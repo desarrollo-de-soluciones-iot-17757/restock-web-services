@@ -29,7 +29,9 @@ public class CollectionInitializer {
             "branches",
             "discrepancies",
             "telemetry_readings",
-            "stock_comparison_tasks"
+            "stock_comparison_tasks",
+            "push_subscriptions",
+            "device_thresholds"
     );
 
     /**
