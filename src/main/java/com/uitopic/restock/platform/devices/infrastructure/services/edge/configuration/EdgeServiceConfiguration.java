@@ -11,10 +11,17 @@ public class EdgeServiceConfiguration {
     private String baseUrl;
 
     @Value("${edge.service.iam.url}")
-    private String devicesEndpointUrl;
+    private String iamDevicesEndpointUrl;
+
+    @Value("${edge.service.device-thresholds.url}")
+    private String deviceThresholdsEndpointUrl;
 
     @Bean
     public EdgeServiceSettings edgeServiceSettings() {
-        return new EdgeServiceSettings(baseUrl, devicesEndpointUrl);
+        return new EdgeServiceSettings(
+                baseUrl,
+                iamDevicesEndpointUrl,
+                deviceThresholdsEndpointUrl
+        );
     }
 }

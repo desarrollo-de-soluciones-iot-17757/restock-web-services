@@ -5,6 +5,7 @@ package com.uitopic.restock.platform.devices.infrastructure.services.edge.config
  */
 public record EdgeServiceSettings(
         String baseUrl,
-        String devicesUrl
+        String iamDevicesUrl,
+        String deviceThresholdsUrl
 ) {
 }
