@@ -30,6 +30,14 @@ public interface PushSubscriptionRepository {
     Optional<PushSubscription> findByProviderToken(String providerToken);
 
     /**
+     * Finds all push subscriptions by provider token.
+     *
+     * @param providerToken The unique token provided by the push notification provider.
+     * @return All push subscriptions associated with the provider token.
+     */
+    List<PushSubscription> findAllByProviderToken(String providerToken);
+
+    /**
      * Finds all active push subscriptions for a given user, ordered by the last update time in descending order.
      *
      * @param userId The unique identifier of the user.

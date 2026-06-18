@@ -20,7 +20,15 @@ public interface PushSubscriptionPersistenceRepository extends MongoRepository<P
      * @param providerToken the unique token provided by the push notification provider
      * @return the PushSubscriptionPersistenceEntity associated with the given provider token, or null if no such subscription exists
      */
-    Optional<PushSubscriptionPersistenceEntity> findByProviderToken(String providerToken);
+    Optional<PushSubscriptionPersistenceEntity> findFirstByProviderTokenOrderByUpdatedAtDesc(String providerToken);
+
+    /**
+     * Finds all push subscriptions by provider token.
+     *
+     * @param providerToken the unique token provided by the push notification provider
+     * @return all push subscriptions associated with the given provider token
+     */
+    List<PushSubscriptionPersistenceEntity> findAllByProviderToken(String providerToken);
 
     /**
      * Finds all active push subscriptions for a given user, ordered by the last update time in descending order.

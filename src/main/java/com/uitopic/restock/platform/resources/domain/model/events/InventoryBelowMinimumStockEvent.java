@@ -19,6 +19,12 @@ import lombok.Data;
 public class InventoryBelowMinimumStockEvent implements NotificationEvent {
 
     /**
+     * The name of the custom supply associated with the inventory event. This provides context about the specific item that is experiencing low inventory levels, allowing for better identification and management of the issue.
+     */
+    @NotBlank
+    private String customSupplyName;
+
+    /**
      * The name of the branch where the inventory is located. This provides context about the location of the inventory that is below the minimum stock level, allowing for better identification and management of the issue.
      */
     @NotBlank
@@ -71,6 +77,32 @@ public class InventoryBelowMinimumStockEvent implements NotificationEvent {
      */
     @NotNull
     private StockAlertLevel alertLevel;
+
+    /**
+     * In this case, the stock event type is set to "INVENTORY_BELOW_MINIMUM_STOCK" to indicate that the event being represented is related to inventory levels falling below the minimum stock threshold. This field can be used for categorization and filtering of events, allowing for better organization and management of notifications in the system.
+     */
+    @NotBlank
+    private String stockEventType;
+
+    /**
+     * Returns the unique identifier of the source entity that triggered the event, which in this case is the batch ID. This identifier can be used to correlate the event with the specific batch that is associated with the notification, allowing for better tracking and management of notifications in the system.
+     *
+     * @return a unique identifier (batchId) that represents the source of the event
+     */
+    @Override
+    public String getSourceId() {
+        return this.batchId;
+    }
+
+    /**
+     * Returns the alert level indicating the severity of the event, which can be used to determine the appropriate actions to take (e.g., restocking, sending notifications). This field is essential for categorizing the notification event and ensuring that the right level of attention is given to the issue based on its severity.
+     *
+     * @return a string representing the alert level (e.g., "LOW", "MEDIUM", "HIGH") that indicates the severity of the event
+     */
+    @Override
+    public String getAlertLevelName() {
+        return alertLevel.name();
+    }
 
     /**
      * The title of the notification, which is dynamically generated based on the alert level and branch name. This title provides a clear indication of the nature of the notification, making it easier to identify and address the issue.

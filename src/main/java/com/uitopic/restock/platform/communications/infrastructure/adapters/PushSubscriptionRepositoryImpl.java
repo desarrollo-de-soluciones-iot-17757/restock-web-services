@@ -49,8 +49,16 @@ public class PushSubscriptionRepositoryImpl implements PushSubscriptionRepositor
      */
     @Override
     public Optional<PushSubscription> findByProviderToken(String providerToken) {
-        return pushSubscriptionMongoRepository.findByProviderToken(providerToken)
+        return pushSubscriptionMongoRepository.findFirstByProviderTokenOrderByUpdatedAtDesc(providerToken)
                 .map(PushSubscriptionPersistenceAssembler::toDomainFromPersistence);
+    }
+
+    @Override
+    public List<PushSubscription> findAllByProviderToken(String providerToken) {
+        return pushSubscriptionMongoRepository.findAllByProviderToken(providerToken)
+                .stream()
+                .map(PushSubscriptionPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
 

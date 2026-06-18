@@ -34,4 +34,12 @@ public interface NotificationRepository {
      * @return The notification entity associated with the specified ID, or null if not found.
      */
     Notification findById(String notificationId);
+
+    /**
+     * Checks if a notification exists in the data store by its unique identifier.
+     *
+     * @param notificationId The unique identifier of the notification to check for existence.
+     * @return true if a notification with the specified ID exists, false otherwise.
+     */
+    Boolean existsById(String notificationId);
 }

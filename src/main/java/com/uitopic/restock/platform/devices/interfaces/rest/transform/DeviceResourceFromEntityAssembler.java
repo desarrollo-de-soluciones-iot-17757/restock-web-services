@@ -24,7 +24,7 @@ public class DeviceResourceFromEntityAssembler {
                 specs != null ? specs.manufacturer() : null,
                 specs != null ? specs.model() : null,
                 specs != null ? specs.firmwareVersion() : null,
-                weight != null ? weight.netWeight() : null,
+                weight != null ? weight.unitStockWeight() : null,
                 weight != null ? weight.tareWeight() : null,
                 weight != null ? weight.grossWeight() : null,
                 weight != null && weight.calibrationDate() != null ? weight.calibrationDate().toString() : null,

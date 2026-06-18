@@ -29,7 +29,7 @@ public interface DeviceThresholdPersistenceRepository extends MongoRepository<De
      * @param deviceId the device ID to filter by
      * @return an Optional containing the DeviceThresholdPersistenceEntity if found, or empty if not found
      */
-    Optional<DeviceThresholdPersistenceEntity> findByDeviceId(DeviceId deviceId);
+    Optional<DeviceThresholdPersistenceEntity> findFirstByDeviceIdOrderByUpdatedAtDesc(DeviceId deviceId);
 
     /**
      * Check if a DeviceThresholdPersistenceEntity exists by deviceId.

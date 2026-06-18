@@ -3,6 +3,7 @@ package com.uitopic.restock.platform.profiles.application.acl;
 import com.uitopic.restock.platform.profiles.domain.model.commands.CreateProfileCommand;
 import com.uitopic.restock.platform.profiles.domain.services.ProfileCommandService;
 import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.UserId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,5 +31,16 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
             log.error("Failed to create profile for userId='{}': {}", userId, e.getMessage());
             return "";
         }
+    }
+
+    /**
+     * Retrieves the notification preference for a given user ID.
+     *
+     * @param userId the ID of the user whose notification preference is being queried
+     * @return the notification preference as a string (e.g., "EMAIL", "PUSH", "ALL", "NONE"), or empty string if not found
+     */
+    @Override
+    public String getNotificationPreferenceByUserId(UserId userId) {
+        return "";
     }
 }

@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.communications.application.internal.outbound
 import com.uitopic.restock.platform.communications.application.internal.outboundservices.pushprovider.PushNotificationService;
 import com.uitopic.restock.platform.communications.domain.model.aggregates.Notification;
 import com.uitopic.restock.platform.communications.domain.model.commands.CreateNotificationCommand;
+import com.uitopic.restock.platform.communications.domain.model.commands.MarkNotificationAsReadCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendEmailNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.model.commands.SendPushNotificationCommand;
 import com.uitopic.restock.platform.communications.domain.repositories.NotificationRepository;
@@ -54,10 +55,31 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         var notification = new Notification(
                 command.recipientUserId(),
                 command.sourceId(),
+                command.sourceType(),
                 command.message(),
                 command.title(),
                 command.severity()
         );
+        return Optional.of(notificationRepository.save(notification));
+    }
+
+    /**
+     * Handles the MarkNotificationAsReadCommand by marking the specified notification as read.
+     *
+     * @param command The command containing the details for marking the notification as read.
+     * @return an Optional containing the updated Notification, or empty if the notification was not found or could not be updated.
+     */
+    @Override
+    public Optional<Notification> handle(MarkNotificationAsReadCommand command) {
+
+        log.info("Marking notification as read for notification with id {}", command.notificationId());
+        if (!notificationRepository.existsById(command.notificationId())) {
+            log.warn("Notification with id {} not found. Cannot mark as read.", command.notificationId());
+            throw new IllegalArgumentException("Notification with id " + command.notificationId() + " not found.");
+        }
+
+        var notification = notificationRepository.findById(command.notificationId());
+        notification.markAsRead();
         return Optional.of(notificationRepository.save(notification));
     }
 
@@ -85,14 +107,22 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.sourceId(),
                 command.title());
 
-        activeDevices.forEach(device -> pushNotificationService.sendPushNotification(
-                command.recipientUserId(),
-                device.getProviderToken(),
-                command.severity(),
-                command.sourceId(),
-                command.title(),
-                command.message()
-        ));
+        activeDevices.forEach(device -> {
+            log.info(
+                    "Sending push notification to active subscription. recipientUserId={}, subscriptionId={}, tokenPrefix={}",
+                    command.recipientUserId(),
+                    device.getId(),
+                    maskToken(device.getProviderToken())
+            );
+            pushNotificationService.sendPushNotification(
+                    command.recipientUserId(),
+                    device.getProviderToken(),
+                    command.severity(),
+                    command.sourceId(),
+                    command.title(),
+                    command.message()
+            );
+        });
     }
 
     /**
@@ -120,5 +150,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.htmlVariables(),
                 command.type()
         ));
+    }
+
+    private static String maskToken(String token) {
+        if (token == null || token.length() <= 12) {
+            return "****";
+        }
+        return token.substring(0, 8) + "...";
     }
 }

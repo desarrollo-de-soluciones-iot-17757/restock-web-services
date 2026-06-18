@@ -12,10 +12,10 @@ import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasure
 import lombok.*;
 
 /**
- * Aggregate root representing a custom supply in the resources bounded context.
+ * Aggregate root representing a custom supply in the resources-bounded context.
  * A custom supply is created from a base supply and stores account-specific
  * information such as name, stock range, unit price, unit measurement,
- * description and optional picture URL.
+ * description, and optional picture URL.
  * This aggregate stores both the supply identifier and the full supply data.
  */
 @EqualsAndHashCode(callSuper = true)
@@ -75,8 +75,14 @@ public class CustomSupply extends AbstractDomainAggregateRoot<CustomSupply> {
      */
     private ImageURL pictureUrl;
 
+    /// Default Image
+    private static final String DEFAULT_IMAGE_URL = "https://res.cloudinary.com/duasujxja/image/upload/v1781058191/default_custom_supply.png";
+
+    /// Default public ID for the default image in the image hosting service
+    private static final String DEFAULT_PUBLIC_ID = "default_custom_supply";
+
     /**
-     * Creates a custom supply from a command, a loaded base supply and an optional picture.
+     * Creates a custom supply from a command, a loaded base supply, and an optional picture.
      *
      * @param command command with the custom supply data
      * @param supply base supply loaded from persistence
@@ -99,13 +105,12 @@ public class CustomSupply extends AbstractDomainAggregateRoot<CustomSupply> {
         this.unitPrice = command.unitPrice();
         this.description = command.description();
         this.unitMeasurement = command.unitMeasurement();
-        this.pictureUrl = pictureUrl;
+        this.pictureUrl = this.applyImage(pictureUrl);
     }
 
     /**
      * Partially updates this custom supply.
-     *
-     * The base supply ID and account ID are not modified by this operation.
+     * This operation does not modify the base supply ID and account ID.
      *
      * @param command command with optional updated fields
      * @param pictureUrl picture URL to keep or replace
@@ -148,7 +153,16 @@ public class CustomSupply extends AbstractDomainAggregateRoot<CustomSupply> {
         if (pictureUrl != null) {
             this.pictureUrl = pictureUrl;
         }
-
         return this;
+    }
+
+    /**
+     * Returns the provided image if valid, otherwise falls back to the default.
+     */
+    private ImageURL applyImage(ImageURL pictureUrl) {
+        if (pictureUrl == null || pictureUrl.url() == null || pictureUrl.url().isBlank()) {
+            return new ImageURL(DEFAULT_IMAGE_URL, DEFAULT_PUBLIC_ID);
+        }
+        return pictureUrl;
     }
 }
