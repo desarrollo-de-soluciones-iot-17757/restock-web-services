@@ -47,7 +47,7 @@ public class DeviceThresholdRepositoryImpl implements DeviceThresholdRepository 
      */
     @Override
     public Optional<DeviceThreshold> findByDeviceId(DeviceId deviceId) {
-        return thresholdMongoRepository.findByDeviceId(deviceId)
+        return thresholdMongoRepository.findFirstByDeviceIdOrderByUpdatedAtDesc(deviceId)
                 .map(DeviceThresholdPersistenceAssembler::toDomainFromPersistence);
     }
 

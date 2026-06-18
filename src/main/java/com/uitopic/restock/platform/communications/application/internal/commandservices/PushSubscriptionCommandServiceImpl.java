@@ -38,6 +38,8 @@ public class PushSubscriptionCommandServiceImpl implements PushSubscriptionComma
         log.info("Registering push subscription. userId={}, platform={}, provider={}",
                 command.userId(), command.clientPlatform(), command.provider());
 
+        var existingSubscriptions = pushSubscriptionRepository.findAllByProviderToken(command.providerToken());
+
         var pushSubscription = pushSubscriptionRepository.findByProviderToken(command.providerToken())
                 .map(existing -> {
                     existing.setUserId(command.userId());
@@ -53,6 +55,30 @@ public class PushSubscriptionCommandServiceImpl implements PushSubscriptionComma
                         command.provider()
                 ));
 
-        return Optional.of(pushSubscriptionRepository.save(pushSubscription));
+        var registeredSubscription = pushSubscriptionRepository.save(pushSubscription);
+
+        existingSubscriptions.stream()
+                .filter(existing -> registeredSubscription.getId() != null)
+                .filter(existing -> existing.getId() != null)
+                .filter(existing -> !existing.getId().equals(registeredSubscription.getId()))
+                .forEach(duplicate -> {
+                    duplicate.deactivate();
+                    pushSubscriptionRepository.save(duplicate);
+                    log.warn(
+                            "Deactivated duplicate push subscription. subscriptionId={}, userId={}, tokenPrefix={}",
+                            duplicate.getId(),
+                            duplicate.getUserId(),
+                            maskToken(command.providerToken())
+                    );
+                });
+
+        return Optional.of(registeredSubscription);
+    }
+
+    private static String maskToken(String token) {
+        if (token == null || token.length() <= 12) {
+            return "****";
+        }
+        return token.substring(0, 8) + "...";
     }
 }

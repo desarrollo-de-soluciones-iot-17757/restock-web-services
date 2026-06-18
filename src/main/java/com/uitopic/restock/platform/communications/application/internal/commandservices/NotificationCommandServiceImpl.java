@@ -107,14 +107,22 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.sourceId(),
                 command.title());
 
-        activeDevices.forEach(device -> pushNotificationService.sendPushNotification(
-                command.recipientUserId(),
-                device.getProviderToken(),
-                command.severity(),
-                command.sourceId(),
-                command.title(),
-                command.message()
-        ));
+        activeDevices.forEach(device -> {
+            log.info(
+                    "Sending push notification to active subscription. recipientUserId={}, subscriptionId={}, tokenPrefix={}",
+                    command.recipientUserId(),
+                    device.getId(),
+                    maskToken(device.getProviderToken())
+            );
+            pushNotificationService.sendPushNotification(
+                    command.recipientUserId(),
+                    device.getProviderToken(),
+                    command.severity(),
+                    command.sourceId(),
+                    command.title(),
+                    command.message()
+            );
+        });
     }
 
     /**
@@ -142,5 +150,12 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 command.htmlVariables(),
                 command.type()
         ));
+    }
+
+    private static String maskToken(String token) {
+        if (token == null || token.length() <= 12) {
+            return "****";
+        }
+        return token.substring(0, 8) + "...";
     }
 }

@@ -15,6 +15,7 @@ public final class DevicePersistenceAssembler {
         var device = new Device();
         device.setId(entity.getId());
         device.setAccountId(entity.getAccountId());
+        device.setDeviceToken(entity.getDeviceToken());
         device.setBranchId(entity.getBranchId());
         device.setAssignedBatchId(entity.getAssignedBatchId());
         device.setSupplyThresholdId(entity.getSupplyThresholdId());
@@ -37,6 +38,7 @@ public final class DevicePersistenceAssembler {
             entity.setId(device.getId());
         }
         entity.setAccountId(device.getAccountId());
+        entity.setDeviceToken(device.getDeviceToken());
         entity.setBranchId(device.getBranchId());
         entity.setAssignedBatchId(device.getAssignedBatchId());
         entity.setSupplyThresholdId(device.getSupplyThresholdId());
