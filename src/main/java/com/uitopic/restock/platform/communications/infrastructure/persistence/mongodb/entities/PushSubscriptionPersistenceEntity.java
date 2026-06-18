@@ -19,9 +19,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class PushSubscriptionPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
     /** Unique identifier for the push subscription. */
-    private String id;
-
-    /** Unique identifier for the push subscription. */
     private String userId;
 
     /** Token provided by the push notification provider. */

@@ -1,4 +1,4 @@
-package com.uitopic.restock.platform.devices.application.internal.telemetryservices;
+package com.uitopic.restock.platform.devices.application.internal.outboundservices.acl;
 
 import com.uitopic.restock.platform.devices.domain.services.DeviceTelemetryService;
 import lombok.extern.slf4j.Slf4j;

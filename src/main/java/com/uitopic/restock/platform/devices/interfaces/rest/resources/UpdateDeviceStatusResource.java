@@ -7,9 +7,9 @@ import jakarta.validation.constraints.Pattern;
 @Schema(description = "Request body to transition device lifecycle status.")
 public record UpdateDeviceStatusResource(
 
-        @Schema(description = "Target status: CONFIGURED (completes onboarding) or INACTIVE (deactivates device)")
+        @Schema(description = "Target status: CALIBRATED (completes onboarding) or INACTIVE (deactivates device)")
         @NotBlank(message = "Status is required")
-        @Pattern(regexp = "^(CONFIGURED|INACTIVE)$", message = "Status must be CONFIGURED or INACTIVE")
+        @Pattern(regexp = "^(CALIBRATED|INACTIVE)$", message = "Status must be CALIBRATED or INACTIVE")
         String status
 ) {
 }

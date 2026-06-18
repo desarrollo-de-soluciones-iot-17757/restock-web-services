@@ -69,18 +69,22 @@ public class FirebaseCloudMessagingServiceImpl implements FirebaseCloudMessaging
             String recipientUserId,
             String deviceToken
     ) {
-        pushSubscriptionRepository
-                .findByProviderToken(deviceToken)
-                .ifPresentOrElse(device -> {
-                    device.deactivate();
-                    pushSubscriptionRepository.save(device);
-                    log.warn("Deactivated unregistered FCM device token. user={}, notificationDeviceId={}, tokenPrefix={}",
-                            recipientUserId,
-                            device.getId(),
-                            maskToken(deviceToken));
-                }, () -> log.warn("UNREGISTERED FCM token was not found in database. user={}, tokenPrefix={}",
-                        recipientUserId,
-                        maskToken(deviceToken)));
+        var devices = pushSubscriptionRepository.findAllByProviderToken(deviceToken);
+        if (devices.isEmpty()) {
+            log.warn("UNREGISTERED FCM token was not found in database. user={}, tokenPrefix={}",
+                    recipientUserId,
+                    maskToken(deviceToken));
+            return;
+        }
+
+        devices.forEach(device -> {
+            device.deactivate();
+            pushSubscriptionRepository.save(device);
+            log.warn("Deactivated unregistered FCM device token. user={}, notificationDeviceId={}, tokenPrefix={}",
+                    recipientUserId,
+                    device.getId(),
+                    maskToken(deviceToken));
+        });
     }
 
     private String maskToken(String deviceToken) {

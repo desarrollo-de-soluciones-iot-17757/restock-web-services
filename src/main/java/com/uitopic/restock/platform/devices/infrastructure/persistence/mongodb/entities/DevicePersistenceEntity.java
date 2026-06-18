@@ -20,6 +20,8 @@ public class DevicePersistenceEntity extends AuditableAbstractPersistenceEntity 
 
     private AccountId accountId;
 
+    private String deviceToken;
+
     private String branchId;
 
     private String assignedBatchId;
