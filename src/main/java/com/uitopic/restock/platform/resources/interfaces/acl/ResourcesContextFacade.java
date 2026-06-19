@@ -10,6 +10,7 @@ public interface ResourcesContextFacade {
     double subtractSupplyStock(String branchId, String supplyId, Integer quantity);
     void addSupplyStockBack(String branchId, String supplyId, Integer quantity, String unit);
     void adjustStock(String branchId, String supplyId, Integer adjustedQuantity, String unit);
+    String resolveAvailableBatchId(String branchId, String customSupplyId, Double quantityNeeded);
 
     /**
      * Retrieves the current supply stock level for a given batch ID. This method is used to obtain the available stock quantity for a specific batch of supplies, which can be used for inventory management and restocking decisions.
