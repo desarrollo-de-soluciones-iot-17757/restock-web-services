@@ -1,7 +1,7 @@
 package com.uitopic.restock.platform.profiles.domain.model.commands;
 
-public record CreateProfileCommand(
-        String userId,
+public record UpdateProfileCommand(
+        String id,
         String name,
         String lastName,
         String phoneNumber,

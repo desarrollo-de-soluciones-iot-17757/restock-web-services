@@ -1,14 +1,12 @@
 package com.uitopic.restock.platform.profiles.domain.model.commands;
 
-public record CreateProfileCommand(
-        String userId,
-        String name,
-        String lastName,
-        String phoneNumber,
+public record UpdateBusinessCommand(
+        String id,
+        String ruc,
         byte[] image,
         String photoFileName,
-        String gender,
-        String birthDate
+        String companyName,
+        String mainLocation
 ) {
     public boolean hasImage() {
         return image != null && image.length > 0
