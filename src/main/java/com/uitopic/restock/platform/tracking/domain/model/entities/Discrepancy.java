@@ -66,11 +66,14 @@ public class Discrepancy {
     private StockRecord systemStock;
 
     /**
-     * The threshold used during the stock comparison.
+     * The stock used in the comparison, which may include justified withdrawn stock if applicable..
      */
-    private Double thresholdUsed;
+    private Double justifiedWithdrawnStockUsed;
 
-
+    /**
+     * The total physical stock used in the comparison, which includes both the physical stock obtained from the count and any justified withdrawn stock.
+     */
+    private Double totalPhysicalStock;
 
     /**
      * The risk level of the discrepancy, provided by the request. This indicates the severity of the inventory discrepancy.
@@ -135,9 +138,11 @@ public class Discrepancy {
         this.customSupplyId = stockComparisonTask.getCustomSupplyId();
         this.customSupplyName = stockComparisonTask.getCustomSupplyName();
 
+        this.justifiedWithdrawnStockUsed = stockComparisonTask.getJustifiedWithdrawnStockUsed();
+        this.totalPhysicalStock = stockComparisonTask.getTotalPhysicalStock();
+        
         this.physicalStock = stockComparisonTask.getPhysicalStock();
         this.systemStock = stockComparisonTask.getSystemStock();
-        this.thresholdUsed = stockComparisonTask.getThresholdUsed();
         this.quantityDifference = stockComparisonTask.getDifference();
 
         this.riskLevel = riskLevel;
