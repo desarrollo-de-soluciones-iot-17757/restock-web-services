@@ -1,4 +1,11 @@
 package com.uitopic.restock.platform.sales.domain.model.events;
 
-public class SalesOrderCreatedEvent {
+import java.time.LocalDateTime;
+
+public record SalesOrderCreatedEvent(
+        String salesOrderId,
+        String accountId,
+        String branchId,
+        LocalDateTime registeredAt
+) {
 }
