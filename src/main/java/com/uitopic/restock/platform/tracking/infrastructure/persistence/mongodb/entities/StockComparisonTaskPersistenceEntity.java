@@ -1,5 +1,8 @@
 package com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.entities;
 
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BranchId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.shared.infrastructure.persistence.mongodb.entities.AuditableAbstractPersistenceEntity;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.ComparisonResult;
@@ -28,6 +31,14 @@ public class StockComparisonTaskPersistenceEntity extends AuditableAbstractPersi
      * The stock record obtained from the system, which is used for comparison against the physical stock. This field is set when the task is created and remains unchanged throughout the task's lifecycle.
      */
     private StockRecord systemStock;
+    private Double justifiedWithdrawnStockUsed;
+    private Double totalPhysicalStock;
+    private Double difference;
+    private AccountId accountId;
+    private BranchId branchId;
+    private BatchId batchId;
+    private String customSupplyId;
+    private String customSupplyName;
 
     /**
      * The current status of the task, used for tracking progress and identifying tasks that are in progress, completed, cancelled, or failed.
