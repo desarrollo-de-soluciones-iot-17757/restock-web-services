@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 /**
- * Aggregate root representing a conciliation task created from a critical stock discrepancy.
+ * Aggregate root representing a conciliation task created from a stock discrepancy.
  * <p>
  * This task tracks the operational resolution process of a mismatch between physical stock
  * and system stock. It stores the discrepancy context, the affected inventory information,
@@ -106,7 +106,7 @@ public class ConciliationTask extends Task {
 
     /**
      * The alert level assigned to the discrepancy that originated this conciliation task.
-     * Only critical discrepancies are allowed to create conciliation tasks.
+     * Only warning and critical discrepancies are allowed to create conciliation tasks.
      */
     private DiscrepancyAlertLevel alertLevel;
 
@@ -148,13 +148,13 @@ public class ConciliationTask extends Task {
     private Instant resolvedAt;
 
     /**
-     * Creates a new conciliation task from a critical discrepancy.
+     * Creates a new conciliation task from a discrepancy that requires conciliation.
      * <p>
      * The constructor copies the relevant discrepancy context, including stock records,
      * account information, branch information, batch information, supply information, and alert level.
-     * A conciliation task can only be created from a discrepancy with CRITICAL risk level.
+     * A conciliation task can only be created from a discrepancy with WARNING or CRITICAL risk level.
      *
-     * @param discrepancy the critical discrepancy that originated the conciliation task
+     * @param discrepancy the discrepancy that originated the conciliation task
      */
     public ConciliationTask(Discrepancy discrepancy) {
         super(discrepancy.getDeviceId());
@@ -167,8 +167,8 @@ public class ConciliationTask extends Task {
             throw new DiscrepancyResolutionException("Stock comparison task ID cannot be null or blank");
         }
 
-        if (discrepancy.getRiskLevel() != DiscrepancyAlertLevel.CRITICAL) {
-            throw new DiscrepancyResolutionException("Only critical discrepancies can create conciliation tasks");
+        if (discrepancy.getRiskLevel() == DiscrepancyAlertLevel.OK) {
+            throw new DiscrepancyResolutionException("Only warning or critical discrepancies can create conciliation tasks");
         }
 
         this.discrepancyId = discrepancy.getId();
