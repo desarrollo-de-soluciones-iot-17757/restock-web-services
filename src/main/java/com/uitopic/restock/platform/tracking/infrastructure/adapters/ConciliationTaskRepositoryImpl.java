@@ -61,6 +61,16 @@ public class ConciliationTaskRepositoryImpl implements ConciliationTaskRepositor
      * @inheritDocs
      */
     @Override
+    public List<ConciliationTask> findAllByCustomSupplyId(String customSupplyId) {
+        return conciliationTaskMongoRepository.findAllByCustomSupplyId(customSupplyId).stream()
+                .map(ConciliationTaskPersistenceAssembler::toDomainFromPersistence)
+                .toList();
+    }
+
+    /**
+     * @inheritDocs
+     */
+    @Override
     public List<ConciliationTask> findAllByAccountIdAndFilters(AccountId accountId, ConciliationTaskStatus status, String customSupplyId, BranchId branchId, DeviceId deviceId) {
         return findAllByAccountId(accountId).stream()
                 .filter(task -> status == null || task.getConciliationStatus() == status)

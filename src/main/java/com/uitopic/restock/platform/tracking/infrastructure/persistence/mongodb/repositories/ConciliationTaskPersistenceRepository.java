@@ -25,6 +25,14 @@ public interface ConciliationTaskPersistenceRepository extends MongoRepository<C
     List<ConciliationTaskPersistenceEntity> findAllByAccountId(AccountId accountId);
 
     /**
+     * Finds all conciliation tasks associated with a custom supply.
+     *
+     * @param customSupplyId custom supply identifier
+     * @return persistence entities associated with the custom supply
+     */
+    List<ConciliationTaskPersistenceEntity> findAllByCustomSupplyId(String customSupplyId);
+
+    /**
      * Finds conciliation tasks that match the full stock comparison scope and
      * status.
      *

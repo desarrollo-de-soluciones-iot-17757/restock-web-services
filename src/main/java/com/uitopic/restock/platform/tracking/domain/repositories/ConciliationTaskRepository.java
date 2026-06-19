@@ -43,6 +43,14 @@ public interface ConciliationTaskRepository {
     List<ConciliationTask> findAllByAccountId(AccountId accountId);
 
     /**
+     * Finds all conciliation tasks for a custom supply.
+     *
+     * @param customSupplyId custom supply identifier
+     * @return list of conciliation tasks associated with the custom supply
+     */
+    List<ConciliationTask> findAllByCustomSupplyId(String customSupplyId);
+
+    /**
      * Finds conciliation tasks for an account using optional filters.
      *
      * @param accountId account identifier
