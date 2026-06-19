@@ -2,10 +2,8 @@ package com.uitopic.restock.platform.sales.domain.model.events;
 
 import java.time.LocalDateTime;
 
-public record SalesOrderCreatedEvent(
+public record SalesOrderCancelledEvent(
         String salesOrderId,
-        String accountId,
-        String branchId,
-        LocalDateTime registeredAt
+        LocalDateTime cancelledAt
 ) {
 }
