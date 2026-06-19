@@ -7,6 +7,8 @@ import com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * Implementation of the DiscrepancyRepository interface for managing inventory discrepancies.
  * This class uses a MongoDB repository for persistence operations and an assembler to convert between domain and persistence models.
@@ -28,5 +30,11 @@ public class DiscrepancyRepositoryImpl implements DiscrepancyRepository {
                         .toPersistenceFromDomain(discrepancy));
 
         return DiscrepancyPersistenceAssembler.toDomainFromPersistence(saved);
+    }
+
+    @Override
+    public Optional<Discrepancy> findById(String id) {
+        return discrepancyMongoRepository.findById(id)
+                .map(DiscrepancyPersistenceAssembler::toDomainFromPersistence);
     }
 }

@@ -11,4 +11,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "businesses")
 public class BusinessPersistenceEntity extends AuditableAbstractPersistenceEntity {
+    private String userId;
+    private String ruc;
+    private String pictureUrl;
+    private String picturePublicId;
+    private String companyName;
+    private String mainLocation;
 }

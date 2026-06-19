@@ -3,8 +3,8 @@ package com.uitopic.restock.platform.tracking.domain.model.events;
 import com.uitopic.restock.platform.shared.domain.model.events.NotificationEvent;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
+import com.uitopic.restock.platform.tracking.domain.model.aggregates.StockComparisonTask;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
-import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -36,12 +36,6 @@ public class DiscrepancyDetectedEvent implements NotificationEvent {
     private Double systemStock;
 
     /**
-     * The threshold used to determine the risk level of the discrepancy, provided by the comparison task. This value is used to evaluate the severity of the discrepancy based on predefined thresholds for quantity differences.
-     */
-    @NotEmpty
-    private Double thresholdUsed;
-
-    /**
      * The device ID associated with the discrepancy, provided by the request. This is used to track the source of the discrepancy and can be helpful for auditing and resolution purposes.
      */
     @NotNull
@@ -58,6 +52,12 @@ public class DiscrepancyDetectedEvent implements NotificationEvent {
      */
     @NotNull
     private DiscrepancyAlertLevel alertLevel;
+
+    /**
+     * The stock comparison task associated with the discrepancy, provided by the request. This aggregate contains additional context and information about the comparison process that led to the detection of the discrepancy, which can be useful for further analysis and resolution.
+     */
+    @NotNull
+    private StockComparisonTask stockComparisonTask;
 
     /**
      * Returns the source ID of the event, which is the device ID associated with the discrepancy. This allows the system to identify the origin of the event and can be useful for tracking and auditing purposes.

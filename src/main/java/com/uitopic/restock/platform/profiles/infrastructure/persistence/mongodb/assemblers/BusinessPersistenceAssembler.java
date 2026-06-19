@@ -5,15 +5,31 @@ import com.uitopic.restock.platform.profiles.infrastructure.persistence.mongodb.
 
 public final class BusinessPersistenceAssembler {
 
-    private BusinessPersistenceAssembler() {
-        // Private constructor to prevent instantiation
-    }
+    private BusinessPersistenceAssembler() {}
 
     public static Business toDomainFromPersistence(BusinessPersistenceEntity entity) {
-        return null;
+        if (entity == null) return null;
+        var business = new Business();
+        business.setId(entity.getId());
+        business.setUserId(entity.getUserId());
+        business.setRuc(entity.getRuc());
+        business.setPictureUrl(entity.getPictureUrl());
+        business.setPicturePublicId(entity.getPicturePublicId());
+        business.setCompanyName(entity.getCompanyName());
+        business.setMainLocation(entity.getMainLocation());
+        return business;
     }
 
     public static BusinessPersistenceEntity toPersistenceFromDomain(Business business) {
-        return null;
+        if (business == null) return null;
+        var entity = new BusinessPersistenceEntity();
+        if (business.getId() != null) entity.setId(business.getId());
+        entity.setUserId(business.getUserId());
+        entity.setRuc(business.getRuc());
+        entity.setPictureUrl(business.getPictureUrl());
+        entity.setPicturePublicId(business.getPicturePublicId());
+        entity.setCompanyName(business.getCompanyName());
+        entity.setMainLocation(business.getMainLocation());
+        return entity;
     }
 }
