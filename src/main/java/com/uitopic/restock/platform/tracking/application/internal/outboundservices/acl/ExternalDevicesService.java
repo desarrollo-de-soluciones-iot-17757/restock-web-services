@@ -28,12 +28,32 @@ public class ExternalDevicesService {
     }
 
     /**
-     * Retrieves the anomaly threshold for a given device ID by delegating to the Devices Context Facade.
+     * Retrieves the justified withdrawn stock configured for a device.
      *
-     * @param deviceId The unique identifier of the device for which to retrieve the anomaly threshold.
-     * @return The anomaly threshold value associated with the specified device ID. This value is used to determine when a device's behavior is considered anomalous.
+     * @param deviceId device identifier
+     * @return a pair containing the justified withdrawn stock value and the
+     *         account that owns the device
      */
-    public Pair<Double, AccountId> getAnomalyThreshold(DeviceId deviceId) {
-        return devicesContextFacade.getAnomalyThresholdByDeviceId(deviceId);
+    public Pair<Double, AccountId> getJustifiedWithdrawnStock(DeviceId deviceId) {
+        return devicesContextFacade.getJustifiedWithdrawnStockByDeviceId(deviceId);
+    }
+
+    /**
+     * Updates the justified withdrawn stock value of a device.
+     *
+     * @param deviceId device identifier
+     * @param amount new justified withdrawn stock amount
+     */
+    public void updateJustifiedWithdrawnStock(DeviceId deviceId, Double amount) {
+        devicesContextFacade.updateJustifiedWithdrawnStock(deviceId, amount);
+    }
+
+    /**
+     * Requests device recalibration using the current device configuration.
+     *
+     * @param deviceId device identifier
+     */
+    public void recalibrateDevice(DeviceId deviceId) {
+        devicesContextFacade.recalibrateDevice(deviceId);
     }
 }

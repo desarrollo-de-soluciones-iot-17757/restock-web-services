@@ -1,8 +1,12 @@
 package com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.entities;
 
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BatchId;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.BranchId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyStatus;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,6 +27,16 @@ public class DiscrepancyPersistenceEntity {
      */
     @MongoId(FieldType.OBJECT_ID)
     private String id;
+    private String stockComparisonTaskId;
+    private AccountId accountId;
+    private BranchId branchId;
+    private BatchId batchId;
+    private String customSupplyId;
+    private String customSupplyName;
+    private StockRecord physicalStock;
+    private StockRecord systemStock;
+    private Double justifiedWithdrawnStockUsed;
+    private Double totalPhysicalStock;
 
     /**
      * The risk level of the discrepancy, provided by the request. This indicates the severity of the inventory discrepancy and can be used to prioritize resolution efforts. The risk level is determined based on the quantity difference and other factors related to the inventory tracking process.
@@ -43,4 +57,6 @@ public class DiscrepancyPersistenceEntity {
      * The device ID associated with the discrepancy, provided by the request. This is used to track and reference specific discrepancies in the inventory tracking process.
      */
     private DeviceId deviceId;
+    private java.time.Instant createdAt;
+    private java.time.Instant resolvedAt;
 }

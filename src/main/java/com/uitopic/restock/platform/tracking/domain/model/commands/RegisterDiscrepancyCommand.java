@@ -1,24 +1,27 @@
 package com.uitopic.restock.platform.tracking.domain.model.commands;
 
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.DeviceId;
 import com.uitopic.restock.platform.tracking.domain.exceptions.DiscrepancyResolutionException;
+import com.uitopic.restock.platform.tracking.domain.model.aggregates.StockComparisonTask;
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 
 /**
- * Command representing the registration of a discrepancy in inventory tracking.
+ * Command representing the registration of a discrepancy from a stock comparison task.
  *
- * @param reportedQuantity the quantity reported by the device, which may differ from the expected quantity
- * @param deviceId the unique identifier of the device reporting the discrepancy
+ * @param stockComparisonTask the stock comparison task that originated the discrepancy
+ * @param riskLevel the risk level assigned to the discrepancy
  */
 public record RegisterDiscrepancyCommand(
-        Double reportedQuantity,
-        DiscrepancyAlertLevel riskLevel,
-        DeviceId deviceId
+        StockComparisonTask stockComparisonTask,
+        DiscrepancyAlertLevel riskLevel
 ) {
 
     public RegisterDiscrepancyCommand {
-        if (reportedQuantity == null || reportedQuantity < 0) {
-            throw new DiscrepancyResolutionException("Reported quantity must be a non-negative number");
+        if (stockComparisonTask == null) {
+            throw new DiscrepancyResolutionException("Stock comparison task cannot be null");
+        }
+
+        if (riskLevel == null) {
+            throw new DiscrepancyResolutionException("Risk level cannot be null");
         }
     }
 }

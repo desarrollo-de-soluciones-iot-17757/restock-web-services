@@ -92,7 +92,7 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
 
     public void confirmCalibration(DeviceThreshold deviceThreshold) {
         validateConfigurationReady(deviceThreshold);
-        if (status != DeviceStatus.CONFIGURED && status != DeviceStatus.CALIBRATED)
+        if (status != DeviceStatus.CONFIGURED && status != DeviceStatus.CALIBRATED && status != DeviceStatus.ACTIVE)
             throw new IllegalStateException("Device must be CONFIGURED before confirming calibration");
         if (weightMeasurement == null)
             throw new IllegalStateException("Measurement must be configured before confirming calibration");

@@ -25,4 +25,7 @@ public interface DevicesContextFacade {
      * @return The anomaly threshold value associated with the specified device ID. This value is used to determine when a device's behavior is considered anomalous.
      */
     Pair<Double, AccountId> getAnomalyThresholdByDeviceId(DeviceId deviceId);
+    Pair<Double, AccountId> getJustifiedWithdrawnStockByDeviceId(DeviceId deviceId);
+    void updateJustifiedWithdrawnStock(DeviceId deviceId, Double amount);
+    void recalibrateDevice(DeviceId deviceId);
 }

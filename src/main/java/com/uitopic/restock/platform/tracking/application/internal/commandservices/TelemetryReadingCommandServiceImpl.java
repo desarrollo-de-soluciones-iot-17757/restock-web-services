@@ -5,6 +5,7 @@ import com.uitopic.restock.platform.tracking.application.internal.outboundservic
 import com.uitopic.restock.platform.tracking.application.internal.outboundservices.acl.ExternalResourcesService;
 import com.uitopic.restock.platform.tracking.domain.exceptions.TelemetryValuesException;
 import com.uitopic.restock.platform.tracking.domain.model.aggregates.StockComparisonTask;
+import com.uitopic.restock.platform.tracking.domain.model.commands.ClosePendingConciliationTasksCommand;
 import com.uitopic.restock.platform.tracking.domain.model.commands.ReceiveTelemetryReadingCommand;
 import com.uitopic.restock.platform.tracking.domain.model.entities.TelemetryReading;
 import com.uitopic.restock.platform.tracking.domain.model.events.DiscrepancyDetectedEvent;
@@ -12,6 +13,7 @@ import com.uitopic.restock.platform.tracking.domain.model.valueobjects.Discrepan
 import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockRecord;
 import com.uitopic.restock.platform.tracking.domain.repositories.StockComparisonTaskRepository;
 import com.uitopic.restock.platform.tracking.domain.repositories.TelemetryReadingRepository;
+import com.uitopic.restock.platform.tracking.domain.services.ConciliationTaskCommandService;
 import com.uitopic.restock.platform.tracking.domain.services.TelemetryReadingCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
 
     // The SpringDomainEventPublisher is used to publish domain events related to telemetry readings and stock comparisons, allowing for decoupled communication between different parts of the application and enabling event-driven architecture patterns.
     private final SpringDomainEventPublisher domainEventPublisher;
+    private final ConciliationTaskCommandService conciliationTaskCommandService;
 
     @Override
     public void handle(ReceiveTelemetryReadingCommand command) {
@@ -64,58 +67,64 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
     }
 
     /**
-     * Performs a stock comparison based on the telemetry reading received from a device. This method retrieves the physical stock from the telemetry reading and the system stock from the external resources service using the assigned batch ID. It then compares the two stock values and checks for any discrepancies based on a predefined threshold. If an anomaly is detected, it logs a warning message; otherwise, it logs an informational message indicating that no anomaly was detected. If any exception occurs during this process, it logs the error and throws a TelemetryValuesException with details about the failure.
+     * Performs a stock comparison based on the telemetry reading received from a device. This method retrieves the device physical stock from the telemetry reading, the justified withdrawn stock from devices, and the digital stock from resources. It then compares the digital stock against the total physical stock to detect discrepancies. If any exception occurs during this process, it logs the error and throws a TelemetryValuesException with details about the failure.
      *
      * @param command the command containing the telemetry reading information, including the physical stock, assigned batch ID, and device ID
      */
     private void performStockComparison(ReceiveTelemetryReadingCommand command) {
 
         try {
-            // Get the physical stock from the telemetry reading and the system stock from the external resources service using the assigned batch ID. Also, retrieve the device ID and the discrepancy threshold for anomaly detection.
+            // Get the device physical stock, digital stock snapshot, and justified withdrawn stock needed for the comparison.
             var physicalStock = command.physicalStock();
-            var systemStockAndName = externalResourcesService.getCustomSupplyStockAndNameByBatchId(command.assignedBatchId());
-            var systemStock = new StockRecord(systemStockAndName.getLeft());
-            var customSupplyName = systemStockAndName.getRight();
+            var resourceSnapshot = externalResourcesService.getStockSnapshotByBatchId(command.assignedBatchId());
+            var systemStock = new StockRecord(resourceSnapshot.stock());
+            var customSupplyName = resourceSnapshot.customSupplyName();
             var deviceId = command.deviceId();
-            var pair = externalDevicesService.getAnomalyThreshold(deviceId);
-            var discrepancyThreshold = pair.getLeft();
-            var accountId = pair.getRight();
+            var justifiedWithdrawnStockAndAccount = externalDevicesService.getJustifiedWithdrawnStock(deviceId);
+            var justifiedWithdrawnStock = justifiedWithdrawnStockAndAccount.getLeft();
+            var accountId = justifiedWithdrawnStockAndAccount.getRight();
 
-            // Register a new stock comparison task using the retrieved physical stock, system stock, device ID, and discrepancy threshold. If any exception occurs during this process, log the error and throw a TelemetryValuesException with details about the failure.
+            // Register a new stock comparison task using the retrieved physical stock, system stock, device ID, and justified withdrawn stock.
             var task = new StockComparisonTask(
                     physicalStock,
                     systemStock,
-                    deviceId
+                    deviceId,
+                    justifiedWithdrawnStock,
+                    accountId,
+                    new com.uitopic.restock.platform.shared.domain.model.valueobjects.BranchId(resourceSnapshot.branchId()),
+                    command.assignedBatchId(),
+                    resourceSnapshot.customSupplyId(),
+                    customSupplyName
             );
 
-            // Check for anomalies by comparing the physical stock and system stock against the discrepancy threshold. If an anomaly is detected, log a warning message with details about the device ID, physical stock, system stock, and the threshold. If no anomaly is detected, log an informational message indicating that the physical stock is within the threshold of the system stock. This allows for monitoring inventory discrepancies and taking appropriate actions if anomalies are detected.
-            var isAnomaly = task.isAnomalyDetected(discrepancyThreshold);
+            // Check for anomalies by comparing digital stock against total physical stock.
+            var isAnomaly = task.isAnomalyDetected();
 
             // Evaluate the result of the anomaly detection and log the appropriate message. If an anomaly is detected, it indicates a significant discrepancy between the physical stock and system stock, which may require further investigation or corrective actions. If no anomaly is detected, it indicates that the physical stock is within an acceptable range of the system stock, suggesting that there are no immediate issues with inventory levels for the device.
             if (isAnomaly) {
                 task.stockMismatch();
-                var riskLevel = DiscrepancyAlertLevel.from(physicalStock.getStock(), systemStock.getStock(), discrepancyThreshold);
+                var savedTask = stockComparisonTaskRepository.save(task);
+                var riskLevel = DiscrepancyAlertLevel.from(savedTask.getDifference());
                 var event = DiscrepancyDetectedEvent.builder()
                         .customSupplyName(customSupplyName)
                         .physicalStock(physicalStock.getStock())
                         .systemStock(systemStock.getStock())
-                        .thresholdUsed(discrepancyThreshold)
                         .deviceId(deviceId)
                         .accountId(accountId)
                         .alertLevel(riskLevel)
+                        .stockComparisonTask(savedTask)
                         .build();
                 domainEventPublisher.publish(event);
             } else {
                 task.stockMatch();
+                var savedTask = stockComparisonTaskRepository.save(task);
+                conciliationTaskCommandService.handle(new ClosePendingConciliationTasksCommand(savedTask));
                 log.info(
-                        "No anomaly detected for device {}: physical stock {} is within the threshold of system stock {}",
+                        "No anomaly detected for device {}: total physical stock {} matches system stock {}",
                         deviceId.getDeviceId(),
-                        physicalStock.getStock(),
+                        savedTask.getTotalPhysicalStock(),
                         systemStock.getStock());
             }
-
-            // Save the stock comparison task to the repository. This allows for tracking and analyzing stock comparisons over time, and can be used for reporting or further investigations if anomalies are detected. If saving the task fails, log an error message and throw a TelemetryValuesException to indicate the failure.
-            stockComparisonTaskRepository.save(task);
 
         } catch (Exception e) {
             log.error("Error performing stock comparison for device {}: {}", command.deviceId(), e.getMessage());

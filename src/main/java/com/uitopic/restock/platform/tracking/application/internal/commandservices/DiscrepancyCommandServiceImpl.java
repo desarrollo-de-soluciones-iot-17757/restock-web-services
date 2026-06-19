@@ -1,8 +1,11 @@
 package com.uitopic.restock.platform.tracking.application.internal.commandservices;
 
 import com.uitopic.restock.platform.tracking.domain.model.commands.RegisterDiscrepancyCommand;
+import com.uitopic.restock.platform.tracking.domain.model.commands.CreateConciliationTaskCommand;
 import com.uitopic.restock.platform.tracking.domain.model.entities.Discrepancy;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyAlertLevel;
 import com.uitopic.restock.platform.tracking.domain.repositories.DiscrepancyRepository;
+import com.uitopic.restock.platform.tracking.domain.services.ConciliationTaskCommandService;
 import com.uitopic.restock.platform.tracking.domain.services.DiscrepancyCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ public class DiscrepancyCommandServiceImpl implements DiscrepancyCommandService 
 
     // Repository for managing discrepancies
     private final DiscrepancyRepository discrepancyRepository;
+    private final ConciliationTaskCommandService conciliationTaskCommandService;
 
     /**
      * @inheritDocs
@@ -28,21 +32,22 @@ public class DiscrepancyCommandServiceImpl implements DiscrepancyCommandService 
         log.info(
                 "{} - Registering a discrepancy for deviceId {}",
                 command.getClass().getSimpleName(),
-                command.deviceId().getDeviceId()
+                command.stockComparisonTask().getDeviceId().getDeviceId()
         );
 
         // Create a new discrepancy entity based on the command data
         var discrepancy = new Discrepancy(
-                command.reportedQuantity(),
-                command.riskLevel(),
-                command.deviceId()
+                command.stockComparisonTask(),
+                command.riskLevel()
         );
 
         // Save the discrepancy to the repository
-        discrepancyRepository.save(discrepancy);
+        var savedDiscrepancy = discrepancyRepository.save(discrepancy);
 
-        log.info("Discrepancy registered successfully for deviceId: {}", command.deviceId().getDeviceId());
+        if (savedDiscrepancy.getRiskLevel() != DiscrepancyAlertLevel.OK) {
+            conciliationTaskCommandService.handle(new CreateConciliationTaskCommand(savedDiscrepancy));
+        }
 
-        // TODO: Create the conciliation task here and associate it with the discrepancy if needed
+        log.info("Discrepancy registered successfully for deviceId: {}", command.stockComparisonTask().getDeviceId().getDeviceId());
     }
 }
