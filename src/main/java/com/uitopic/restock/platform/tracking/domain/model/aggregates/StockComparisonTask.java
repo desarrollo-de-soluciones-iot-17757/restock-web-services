@@ -10,7 +10,6 @@ import com.uitopic.restock.platform.tracking.domain.model.valueobjects.StockReco
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * Aggregate root representing a stock comparison task, which compares the physical stock obtained from a count against the system stock to identify discrepancies. The task is associated with a specific device that performed the stock count and tracks the result of the comparison.
@@ -21,7 +20,7 @@ import lombok.Setter;
 public class StockComparisonTask extends Task {
 
     /**
-     * The stock record obtained from the physical count, which is used for comparison against the system stock. This field is set when the task is created and remains unchanged throughout the task's lifecycle.
+     * The stock record obtained from the physical count of the device, which is used for comparison against the system stock. This field is set when the task is created and remains unchanged throughout the task's lifecycle.
      */
     private StockRecord physicalStock;
 
@@ -36,14 +35,20 @@ public class StockComparisonTask extends Task {
     private ComparisonResult result;
 
     /**
-     * The threshold used for determining whether the stock comparison result is a match or mismatch. This field is set when the task is created and remains unchanged throughout the task's lifecycle.
+     * Represent justified withdrawn of physical stock
      */
-    private Double thresholdUsed;
+    private Double justifiedWithdrawnStockUsed;
 
     /**
-     * The difference gotten from the comparison, which is calculated as the absolute difference between the physical stock and system stock. This field is set when the task is completed.
+     * Total physical stock used in the comparison, which includes both the physical stock obtained from the count and any justified withdrawn stock.
+     */
+    private Double totalPhysicalStock;
+
+    /**
+     * Represents the difference between the physical stock and the system stock. This field is set when the task is completed and indicates whether there is a discrepancy between the two stock records.
      */
     private Double difference;
+
 
     /**
      * The identifier of the account related to this stock comparison task. This field is set when the task is created and remains unchanged throughout the task's lifecycle.
@@ -82,7 +87,7 @@ public class StockComparisonTask extends Task {
             StockRecord physicalStock,
             StockRecord systemStock,
             DeviceId deviceId,
-            Double thresholdUsed,
+            Double justifiedWithdrawnStockUsed,
             AccountId accountId,
             BranchId branchId,
             BatchId batchId,
@@ -92,16 +97,19 @@ public class StockComparisonTask extends Task {
         super(deviceId);
 
         if (physicalStock == null) {
-            throw new StockComparisonIncompletedException("Physical stock cannot be null");
+            throw new StockComparisonIncompletedException("Device physical stock cannot be null");
         }
         if (systemStock == null) {
             throw new StockComparisonIncompletedException("System stock cannot be null");
         }
-        if (thresholdUsed == null || thresholdUsed < 0.0) {
-            throw new StockComparisonIncompletedException("Threshold used cannot be null or negative");
+        if (justifiedWithdrawnStockUsed == null || justifiedWithdrawnStockUsed < 0.0) {
+            throw new StockComparisonIncompletedException("Justified withdrawn stock cannot be null or negative");
         }
         if (accountId == null) {
             throw new StockComparisonIncompletedException("Account ID cannot be null");
+        }
+        if (branchId == null) {
+            throw new StockComparisonIncompletedException("Branch ID cannot be null");
         }
         if (batchId == null) {
             throw new StockComparisonIncompletedException("Batch ID cannot be null");
@@ -113,15 +121,14 @@ public class StockComparisonTask extends Task {
             throw new StockComparisonIncompletedException("Custom supply name cannot be null or blank");
         }
 
-        if (branchId == null) {
-            throw new StockComparisonIncompletedException("Branch ID cannot be null");
-        }
-
         this.result = ComparisonResult.IN_PROGRESS;
         this.physicalStock = physicalStock;
         this.systemStock = systemStock;
-        this.thresholdUsed = thresholdUsed;
-        this.difference = Math.abs(systemStock.getStock() - physicalStock.getStock());
+        this.justifiedWithdrawnStockUsed = justifiedWithdrawnStockUsed;
+
+        this.totalPhysicalStock = physicalStock.getStock() + justifiedWithdrawnStockUsed;
+        this.difference = Math.abs(systemStock.getStock() - this.totalPhysicalStock);
+
         this.accountId = accountId;
         this.branchId = branchId;
         this.batchId = batchId;
@@ -130,12 +137,13 @@ public class StockComparisonTask extends Task {
     }
 
     /**
-     * Checks if the stock levels are within the specified threshold.
+     * Checks if the difference between the digital stock and the total physical
+     * stock is greater than zero.
      *
-     * @return true if an anomaly is detected (i.e., the difference exceeds the threshold), false otherwise
+     * @return true if an anomaly is detected, false otherwise
      */
     public Boolean isAnomalyDetected() {
-        return !systemStock.isInThreshold(physicalStock, thresholdUsed);
+        return this.difference > 0;
     }
 
     /**
