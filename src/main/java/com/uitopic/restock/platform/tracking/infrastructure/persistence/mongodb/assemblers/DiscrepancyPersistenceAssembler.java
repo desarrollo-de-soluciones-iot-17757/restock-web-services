@@ -23,10 +23,22 @@ public final class DiscrepancyPersistenceAssembler {
 
         var discrepancy = new Discrepancy();
         discrepancy.setId(entity.getId());
+        discrepancy.setStockComparisonTaskId(entity.getStockComparisonTaskId());
+        discrepancy.setAccountId(entity.getAccountId());
+        discrepancy.setBranchId(entity.getBranchId());
+        discrepancy.setBatchId(entity.getBatchId());
+        discrepancy.setCustomSupplyId(entity.getCustomSupplyId());
+        discrepancy.setCustomSupplyName(entity.getCustomSupplyName());
+        discrepancy.setPhysicalStock(entity.getPhysicalStock());
+        discrepancy.setSystemStock(entity.getSystemStock());
+        discrepancy.setJustifiedWithdrawnStockUsed(entity.getJustifiedWithdrawnStockUsed());
+        discrepancy.setTotalPhysicalStock(entity.getTotalPhysicalStock());
         discrepancy.setRiskLevel(entity.getRiskLevel());
         discrepancy.setQuantityDifference(entity.getQuantityDifference());
         discrepancy.setStatus(entity.getStatus());
         discrepancy.setDeviceId(entity.getDeviceId());
+        discrepancy.setCreatedAt(entity.getCreatedAt());
+        discrepancy.setResolvedAt(entity.getResolvedAt());
 
         return discrepancy;
     }
@@ -46,10 +58,22 @@ public final class DiscrepancyPersistenceAssembler {
         if (discrepancy.getId() != null) {
             entity.setId(discrepancy.getId());
         }
+        entity.setStockComparisonTaskId(discrepancy.getStockComparisonTaskId());
+        entity.setAccountId(discrepancy.getAccountId());
+        entity.setBranchId(discrepancy.getBranchId());
+        entity.setBatchId(discrepancy.getBatchId());
+        entity.setCustomSupplyId(discrepancy.getCustomSupplyId());
+        entity.setCustomSupplyName(discrepancy.getCustomSupplyName());
+        entity.setPhysicalStock(discrepancy.getPhysicalStock());
+        entity.setSystemStock(discrepancy.getSystemStock());
+        entity.setJustifiedWithdrawnStockUsed(discrepancy.getJustifiedWithdrawnStockUsed());
+        entity.setTotalPhysicalStock(discrepancy.getTotalPhysicalStock());
         entity.setRiskLevel(discrepancy.getRiskLevel());
         entity.setQuantityDifference(discrepancy.getQuantityDifference());
         entity.setStatus(discrepancy.getStatus());
         entity.setDeviceId(discrepancy.getDeviceId());
+        entity.setCreatedAt(discrepancy.getCreatedAt());
+        entity.setResolvedAt(discrepancy.getResolvedAt());
 
         return entity;
     }

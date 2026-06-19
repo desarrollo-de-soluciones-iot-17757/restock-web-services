@@ -28,6 +28,14 @@ public final class StockComparisonTaskPersistenceAssembler {
         stockComparisonTask.setCreatedAt(entity.getCreatedAt().toInstant());
         stockComparisonTask.setPhysicalStock(entity.getPhysicalStock());
         stockComparisonTask.setSystemStock(entity.getSystemStock());
+        stockComparisonTask.setJustifiedWithdrawnStockUsed(entity.getJustifiedWithdrawnStockUsed());
+        stockComparisonTask.setTotalPhysicalStock(entity.getTotalPhysicalStock());
+        stockComparisonTask.setDifference(entity.getDifference());
+        stockComparisonTask.setAccountId(entity.getAccountId());
+        stockComparisonTask.setBranchId(entity.getBranchId());
+        stockComparisonTask.setBatchId(entity.getBatchId());
+        stockComparisonTask.setCustomSupplyId(entity.getCustomSupplyId());
+        stockComparisonTask.setCustomSupplyName(entity.getCustomSupplyName());
         stockComparisonTask.setResult(entity.getResult());
 
         return stockComparisonTask;
@@ -50,6 +58,14 @@ public final class StockComparisonTaskPersistenceAssembler {
         entity.setDeviceId(stockComparisonTask.getDeviceId());
         entity.setPhysicalStock(stockComparisonTask.getPhysicalStock());
         entity.setSystemStock(stockComparisonTask.getSystemStock());
+        entity.setJustifiedWithdrawnStockUsed(stockComparisonTask.getJustifiedWithdrawnStockUsed());
+        entity.setTotalPhysicalStock(stockComparisonTask.getTotalPhysicalStock());
+        entity.setDifference(stockComparisonTask.getDifference());
+        entity.setAccountId(stockComparisonTask.getAccountId());
+        entity.setBranchId(stockComparisonTask.getBranchId());
+        entity.setBatchId(stockComparisonTask.getBatchId());
+        entity.setCustomSupplyId(stockComparisonTask.getCustomSupplyId());
+        entity.setCustomSupplyName(stockComparisonTask.getCustomSupplyName());
         entity.setResult(stockComparisonTask.getResult());
 
         return entity;
