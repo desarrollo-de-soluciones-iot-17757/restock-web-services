@@ -9,15 +9,15 @@ import com.uitopic.restock.platform.tracking.domain.model.commands.ResolveConcil
  * Domain service contract for conciliation task command operations.
  *
  * <p>
- * Defines the operations required to create conciliation tasks from critical
+ * Defines the operations required to create conciliation tasks from
  * discrepancies, resolve them manually, and close them automatically when stock
  * comparisons normalize.
  */
 public interface ConciliationTaskCommandService {
     /**
-     * Creates a pending conciliation task for a critical discrepancy.
+     * Creates a pending conciliation task for a discrepancy that requires conciliation.
      *
-     * @param command command with the critical discrepancy
+     * @param command command with the discrepancy
      * @return created conciliation task
      */
     ConciliationTask handle(CreateConciliationTaskCommand command);
