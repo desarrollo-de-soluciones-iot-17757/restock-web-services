@@ -9,26 +9,26 @@ public enum DiscrepancyAlertLevel {
     CRITICAL;
 
     /**
-     * Determines the alert level based on the difference between physical stock and system stock, using a specified threshold to evaluate the severity of the discrepancy.
+     * Determines the alert level from the already calculated stock difference.
      *
-     * @param physicalStock the stock level obtained from the physical count, provided by the comparison task
-     * @param systemStock the stock level obtained from the system, provided by the comparison task
-     * @param threshold the threshold used to determine the risk level of the discrepancy, provided by the comparison task
-     * @return the appropriate DiscrepancyAlertLevel based on the evaluation of the difference between physical and system stock levels against the specified threshold
+     * @param difference absolute difference between digital stock and total
+     *                   physical stock
+     * @return CRITICAL when there is a meaningful difference, otherwise OK
      */
-    public static DiscrepancyAlertLevel from(double physicalStock, double systemStock, double threshold) {
+    public static DiscrepancyAlertLevel from(double difference) {
+        return difference > 0 ? CRITICAL : OK;
+    }
 
-        var difference = Math.abs(physicalStock - systemStock);
-
-        if (0 <= difference && difference <= 1) {
-            return OK;
-        }
-
-        if (threshold < difference) {
-            return CRITICAL;
-        }
-
-        return WARNING;
-
+    /**
+     * Compatibility factory that evaluates the absolute difference between two
+     * stock values. The threshold parameter is ignored because discrepancy
+     * evaluation no longer uses a tolerated anomaly threshold.
+     *
+     * @param totalPhysicalStock physical stock value
+     * @param systemStock digital stock value
+     * @return alert level based on the absolute difference
+     */
+    public static DiscrepancyAlertLevel from(double totalPhysicalStock, double systemStock) {
+        return from(Math.abs(totalPhysicalStock - systemStock));
     }
 }
