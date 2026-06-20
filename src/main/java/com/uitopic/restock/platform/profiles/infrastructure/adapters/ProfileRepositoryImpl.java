@@ -39,6 +39,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
+    public List<Profile> findByAccountId(String accountId) {
+        return profilePersistenceRepository.findByAccountId(accountId).stream()
+                .map(ProfilePersistenceAssembler::toDomainFromPersistence)
+                .toList();
+    }
+
+    @Override
     public Profile save(Profile profile) {
         var saved = profilePersistenceRepository.save(ProfilePersistenceAssembler.toPersistenceFromDomain(profile));
         return ProfilePersistenceAssembler.toDomainFromPersistence(saved);

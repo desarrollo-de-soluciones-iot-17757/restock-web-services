@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.profiles.application.internal.queryservices
 
 import com.uitopic.restock.platform.profiles.domain.model.aggregates.Profile;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetAllProfilesQuery;
+import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByAccountIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByUserIdQuery;
 import com.uitopic.restock.platform.profiles.domain.repositories.ProfileRepository;
@@ -39,5 +40,11 @@ public class ProfileQueryServiceImpl implements ProfileQueryService {
     @Transactional(readOnly = true)
     public List<Profile> handle(GetProfileByUserIdQuery query) {
         return profileRepository.findByUserId(query.userId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Profile> handle(GetProfileByAccountIdQuery query) {
+        return profileRepository.findByAccountId(query.accountId().getAccountId());
     }
 }

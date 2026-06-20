@@ -2,8 +2,10 @@ package com.uitopic.restock.platform.profiles.interfaces.rest.controllers;
 
 import com.uitopic.restock.platform.profiles.domain.model.commands.DeleteProfileCommand;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetAllProfilesQuery;
+import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByAccountIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetProfileByUserIdQuery;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.profiles.domain.services.ProfileCommandService;
 import com.uitopic.restock.platform.profiles.domain.services.ProfileQueryService;
 import com.uitopic.restock.platform.profiles.interfaces.rest.resources.CreateProfileResource;
@@ -44,11 +46,14 @@ public class UserProfilesController {
     @Operation(summary = "Get profiles with optional filters")
     @GetMapping
     public ResponseEntity<List<ProfileResource>> getAll(
+            @RequestParam(required = false) String accountId,
             @RequestParam(required = false) String userId
     ) {
-        var profiles = userId != null && !userId.isBlank()
-                ? profileQueryService.handle(new GetProfileByUserIdQuery(userId))
-                : profileQueryService.handle(new GetAllProfilesQuery());
+        var profiles = accountId != null && !accountId.isBlank()
+                ? profileQueryService.handle(new GetProfileByAccountIdQuery(new AccountId(accountId)))
+                : userId != null && !userId.isBlank()
+                        ? profileQueryService.handle(new GetProfileByUserIdQuery(userId))
+                        : profileQueryService.handle(new GetAllProfilesQuery());
 
         return ResponseEntity.ok(profiles.stream()
                 .map(ProfileResourceFromEntityAssembler::toResourceFromEntity)

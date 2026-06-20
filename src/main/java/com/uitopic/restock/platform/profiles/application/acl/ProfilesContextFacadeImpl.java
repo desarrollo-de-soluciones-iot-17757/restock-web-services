@@ -20,10 +20,10 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
 
     @Override
     @Transactional
-    public String createProfile(String userId, String businessName, String email) {
-        log.info("Creating profile via ACL for userId='{}', businessName='{}'", userId, businessName);
+    public String createProfile(String accountId, String userId, String businessName, String email) {
+        log.info("Creating profile via ACL for userId='{}', accountId='{}', businessName='{}'", userId, accountId, businessName);
         try {
-            var command = new CreateProfileCommand(userId, email, null, null, null, null, null, null);
+            var command = new CreateProfileCommand(accountId, userId, email, null, null, null, null, null, null);
             var profile = profileCommandService.handle(command);
             log.info("Profile created via ACL: id='{}'", profile.getId());
             return profile.getId();
