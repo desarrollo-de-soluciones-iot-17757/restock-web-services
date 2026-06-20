@@ -41,8 +41,8 @@ public class SalesOrderCompletedEventHandler {
 
         try {
             event.batchConsumptions().forEach(consumption -> {
-                log.debug("Deducting {} {} from batchId={}",
-                        consumption.quantityToConsume(), consumption.unitMeasurement(), consumption.batchId());
+                log.debug("Deducting {} from batchId={}",
+                        consumption.quantityToConsume(), consumption.batchId());
                 externalResourcesService.subtractBatchStock(
                         event.branchId(),
                         consumption.batchId(),
