@@ -9,6 +9,7 @@ import lombok.*;
 public class Business extends AbstractDomainAggregateRoot<Business> {
 
     private String id;
+    private String accountId;
     private String userId;
     private String ruc;
     private String pictureUrl;
@@ -17,9 +18,10 @@ public class Business extends AbstractDomainAggregateRoot<Business> {
     private String mainLocation;
 
     @Builder
-    public Business(String userId, String ruc, String pictureUrl, String picturePublicId,
+    public Business(String accountId, String userId, String ruc, String pictureUrl, String picturePublicId,
                     String companyName, String mainLocation) {
         if (userId == null || userId.isBlank()) throw new IllegalArgumentException("User ID cannot be blank");
+        this.accountId = accountId;
         this.userId = userId;
         this.ruc = ruc;
         this.pictureUrl = pictureUrl;

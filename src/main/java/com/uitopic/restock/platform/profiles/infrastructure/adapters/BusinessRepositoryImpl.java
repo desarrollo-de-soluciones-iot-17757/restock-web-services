@@ -39,6 +39,13 @@ public class BusinessRepositoryImpl implements BusinessRepository {
     }
 
     @Override
+    public List<Business> findByAccountId(String accountId) {
+        return businessPersistenceRepository.findByAccountId(accountId).stream()
+                .map(BusinessPersistenceAssembler::toDomainFromPersistence)
+                .toList();
+    }
+
+    @Override
     public Business save(Business business) {
         var saved = businessPersistenceRepository.save(BusinessPersistenceAssembler.toPersistenceFromDomain(business));
         return BusinessPersistenceAssembler.toDomainFromPersistence(saved);

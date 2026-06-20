@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Schema(name = "CreateBusinessResource", description = "Request resource for creating a business")
 public record CreateBusinessResource(
+        @NotBlank String accountId,
         @NotBlank String userId,
         String ruc,
         @NotBlank String companyName,

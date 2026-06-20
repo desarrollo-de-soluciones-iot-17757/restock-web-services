@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.profiles.application.internal.queryservices
 
 import com.uitopic.restock.platform.profiles.domain.model.aggregates.Business;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetAllBusinessesQuery;
+import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByAccountIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByUserIdQuery;
 import com.uitopic.restock.platform.profiles.domain.repositories.BusinessRepository;
@@ -39,5 +40,11 @@ public class BusinessQueryServiceImpl implements BusinessQueryService {
     @Transactional(readOnly = true)
     public List<Business> handle(GetBusinessByUserIdQuery query) {
         return businessRepository.findByUserId(query.userId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Business> handle(GetBusinessByAccountIdQuery query) {
+        return businessRepository.findByAccountId(query.accountId().getAccountId());
     }
 }

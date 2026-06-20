@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BusinessPersistenceRepository extends MongoRepository<BusinessPersistenceEntity, String> {
     List<BusinessPersistenceEntity> findByUserId(String userId);
+    List<BusinessPersistenceEntity> findByAccountId(String accountId);
 }

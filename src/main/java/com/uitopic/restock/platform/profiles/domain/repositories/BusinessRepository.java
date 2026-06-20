@@ -9,6 +9,7 @@ public interface BusinessRepository {
     List<Business> findAll();
     Optional<Business> findById(String id);
     List<Business> findByUserId(String userId);
+    List<Business> findByAccountId(String accountId);
     Business save(Business business);
     void deleteById(String id);
 }

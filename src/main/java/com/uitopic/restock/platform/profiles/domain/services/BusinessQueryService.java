@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.profiles.domain.services;
 
 import com.uitopic.restock.platform.profiles.domain.model.aggregates.Business;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetAllBusinessesQuery;
+import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByAccountIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByIdQuery;
 import com.uitopic.restock.platform.profiles.domain.model.queries.GetBusinessByUserIdQuery;
 
@@ -12,4 +13,5 @@ public interface BusinessQueryService {
     List<Business> handle(GetAllBusinessesQuery query);
     Optional<Business> handle(GetBusinessByIdQuery query);
     List<Business> handle(GetBusinessByUserIdQuery query);
+    List<Business> handle(GetBusinessByAccountIdQuery query);
 }
