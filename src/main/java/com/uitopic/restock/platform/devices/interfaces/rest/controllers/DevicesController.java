@@ -62,7 +62,7 @@ public class DevicesController {
     }
 
     @Operation(summary = "Add technical specifications to a device (onboarding step 2)")
-    @PutMapping(value = "/{deviceId}/specifications", consumes = APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{deviceId}/specifications", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> addSpecifications(
             @PathVariable String deviceId,
             @Valid @RequestBody AddDeviceSpecificationsResource resource
@@ -76,7 +76,7 @@ public class DevicesController {
     }
 
     @Operation(summary = "Assign device to a branch (onboarding step 3)")
-    @PutMapping(value = "/{deviceId}/configuration/branch", consumes = APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{deviceId}/configuration/branch", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> assignBranch(
             @PathVariable String deviceId,
             @Valid @RequestBody AssignBranchResource resource
@@ -88,7 +88,7 @@ public class DevicesController {
     }
 
     @Operation(summary = "Assign a batch to monitor (onboarding step 4)")
-    @PutMapping(value = "/{deviceId}/configuration/batch", consumes = APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{deviceId}/configuration/batch", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> assignBatch(
             @PathVariable String deviceId,
             @Valid @RequestBody AssignBatchResource resource
@@ -100,7 +100,7 @@ public class DevicesController {
     }
 
     @Operation(summary = "Link a supply threshold (onboarding step 5)")
-    @PutMapping(value = "/{deviceId}/configuration/threshold", consumes = APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{deviceId}/configuration/threshold", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> assignSupplyThreshold(
             @PathVariable String deviceId,
             @Valid @RequestBody AssignSupplyThresholdResource resource
@@ -112,7 +112,7 @@ public class DevicesController {
     }
 
     @Operation(summary = "Configure weight measurement parameters (onboarding step 6)")
-    @PutMapping(value = "/{deviceId}/configuration/measurement", consumes = APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/{deviceId}/configuration/measurement", consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<DeviceResource> updateMeasurement(
             @PathVariable String deviceId,
             @Valid @RequestBody UpdateDeviceMeasurementResource resource
