@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public interface ResourcesContextFacade {
     double subtractSupplyStock(String branchId, String supplyId, Integer quantity);
-    void addSupplyStockBack(String branchId, String supplyId, Integer quantity, String unit);
+    void addSupplyStockBack(String branchId, String batchId, Integer quantity);
     String resolveAvailableBatchId(String branchId, String customSupplyId, Double quantityNeeded);
     void adjustStock(String branchId, String supplyId, Double adjustedQuantity, String unit);
     void adjustStockByBatchId(BatchId batchId, Double adjustedQuantity);
