@@ -36,7 +36,7 @@ class AuthenticationControllerSystemTest {
         @Test
         void signUp_validPayload_returns201WithUserData() throws Exception {
                 SignUpResource resource = new SignUpResource("Valid Business", "signup-valid@example.com",
-                                "password123", "ADMIN");
+                                "password123", "RESTAURANTADMIN");
 
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -44,13 +44,13 @@ class AuthenticationControllerSystemTest {
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.id").exists())
                                 .andExpect(jsonPath("$.email").value("signup-valid@example.com"))
-                                .andExpect(jsonPath("$.role").value("ADMIN"));
+                                .andExpect(jsonPath("$.role").value("RESTAURANTADMIN"));
         }
 
         @Test
         void signUp_duplicateEmail_returns409WithMessage() throws Exception {
                 SignUpResource resource = new SignUpResource("Dup Business", "dup@example.com", "password123",
-                                "CASHIER");
+                                "RESTAURANTADMIN");
 
                 // First register
                 mockMvc.perform(post("/api/v1/auth/sign-up")
@@ -63,7 +63,7 @@ class AuthenticationControllerSystemTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(resource)))
                                 .andExpect(status().isConflict())
-                                .andExpect(status().reason("Email already registered: dup@example.com"));
+                                .andExpect(jsonPath("$.message").value("Email already registered: dup@example.com"));
         }
 
         @Test
@@ -85,13 +85,13 @@ class AuthenticationControllerSystemTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(resource)))
                                 .andExpect(status().isBadRequest())
-                                .andExpect(status().reason("Unknown role: UNKNOWN_ROLE"));
+                                .andExpect(jsonPath("$.message").value("Unknown role: UNKNOWN_ROLE"));
         }
 
         @Test
         void signIn_validCredentials_returns200WithNonBlankToken() throws Exception {
                 SignUpResource signUp = new SignUpResource("SignIn Business", "signin-valid@example.com", "password123",
-                                "WAREHOUSEMAN");
+                                "RETAILADMIN");
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(signUp)))
@@ -105,14 +105,14 @@ class AuthenticationControllerSystemTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id").exists())
                                 .andExpect(jsonPath("$.email").value("signin-valid@example.com"))
-                                .andExpect(jsonPath("$.role").value("WAREHOUSEMAN"))
+                                .andExpect(jsonPath("$.role").value("RETAILADMIN"))
                                 .andExpect(jsonPath("$.token").value(not(emptyOrNullString())));
         }
 
         @Test
         void signIn_wrongPassword_returns401() throws Exception {
                 SignUpResource signUp = new SignUpResource("Wrong Pwd Business", "wrong-pwd@example.com", "password123",
-                                "CASHIER");
+                                "RESTAURANTADMIN");
                 mockMvc.perform(post("/api/v1/auth/sign-up")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(signUp)))

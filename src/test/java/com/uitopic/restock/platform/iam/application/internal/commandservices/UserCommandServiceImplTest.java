@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.iam.application.internal.commandservices;
 
+import com.uitopic.restock.platform.iam.application.internal.outboundservices.acl.ExternalProfilesService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.hashing.HashingService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.tokens.TokenService;
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
@@ -9,7 +10,6 @@ import com.uitopic.restock.platform.iam.domain.model.entities.Role;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
-import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,33 +37,33 @@ class UserCommandServiceImplTest {
     private TokenService tokenService;
 
     @Mock
-    private ProfilesContextFacade profilesContextFacade;
+    private ExternalProfilesService externalProfilesService;
 
     @InjectMocks
     private UserCommandServiceImpl userCommandService;
 
     @Test
     void handle_signUp_newEmail_savesAndReturnsUser() {
-        SignUpCommand command = new SignUpCommand("My Business", "new@example.com", "password", "CASHIER");
+        SignUpCommand command = new SignUpCommand("My Business", "new@example.com", "password", "RESTAURANTADMIN");
 
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
         when(hashingService.encode("password")).thenReturn("encoded_password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(profilesContextFacade.createProfile(any(), any(), any())).thenReturn("profile_id");
+        when(externalProfilesService.createProfileForNewUser(any(), any(), any())).thenReturn("profile_id");
 
         User result = userCommandService.handle(command);
 
         assertNotNull(result);
         assertEquals("new@example.com", result.getEmail().email());
         assertEquals("encoded_password", result.getPasswordHash());
-        assertEquals("CASHIER", result.getRole().getType().name());
+        assertEquals("RESTAURANTADMIN", result.getRole().getType().name());
         verify(userRepository).save(any(User.class));
-        verify(profilesContextFacade).createProfile(any(), eq("My Business"), eq("new@example.com"));
+        verify(externalProfilesService).createProfileForNewUser(any(), eq("My Business"), eq("new@example.com"));
     }
 
     @Test
     void handle_signUp_duplicateEmail_throws409Conflict() {
-        SignUpCommand command = new SignUpCommand("My Business", "duplicate@example.com", "password", "CASHIER");
+        SignUpCommand command = new SignUpCommand("My Business", "duplicate@example.com", "password", "RESTAURANTADMIN");
 
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
@@ -73,7 +73,7 @@ class UserCommandServiceImplTest {
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Email already registered"));
         verify(userRepository, never()).save(any(User.class));
-        verify(profilesContextFacade, never()).createProfile(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
     }
 
     @Test
@@ -88,7 +88,7 @@ class UserCommandServiceImplTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Unknown role"));
         verify(userRepository, never()).save(any(User.class));
-        verify(profilesContextFacade, never()).createProfile(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
     }
 
     @Test
@@ -106,7 +106,7 @@ class UserCommandServiceImplTest {
         assertEquals(user, result.get().getKey());
         assertEquals("jwt.token.here", result.get().getValue());
         assertEquals("user@example.com", result.get().getKey().getEmail().email());
-        assertEquals("ADMIN", result.get().getKey().getRole().getType().name());
+        assertEquals("RESTAURANTADMIN", result.get().getKey().getRole().getType().name());
     }
 
     @Test
