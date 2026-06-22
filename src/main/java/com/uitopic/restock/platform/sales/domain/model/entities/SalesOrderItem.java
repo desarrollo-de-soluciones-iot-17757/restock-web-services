@@ -1,21 +1,24 @@
 package com.uitopic.restock.platform.sales.domain.model.entities;
+import com.uitopic.restock.platform.sales.domain.model.commands.CreateSalesOrderItemCommand;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.BatchConsumption;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.ProductType;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.Money;
-
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
+/**
+ * Entity representing an item in a sales order.
+ * Multiple items can belong to a single SalesOrder.
+ */
 @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@With
-@EqualsAndHashCode
 public class SalesOrderItem {
 
     /**
@@ -52,6 +55,28 @@ public class SalesOrderItem {
      * List of batches consumed to fulfill this sales order item.
      */
     private List<BatchConsumption> consumedBatches = new ArrayList<>();
+
+    /**
+     * Creates a new SalesOrderItem from an AddProductToOrderCommand.
+     * The ID is auto-generated and consumed batches are initialized as an empty list.
+     *
+     */
+    public SalesOrderItem(String productId, ProductType productType, String nameSnapshot, Money unitPrice, int quantity) {
+        this.id = UUID.randomUUID().toString();
+        this.productId = productId;
+        this.productType = productType;
+        this.nameSnapshot = nameSnapshot;
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+    }
+
+    public SalesOrderItem(CreateSalesOrderItemCommand command) {
+        this.productId = command.productId();
+        this.productType = ProductType.valueOf(command.productType().toUpperCase());
+        this.nameSnapshot = command.nameSnapshot();
+        this.unitPrice = new Money(BigDecimal.valueOf(command.unitPrice().doubleValue()), command.currency());
+        this.quantity = command.quantity();
+    }
 
     /**
      * Calculates the subtotal for this item.

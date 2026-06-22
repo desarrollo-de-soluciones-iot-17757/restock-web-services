@@ -1,10 +1,7 @@
 package com.uitopic.restock.platform.resources.domain.services;
 
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
-import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.DeleteBatchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.TransferBatchStockCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBatchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,5 +43,23 @@ public interface BatchCommandService {
      * @return affected batches: source and target
      */
     List<Batch> handle(TransferBatchStockCommand command);
-    
+
+    /**
+     * Subtracts or reduces stock from an existing batch.
+     * Used for sales, consumption, or inventory shrinkage.
+     *
+     * @param command command with the batch identifier and quantity to subtract
+     * @return the remaining stock level after the subtraction
+     */
+    double handle(SubtractBatchStockCommand command);
+
+    /**
+     * Adds back or returns stock to an existing batch.
+     * Used for customer returns, cancellations, or inventory adjustments.
+     *
+     * @param command command with the batch identifier and quantity to add back
+     * @return updated batch with the restored stock
+     */
+    Batch handle(AddBackBatchStockCommand command);
+
 }

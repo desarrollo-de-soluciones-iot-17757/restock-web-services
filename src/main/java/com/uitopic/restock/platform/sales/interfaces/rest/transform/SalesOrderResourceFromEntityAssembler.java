@@ -23,28 +23,34 @@ public class SalesOrderResourceFromEntityAssembler {
         if(entity == null) return null;
         List<SalesOrderItemResource> itemResources = entity.getItems().stream()
                 .map(item -> {
+
                     log.info("Inspecting item: Product={}, ID={}", item.getProductId(), item.getId());
+
                     Map<String, List<BatchConsumption>> consumptionsBySupply = item.getConsumedBatches().stream()
                             .collect(Collectors.groupingBy(BatchConsumption::customSupplyId));
+
                     List<IngredientResolvedResource> ingredientsResolved = new ArrayList<>();
+
                     consumptionsBySupply.forEach((supplyId, consumptions) -> {
+
                         Double totalRequired = consumptions.stream()
                                 .mapToDouble(BatchConsumption::quantityToConsume)
                                 .sum();
+
                         List<BatchConsumptionResource> batchesReserved = consumptions.stream()
                                 .map(b -> new BatchConsumptionResource(
                                         b.batchId(),
                                         b.quantityToConsume()
                                 )).toList();
-                        String unit = consumptions.isEmpty() ? "g" : consumptions.get(0).unitMeasurement().unitName();
+
                         ingredientsResolved.add(new IngredientResolvedResource(
                                 supplyId,
                                 item.getNameSnapshot(),
                                 totalRequired,
-                                unit,
                                 batchesReserved
                         ));
                     });
+
                     return new SalesOrderItemResource(
                             item.getProductId(),
                             item.getQuantity(),

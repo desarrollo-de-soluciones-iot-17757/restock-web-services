@@ -5,10 +5,7 @@ import com.uitopic.restock.platform.resources.domain.exception.BranchNotFoundExc
 import com.uitopic.restock.platform.resources.domain.exception.CustomSupplyNotFoundException;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
-import com.uitopic.restock.platform.resources.domain.model.commands.CreateBatchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.DeleteBatchCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.TransferBatchStockCommand;
-import com.uitopic.restock.platform.resources.domain.model.commands.UpdateBatchCommand;
+import com.uitopic.restock.platform.resources.domain.model.commands.*;
 import com.uitopic.restock.platform.resources.domain.model.events.StockTransferredEvent;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
@@ -98,6 +95,60 @@ public class BatchCommandServiceImpl implements BatchCommandService {
 
         Batch saved = batchRepository.save(batch);
         log.info("Batch created successfully: id='{}'", saved.getId());
+        return saved;
+    }
+
+    /**
+     * Subtracts or reduces stock from an existing batch.
+     * <p>
+     * Verifies that the batch exists, creates a contextual Stock value object
+     * based on the custom supply's unit measurement, and applies the reduction.
+     *
+     * @param command command with the batch identifier and quantity to subtract
+     * @return the remaining stock level after the subtraction
+     * @throws BatchNotFoundException if the batch does not exist
+     */
+    @Override
+    public double handle(SubtractBatchStockCommand command) {
+        log.info("Subtracting {} from batch id='{}'", command.quantity(), command.batchId());
+
+        Batch batch = batchRepository.findById(command.batchId())
+                .orElseThrow(() -> new BatchNotFoundException("Batch not found: " + command.batchId()));
+
+        CustomSupply customSupply = findCustomSupplyOrThrow(batch.getCustomSupplyId());
+        Stock quantityToSubtract = new Stock(command.quantity(), customSupply.getUnitMeasurement());
+
+        batch.subtract(quantityToSubtract);
+        Batch saved = batchRepository.save(batch);
+
+        log.info("Batch id='{}' stock after subtraction: {}", saved.getId(), saved.getCurrentStock().stock());
+        return saved.getCurrentStock().stock();
+    }
+
+    /**
+     * Adds back or returns stock to an existing batch.
+     * <p>
+     * Verifies that the batch exists, creates a contextual Stock value object
+     * based on the custom supply's unit measurement, and increases the stock.
+     *
+     * @param command command with the batch identifier and quantity to add back
+     * @return updated batch with the restored stock
+     * @throws BatchNotFoundException if the batch does not exist
+     */
+    @Override
+    public Batch handle(AddBackBatchStockCommand command) {
+        log.info("Adding back {} to batch id='{}'", command.quantity(), command.batchId());
+
+        Batch batch = batchRepository.findById(command.batchId())
+                .orElseThrow(() -> new BatchNotFoundException("Batch not found: " + command.batchId()));
+
+        CustomSupply customSupply = findCustomSupplyOrThrow(batch.getCustomSupplyId());
+        Stock quantityToAddBack = new Stock(command.quantity(), customSupply.getUnitMeasurement());
+
+        batch.increase(quantityToAddBack);
+        Batch saved = batchRepository.save(batch);
+
+        log.info("Batch id='{}' stock after add-back: {}", saved.getId(), saved.getCurrentStock().stock());
         return saved;
     }
 
