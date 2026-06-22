@@ -2,7 +2,6 @@ package com.uitopic.restock.platform.sales.application.internal.outboundservices
 
 import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFacade;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.BatchConsumption;
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,19 +16,8 @@ public class ExternalResourcesService {
 
     private final ResourcesContextFacade resourcesContextFacade;
 
-    /**
-     * Constructor dependency injection for the resources context public facade.
-     *
-     * @param resourcesContextFacade the external resources context facade
-     */
     public ExternalResourcesService(ResourcesContextFacade resourcesContextFacade) {
         this.resourcesContextFacade = resourcesContextFacade;
-    }
-
-    public void subtractStock(String branchId, String supplyId, Double quantity) {
-        log.info("ACL: Realizando resta de stock real en Recursos...");
-
-        resourcesContextFacade.subtractSupplyStock(branchId, supplyId, quantity.intValue());
     }
 
     /**
@@ -37,22 +25,20 @@ public class ExternalResourcesService {
      * and maps it to a domain-specific BatchConsumption Value Object.
      *
      * @param branchId       the branch identifier where stock is located
+     * @param supplyId       the custom supply identifier required
      * @param quantityNeeded the total decimal quantity required by the order item
      * @return a BatchConsumption value object ready to be attached to the Sales Order Item
      */
-
-    public BatchConsumption resolveBatchConsumption(String branchId, String supplyId, Double quantityNeeded, String unitNameFromDB) {
+    public BatchConsumption resolveBatchConsumption(String branchId, String supplyId, Double quantityNeeded) {
         String batchId = resourcesContextFacade.resolveAvailableBatchId(branchId, supplyId, quantityNeeded);
-
-        UnitMeasurement unit = new UnitMeasurement(unitNameFromDB);
 
         return new BatchConsumption(
                 batchId,
                 supplyId,
-                quantityNeeded,
-                unit
+                quantityNeeded
         );
     }
+
     /**
      * Deducts specific physical stock from a targeted batch in the Resources context.
      * Aligns directly with the calculated BatchConsumption value object.
@@ -81,22 +67,22 @@ public class ExternalResourcesService {
 
     /**
      * Restores stock back to a specific batch in case a Sales Order is cancelled or modified.
+     * The unit measurement is resolved internally by the Resources context, since it owns
+     * that knowledge through the CustomSupply linked to the batch.
      *
      * @param branchId  the branch identifier
      * @param batchId   the specific batch identifier to restore
      * @param quantity  the decimal amount to return
-     * @param unit      the measurement unit snapshot
      */
-    public void rollBackBatchStock(String branchId, String batchId, Double quantity, String unit) {
-        log.info("ACL: Requesting batch stock rollback to Resources. branchId={}, batchId={}, quantity={}, unit={}",
-                branchId, batchId, quantity, unit);
+    public void rollBackBatchStock(String branchId, String batchId, Double quantity) {
+        log.info("ACL: Requesting batch stock rollback to Resources. branchId={}, batchId={}, quantity={}",
+                branchId, batchId, quantity);
 
         try {
             resourcesContextFacade.addSupplyStockBack(
                     branchId,
                     batchId,
-                    quantity.intValue(),
-                    unit
+                    quantity.intValue()
             );
             log.debug("ACL: Batch stock rollback successfully executed.");
         } catch (Exception e) {

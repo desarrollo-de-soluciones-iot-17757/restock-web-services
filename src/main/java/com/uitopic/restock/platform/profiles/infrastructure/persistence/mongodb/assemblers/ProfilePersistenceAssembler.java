@@ -11,6 +11,7 @@ public final class ProfilePersistenceAssembler {
         if (entity == null) return null;
         var profile = new Profile();
         profile.setId(entity.getId());
+        profile.setAccountId(entity.getAccountId());
         profile.setUserId(entity.getUserId());
         profile.setName(entity.getName());
         profile.setLastName(entity.getLastName());
@@ -26,6 +27,7 @@ public final class ProfilePersistenceAssembler {
         if (profile == null) return null;
         var entity = new ProfilePersistenceEntity();
         if (profile.getId() != null) entity.setId(profile.getId());
+        entity.setAccountId(profile.getAccountId());
         entity.setUserId(profile.getUserId());
         entity.setName(profile.getName());
         entity.setLastName(profile.getLastName());

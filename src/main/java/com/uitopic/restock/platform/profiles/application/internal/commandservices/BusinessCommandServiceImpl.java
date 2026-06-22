@@ -45,7 +45,7 @@ public class BusinessCommandServiceImpl implements BusinessCommandService {
             }
         }
 
-        var business = new Business(command.userId(), command.ruc(), pictureUrl, picturePublicId,
+        var business = new Business(command.accountId(), command.userId(), command.ruc(), pictureUrl, picturePublicId,
                 command.companyName(), command.mainLocation());
         var saved = businessRepository.save(business);
         log.info("Business created: id='{}'", saved.getId());

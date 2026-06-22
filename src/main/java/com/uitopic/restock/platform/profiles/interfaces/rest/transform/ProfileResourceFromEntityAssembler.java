@@ -10,6 +10,7 @@ public final class ProfileResourceFromEntityAssembler {
     public static ProfileResource toResourceFromEntity(Profile profile) {
         return new ProfileResource(
                 profile.getId(),
+                profile.getAccountId(),
                 profile.getUserId(),
                 profile.getName(),
                 profile.getLastName(),

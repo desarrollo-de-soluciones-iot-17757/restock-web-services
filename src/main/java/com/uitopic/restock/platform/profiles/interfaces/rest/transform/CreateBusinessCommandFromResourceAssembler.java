@@ -12,6 +12,7 @@ public final class CreateBusinessCommandFromResourceAssembler {
 
     public static CreateBusinessCommand toCommandFromResource(CreateBusinessResource resource) {
         return new CreateBusinessCommand(
+                resource.accountId(),
                 resource.userId(),
                 resource.ruc(),
                 getBytes(resource.image()),

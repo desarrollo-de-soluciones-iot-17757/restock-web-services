@@ -10,6 +10,7 @@ public final class BusinessResourceFromEntityAssembler {
     public static BusinessResource toResourceFromEntity(Business business) {
         return new BusinessResource(
                 business.getId(),
+                business.getAccountId(),
                 business.getUserId(),
                 business.getRuc(),
                 business.getPictureUrl(),

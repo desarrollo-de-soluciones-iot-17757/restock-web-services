@@ -14,9 +14,6 @@ public record IngredientResolvedResource(
         @Schema(description = "Total theoretical quantity required for the item", example = "500.0")
         Double quantityRequired,
 
-        @Schema(description = "Unit of measurement", example = "g")
-        String unit,
-
         @Schema(description = "Physical batches reserved to supply this ingredient")
         List<BatchConsumptionResource> batchesReserved
 ) {}

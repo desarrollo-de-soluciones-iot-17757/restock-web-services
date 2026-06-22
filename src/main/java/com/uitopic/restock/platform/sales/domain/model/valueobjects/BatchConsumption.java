@@ -1,12 +1,9 @@
 package com.uitopic.restock.platform.sales.domain.model.valueobjects;
 
-import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
-
 public record BatchConsumption(
         String batchId,
         String customSupplyId,
-        Double quantityToConsume,
-        UnitMeasurement unitMeasurement
+        Double quantityToConsume
 ) {
     public BatchConsumption {
         if (batchId == null || batchId.isBlank()) {
