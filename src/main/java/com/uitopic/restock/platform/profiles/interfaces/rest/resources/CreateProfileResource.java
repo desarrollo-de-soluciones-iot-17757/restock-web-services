@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Schema(name = "CreateProfileResource", description = "Request resource for creating a user profile")
 public record CreateProfileResource(
+        @NotBlank String accountId,
         @NotBlank String userId,
         @NotBlank String name,
         String lastName,

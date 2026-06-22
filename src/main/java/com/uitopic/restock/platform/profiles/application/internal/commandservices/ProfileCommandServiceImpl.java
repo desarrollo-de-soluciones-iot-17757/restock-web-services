@@ -45,7 +45,7 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
             }
         }
 
-        var profile = new Profile(command.userId(), command.name(), command.lastName(),
+        var profile = new Profile(command.accountId(), command.userId(), command.name(), command.lastName(),
                 command.phoneNumber(), avatarUrl, avatarPublicId, command.gender(), command.birthDate());
         var saved = profileRepository.save(profile);
         log.info("Profile created: id='{}'", saved.getId());

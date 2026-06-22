@@ -21,13 +21,14 @@ public class ExternalProfilesService {
     /**
      * Creates a profile for a newly registered user by calling the ProfilesContextFacade.
      *
+     * @param accountId the account ID generated during sign-up
      * @param userId the ID of the newly created user
      * @param businessName the business name provided during sign-up
      * @param email the email address of the user
      * @return the ID of the created profile, or empty string if creation failed
      */
-    public String createProfileForNewUser(String userId, String businessName, String email) {
-        var profileId = profilesContextFacade.createProfile(userId, businessName, email);
+    public String createProfileForNewUser(String accountId, String userId, String businessName, String email) {
+        var profileId = profilesContextFacade.createProfile(accountId, userId, businessName, email);
         return profileId != null ? profileId : "";
     }
 }

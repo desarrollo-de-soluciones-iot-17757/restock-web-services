@@ -11,6 +11,7 @@ public final class BusinessPersistenceAssembler {
         if (entity == null) return null;
         var business = new Business();
         business.setId(entity.getId());
+        business.setAccountId(entity.getAccountId());
         business.setUserId(entity.getUserId());
         business.setRuc(entity.getRuc());
         business.setPictureUrl(entity.getPictureUrl());
@@ -24,6 +25,7 @@ public final class BusinessPersistenceAssembler {
         if (business == null) return null;
         var entity = new BusinessPersistenceEntity();
         if (business.getId() != null) entity.setId(business.getId());
+        entity.setAccountId(business.getAccountId());
         entity.setUserId(business.getUserId());
         entity.setRuc(business.getRuc());
         entity.setPictureUrl(business.getPictureUrl());

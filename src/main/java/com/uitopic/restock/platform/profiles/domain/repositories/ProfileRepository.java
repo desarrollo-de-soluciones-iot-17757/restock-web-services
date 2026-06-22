@@ -9,6 +9,7 @@ public interface ProfileRepository {
     List<Profile> findAll();
     Optional<Profile> findById(String id);
     List<Profile> findByUserId(String userId);
+    List<Profile> findByAccountId(String accountId);
     Profile save(Profile profile);
     void deleteById(String id);
 }

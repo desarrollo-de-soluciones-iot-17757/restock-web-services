@@ -9,6 +9,7 @@ import lombok.*;
 public class Profile extends AbstractDomainAggregateRoot<Profile> {
 
     private String id;
+    private String accountId;
     private String userId;
     private String name;
     private String lastName;
@@ -19,9 +20,10 @@ public class Profile extends AbstractDomainAggregateRoot<Profile> {
     private String birthDate;
 
     @Builder
-    public Profile(String userId, String name, String lastName, String phoneNumber,
+    public Profile(String accountId, String userId, String name, String lastName, String phoneNumber,
                    String avatarUrl, String avatarPublicId, String gender, String birthDate) {
         if (userId == null || userId.isBlank()) throw new IllegalArgumentException("User ID cannot be blank");
+        this.accountId = accountId;
         this.userId = userId;
         this.name = name;
         this.lastName = lastName;

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ProfilePersistenceRepository extends MongoRepository<ProfilePersistenceEntity, String> {
     List<ProfilePersistenceEntity> findByUserId(String userId);
+    List<ProfilePersistenceEntity> findByAccountId(String accountId);
 }

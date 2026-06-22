@@ -125,6 +125,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         log.info("Creating profile for user ID: {} via ProfilesContextFacade ACL", saved.getId());
         try {
             String profileId = externalProfilesService.createProfileForNewUser(
+                    generatedAccountId,
                     saved.getId(),
                     command.businessName(),
                     command.email()
