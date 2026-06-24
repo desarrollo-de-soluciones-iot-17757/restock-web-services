@@ -8,7 +8,6 @@ import java.util.List;
 
 public record SubscribedPlanSnapshot(
         String planId,
-        String code,
         String name,
         PlanType type,
         BillingInterval billingInterval,
@@ -30,7 +29,7 @@ public record SubscribedPlanSnapshot(
                 .orElseThrow(() -> new IllegalArgumentException("Plan does not support " + interval));
 
         return new SubscribedPlanSnapshot(
-                plan.id(), plan.code(), plan.name(), plan.type(), interval,
+                plan.id(), plan.name(), plan.type(), interval,
                 selectedPrice.money(), plan.limits(), plan.benefits(), selectedPrice.stripePriceId()
         );
     }
