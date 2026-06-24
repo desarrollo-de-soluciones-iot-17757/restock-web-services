@@ -49,8 +49,7 @@ class UserCommandServiceImplTest {
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
         when(hashingService.encode("password")).thenReturn("encoded_password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(profilesContextFacade.createProfile(any(), any(), any(), null)).thenReturn("profile_id");
-        when(externalProfilesService.createProfileForNewUser(any(), any(), any())).thenReturn("profile_id");
+        when(externalProfilesService.createProfileForNewUser(any(), any(), any(), any())).thenReturn("profile_id");
 
         User result = userCommandService.handle(command);
 
@@ -59,8 +58,7 @@ class UserCommandServiceImplTest {
         assertEquals("encoded_password", result.getPasswordHash());
         assertEquals("RESTAURANTADMIN", result.getRole().getType().name());
         verify(userRepository).save(any(User.class));
-        verify(profilesContextFacade).createProfile(any(), eq("My Business"), eq("new@example.com"), null);
-        verify(externalProfilesService).createProfileForNewUser(any(), eq("My Business"), eq("new@example.com"));
+        verify(externalProfilesService).createProfileForNewUser(any(), any(), eq("My Business"), eq("new@example.com"));
     }
 
     @Test
@@ -75,8 +73,7 @@ class UserCommandServiceImplTest {
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Email already registered"));
         verify(userRepository, never()).save(any(User.class));
-        verify(profilesContextFacade, never()).createProfile(any(), any(), any(), null);
-        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any(), any());
     }
 
     @Test
@@ -91,8 +88,7 @@ class UserCommandServiceImplTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Unknown role"));
         verify(userRepository, never()).save(any(User.class));
-        verify(profilesContextFacade, never()).createProfile(any(), any(), any(), null);
-        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any(), any());
     }
 
     @Test
