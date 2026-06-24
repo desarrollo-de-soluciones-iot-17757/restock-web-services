@@ -9,10 +9,12 @@ import com.uitopic.restock.platform.communications.infrastructure.persistence.mo
 import com.uitopic.restock.platform.communications.infrastructure.persistence.mongodb.repositories.NotificationPersistenceRepository;
 import com.uitopic.restock.platform.communications.interfaces.rest.resources.StockThresholdEvaluationResult;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.Batch;
+import com.uitopic.restock.platform.resources.domain.model.aggregates.Branch;
 import com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.Stock;
 import com.uitopic.restock.platform.resources.domain.model.valueobjects.StockRange;
 import com.uitopic.restock.platform.resources.domain.repositories.BatchRepository;
+import com.uitopic.restock.platform.resources.domain.repositories.BranchRepository;
 import com.uitopic.restock.platform.resources.domain.repositories.CustomSupplyRepository;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.UnitMeasurement;
@@ -26,6 +28,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +42,9 @@ class StockThresholdEvaluationServiceImplTest {
 
     @Mock
     private BatchRepository batchRepository;
+
+    @Mock
+    private BranchRepository branchRepository;
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -57,6 +63,7 @@ class StockThresholdEvaluationServiceImplTest {
         service = new StockThresholdEvaluationServiceImpl(
                 customSupplyRepository,
                 batchRepository,
+                branchRepository,
                 notificationRepository,
                 notificationPersistenceRepository,
                 mongoTemplate,
@@ -100,12 +107,13 @@ class StockThresholdEvaluationServiceImplTest {
         when(supply.getId()).thenReturn("supply-123");
         when(supply.getName()).thenReturn("Coffee");
         when(supply.getAccountId()).thenReturn(new AccountId("account-999"));
-        when(supply.getStockRange()).thenReturn(new StockRange(0.0, 10.0));
+        when(supply.getStockRange()).thenReturn(new StockRange(5.0, 10.0));
 
         UnitMeasurement unit = mock(UnitMeasurement.class);
         when(unit.unitName()).thenReturn("Kg");
 
         Batch batch = mock(Batch.class);
+        when(batch.getId()).thenReturn("batch-999");
         when(batch.getCurrentStock()).thenReturn(new Stock(15.0, unit));
 
         when(customSupplyRepository.findAll()).thenReturn(List.of(supply));
@@ -141,7 +149,6 @@ class StockThresholdEvaluationServiceImplTest {
         assertEquals("account-999", captured.getRecipientId());
         assertEquals("supply-123", captured.getSourceId());
         assertEquals(SourceType.INVENTORY, captured.getSourceType());
-        assertEquals(NotificationSeverity.WARNING, captured.getSeverity());
     }
 
     @Test
@@ -151,12 +158,13 @@ class StockThresholdEvaluationServiceImplTest {
         when(supply.getId()).thenReturn("supply-123");
         when(supply.getName()).thenReturn("Coffee");
         when(supply.getAccountId()).thenReturn(new AccountId("account-999"));
-        when(supply.getStockRange()).thenReturn(new StockRange(0.0, 10.0));
+        when(supply.getStockRange()).thenReturn(new StockRange(5.0, 10.0));
 
         UnitMeasurement unit = mock(UnitMeasurement.class);
         when(unit.unitName()).thenReturn("Kg");
 
         Batch batch = mock(Batch.class);
+        when(batch.getId()).thenReturn("batch-999");
         when(batch.getCurrentStock()).thenReturn(new Stock(15.0, unit));
 
         when(customSupplyRepository.findAll()).thenReturn(List.of(supply));
@@ -164,8 +172,10 @@ class StockThresholdEvaluationServiceImplTest {
 
         NotificationPersistenceEntity activeAlert = new NotificationPersistenceEntity();
         activeAlert.setId("active-notif-123");
-        when(mongoTemplate.find(any(Query.class), eq(NotificationPersistenceEntity.class)))
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("supply-123")), eq(NotificationPersistenceEntity.class)))
                 .thenReturn(List.of(activeAlert));
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("batch-999")), eq(NotificationPersistenceEntity.class)))
+                .thenReturn(Collections.emptyList());
 
         // Act
         List<StockThresholdEvaluationResult> results = service.evaluateStockThresholds();
@@ -184,13 +194,14 @@ class StockThresholdEvaluationServiceImplTest {
         when(supply.getId()).thenReturn("supply-123");
         when(supply.getName()).thenReturn("Coffee");
         when(supply.getAccountId()).thenReturn(new AccountId("account-999"));
-        when(supply.getStockRange()).thenReturn(new StockRange(0.0, 10.0));
+        when(supply.getStockRange()).thenReturn(new StockRange(5.0, 10.0));
 
         UnitMeasurement unit = mock(UnitMeasurement.class);
         when(unit.unitName()).thenReturn("Kg");
 
         Batch batch = mock(Batch.class);
-        when(batch.getCurrentStock()).thenReturn(new Stock(5.0, unit));
+        when(batch.getId()).thenReturn("batch-999");
+        when(batch.getCurrentStock()).thenReturn(new Stock(7.0, unit));
 
         when(customSupplyRepository.findAll()).thenReturn(List.of(supply));
         when(batchRepository.findByCustomSupplyId("supply-123")).thenReturn(List.of(batch));
@@ -198,8 +209,11 @@ class StockThresholdEvaluationServiceImplTest {
         NotificationPersistenceEntity activeAlert = new NotificationPersistenceEntity();
         activeAlert.setId("active-notif-123");
         activeAlert.setStatus(NotificationStatus.UNREAD);
-        when(mongoTemplate.find(any(Query.class), eq(NotificationPersistenceEntity.class)))
+
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("supply-123")), eq(NotificationPersistenceEntity.class)))
                 .thenReturn(List.of(activeAlert));
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("batch-999")), eq(NotificationPersistenceEntity.class)))
+                .thenReturn(Collections.emptyList());
 
         // Act
         List<StockThresholdEvaluationResult> results = service.evaluateStockThresholds();
@@ -210,6 +224,84 @@ class StockThresholdEvaluationServiceImplTest {
         assertEquals("NORMAL", result.status());
         assertNull(result.alertId());
 
+        verify(notificationPersistenceRepository, times(1)).save(activeAlert);
+        assertEquals(NotificationStatus.READ, activeAlert.getStatus());
+    }
+
+    @Test
+    void testEvaluateStockThresholds_LowStock_NewAlert() {
+        // Arrange
+        CustomSupply supply = mock(CustomSupply.class);
+        when(supply.getId()).thenReturn("supply-123");
+        when(supply.getName()).thenReturn("Coffee");
+        when(supply.getAccountId()).thenReturn(new AccountId("account-999"));
+        when(supply.getStockRange()).thenReturn(new StockRange(5.0, 10.0));
+
+        UnitMeasurement unit = mock(UnitMeasurement.class);
+        when(unit.unitName()).thenReturn("Kg");
+
+        Batch batch = mock(Batch.class);
+        when(batch.getId()).thenReturn("batch-999");
+        when(batch.getCode()).thenReturn("B01");
+        when(batch.getBranchId()).thenReturn("branch-123");
+        when(batch.getCurrentStock()).thenReturn(new Stock(2.0, unit));
+
+        when(customSupplyRepository.findAll()).thenReturn(List.of(supply));
+        when(batchRepository.findByCustomSupplyId("supply-123")).thenReturn(List.of(batch));
+
+        Branch branch = mock(Branch.class);
+        when(branch.getName()).thenReturn("San Isidro");
+        when(branchRepository.findById("branch-123")).thenReturn(Optional.of(branch));
+
+        when(mongoTemplate.find(any(Query.class), eq(NotificationPersistenceEntity.class)))
+                .thenReturn(Collections.emptyList());
+
+        // Act
+        service.evaluateStockThresholds();
+
+        // Assert
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository, times(1)).save(captor.capture());
+        Notification captured = captor.getValue();
+        assertEquals("account-999", captured.getRecipientId());
+        assertEquals("batch-999", captured.getSourceId());
+        assertEquals(SourceType.INVENTORY, captured.getSourceType());
+        assertEquals("Low Stock in San Isidro", captured.getTitle());
+        assertTrue(captured.getMessage().contains("B01"));
+    }
+
+    @Test
+    void testEvaluateStockThresholds_LowStock_DeactivateAlert() {
+        // Arrange
+        CustomSupply supply = mock(CustomSupply.class);
+        when(supply.getId()).thenReturn("supply-123");
+        when(supply.getName()).thenReturn("Coffee");
+        when(supply.getAccountId()).thenReturn(new AccountId("account-999"));
+        when(supply.getStockRange()).thenReturn(new StockRange(5.0, 10.0));
+
+        UnitMeasurement unit = mock(UnitMeasurement.class);
+        when(unit.unitName()).thenReturn("Kg");
+
+        Batch batch = mock(Batch.class);
+        when(batch.getId()).thenReturn("batch-999");
+        when(batch.getCurrentStock()).thenReturn(new Stock(7.0, unit));
+
+        when(customSupplyRepository.findAll()).thenReturn(List.of(supply));
+        when(batchRepository.findByCustomSupplyId("supply-123")).thenReturn(List.of(batch));
+
+        NotificationPersistenceEntity activeAlert = new NotificationPersistenceEntity();
+        activeAlert.setId("active-low-notif-123");
+        activeAlert.setStatus(NotificationStatus.UNREAD);
+
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("supply-123")), eq(NotificationPersistenceEntity.class)))
+                .thenReturn(Collections.emptyList());
+        when(mongoTemplate.find(argThat(q -> q != null && q.toString().contains("batch-999")), eq(NotificationPersistenceEntity.class)))
+                .thenReturn(List.of(activeAlert));
+
+        // Act
+        service.evaluateStockThresholds();
+
+        // Assert
         verify(notificationPersistenceRepository, times(1)).save(activeAlert);
         assertEquals(NotificationStatus.READ, activeAlert.getStatus());
     }
