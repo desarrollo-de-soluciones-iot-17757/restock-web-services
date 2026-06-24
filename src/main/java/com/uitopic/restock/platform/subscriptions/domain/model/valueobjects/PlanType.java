@@ -1,4 +1,7 @@
 package com.uitopic.restock.platform.subscriptions.domain.model.valueobjects;
 
-public enum AccountStatus {
+public enum PlanType {
+    BASIC,
+    PREMIUM,
+    PRO
 }
