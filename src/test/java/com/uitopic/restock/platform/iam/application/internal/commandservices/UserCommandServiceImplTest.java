@@ -10,6 +10,7 @@ import com.uitopic.restock.platform.iam.domain.model.entities.Role;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.Email;
 import com.uitopic.restock.platform.iam.domain.model.valueobjects.RoleType;
 import com.uitopic.restock.platform.iam.domain.repositories.UserRepository;
+import com.uitopic.restock.platform.profiles.interfaces.acl.ProfilesContextFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,6 +38,9 @@ class UserCommandServiceImplTest {
     private TokenService tokenService;
 
     @Mock
+    private ProfilesContextFacade profilesContextFacade;
+
+    @Mock
     private ExternalProfilesService externalProfilesService;
 
     @InjectMocks
@@ -50,7 +54,7 @@ class UserCommandServiceImplTest {
         when(hashingService.encode("password")).thenReturn("encoded_password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(profilesContextFacade.createProfile(any(), any(), any(), null)).thenReturn("profile_id");
-        when(externalProfilesService.createProfileForNewUser(any(), any(), any())).thenReturn("profile_id");
+        when(externalProfilesService.createProfileForNewUser(any(), any(), any(), any())).thenReturn("profile_id");
 
         User result = userCommandService.handle(command);
 
@@ -60,7 +64,7 @@ class UserCommandServiceImplTest {
         assertEquals("RESTAURANTADMIN", result.getRole().getType().name());
         verify(userRepository).save(any(User.class));
         verify(profilesContextFacade).createProfile(any(), eq("My Business"), eq("new@example.com"), null);
-        verify(externalProfilesService).createProfileForNewUser(any(), eq("My Business"), eq("new@example.com"));
+        verify(externalProfilesService).createProfileForNewUser(any(), any(), eq("My Business"), eq("new@example.com"));
     }
 
     @Test
@@ -76,7 +80,7 @@ class UserCommandServiceImplTest {
         assertTrue(exception.getReason().contains("Email already registered"));
         verify(userRepository, never()).save(any(User.class));
         verify(profilesContextFacade, never()).createProfile(any(), any(), any(), null);
-        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any(), any());
     }
 
     @Test
@@ -92,7 +96,7 @@ class UserCommandServiceImplTest {
         assertTrue(exception.getReason().contains("Unknown role"));
         verify(userRepository, never()).save(any(User.class));
         verify(profilesContextFacade, never()).createProfile(any(), any(), any(), null);
-        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any());
+        verify(externalProfilesService, never()).createProfileForNewUser(any(), any(), any(), any());
     }
 
     @Test

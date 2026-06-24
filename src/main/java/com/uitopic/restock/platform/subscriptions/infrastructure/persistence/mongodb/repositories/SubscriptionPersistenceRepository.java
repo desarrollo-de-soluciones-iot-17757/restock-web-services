@@ -4,6 +4,10 @@ import com.uitopic.restock.platform.subscriptions.infrastructure.persistence.mon
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SubscriptionPersistenceRepository extends MongoRepository<SubscriptionPersistenceEntity, String> {
+    Optional<SubscriptionPersistenceEntity> findByBusinessId(String businessId);
+    Optional<SubscriptionPersistenceEntity> findByStripeReferenceSubscriptionId(String subscriptionId);
 }
