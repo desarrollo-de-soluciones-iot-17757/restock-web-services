@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.uitopic.restock.platform.subscriptions.interfaces.rest.resources.InvoiceResource;
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/api/v1/subscriptions", produces = "application/json")
 @Tag(name = "Subscriptions", description = "Subscription management endpoints")
@@ -49,5 +52,12 @@ public class SubscriptionsController {
     public ResponseEntity<CheckoutSessionResponseResource> createCheckoutSession(@RequestBody CreateCheckoutSessionResource resource) {
         String sessionUrl = subscriptionCommandService.createCheckoutSession(resource.accountId(), resource.planId());
         return ResponseEntity.ok(new CheckoutSessionResponseResource(sessionUrl));
+    }
+
+    @Operation(summary = "Get Stripe invoices / billing history for account")
+    @GetMapping("/invoices")
+    public ResponseEntity<List<InvoiceResource>> getBillingHistory(@RequestParam String accountId) {
+        List<InvoiceResource> invoices = subscriptionQueryService.getInvoicesByAccountId(accountId);
+        return ResponseEntity.ok(invoices);
     }
 }
