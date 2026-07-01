@@ -7,6 +7,7 @@ package com.uitopic.restock.platform.communications.infrastructure.pushnotificat
 public record FirebaseCloudMessagingSettings(
         String projectId,
         String credentialsBase64,
+        String credentialsPath,
         boolean enabled
 ) {
 }

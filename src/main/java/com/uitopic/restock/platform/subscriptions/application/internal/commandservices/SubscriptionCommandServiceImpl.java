@@ -151,10 +151,11 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
             return;
         }
 
-        String accountIdStr = session.getClientReferenceId();
-        if (accountIdStr == null) {
-            accountIdStr = session.getMetadata() != null ? session.getMetadata().get("accountId") : null;
+        String resolvedAccountIdStr = session.getClientReferenceId();
+        if (resolvedAccountIdStr == null) {
+            resolvedAccountIdStr = session.getMetadata() != null ? session.getMetadata().get("accountId") : null;
         }
+        final String accountIdStr = resolvedAccountIdStr;
         String planId = session.getMetadata() != null ? session.getMetadata().get("planId") : null;
         String stripeSubscriptionId = session.getSubscription();
         String stripeCustomerId = session.getCustomer();
