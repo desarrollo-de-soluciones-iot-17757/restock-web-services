@@ -8,6 +8,9 @@ import com.uitopic.restock.platform.subscriptions.application.internal.outbounds
 import org.springframework.stereotype.Service;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class StripeService implements PaymentService {
 
@@ -56,6 +59,46 @@ public class StripeService implements PaymentService {
             return session.getMetadata();
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve Stripe session metadata", e);
+        }
+    }
+
+    @Override
+    public String getOrCreatePrice(String planName, String planDescription, java.math.BigDecimal priceAmount, String currentPriceId) {
+        if (currentPriceId != null && currentPriceId.startsWith("price_") && !currentPriceId.contains("Placeholder")) {
+            try {
+                // Verify the price exists on Stripe
+                com.stripe.model.Price.retrieve(currentPriceId);
+                return currentPriceId;
+            } catch (Exception e) {
+                // If it doesn't exist, we will create a new one
+                log.info("Price {} not found on Stripe, will create a new one", currentPriceId);
+            }
+        }
+
+        try {
+            log.info("Creating Stripe product and price for plan: {}", planName);
+            // Create Product
+            com.stripe.param.ProductCreateParams productParams = com.stripe.param.ProductCreateParams.builder()
+                    .setName("Restock - " + planName)
+                    .setDescription(planDescription)
+                    .build();
+            com.stripe.model.Product product = com.stripe.model.Product.create(productParams);
+
+            // Create Price
+            com.stripe.param.PriceCreateParams priceParams = com.stripe.param.PriceCreateParams.builder()
+                    .setProduct(product.getId())
+                    .setUnitAmount(priceAmount.multiply(new java.math.BigDecimal("100")).longValue())
+                    .setCurrency("usd")
+                    .setRecurring(com.stripe.param.PriceCreateParams.Recurring.builder()
+                            .setInterval(com.stripe.param.PriceCreateParams.Recurring.Interval.MONTH)
+                            .build())
+                    .build();
+            com.stripe.model.Price price = com.stripe.model.Price.create(priceParams);
+            log.info("Dynamically created Stripe Product and Price for plan {}: Product ID = {}, Price ID = {}", planName, product.getId(), price.getId());
+            return price.getId();
+        } catch (Exception e) {
+            log.error("Failed to create Stripe product/price dynamically for plan: " + planName, e);
+            throw new RuntimeException("Failed to create Stripe product/price dynamically", e);
         }
     }
 }

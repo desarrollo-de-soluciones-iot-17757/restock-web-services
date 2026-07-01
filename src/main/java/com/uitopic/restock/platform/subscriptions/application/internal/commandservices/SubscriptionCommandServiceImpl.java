@@ -30,6 +30,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     private final AccountRepository accountRepository;
     private final PlanRepository planRepository;
     private final PaymentService paymentService;
+    private final com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade iamContextFacade;
 
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
@@ -43,11 +44,13 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     public SubscriptionCommandServiceImpl(SubscriptionRepository subscriptionRepository,
                                            AccountRepository accountRepository,
                                            PlanRepository planRepository,
-                                           PaymentService paymentService) {
+                                           PaymentService paymentService,
+                                           com.uitopic.restock.platform.iam.interfaces.acl.IamContextFacade iamContextFacade) {
         this.subscriptionRepository = subscriptionRepository;
         this.accountRepository = accountRepository;
         this.planRepository = planRepository;
         this.paymentService = paymentService;
+        this.iamContextFacade = iamContextFacade;
     }
 
     @Override
@@ -89,7 +92,18 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     public String createCheckoutSession(String accountIdStr, String planId) {
         AccountId accountId = new AccountId(accountIdStr);
         Account account = accountRepository.findByAccountId(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Subscription Account not found for accountId: " + accountIdStr));
+                .orElseGet(() -> {
+                    log.info("Subscription account not found for accountId: {}. Auto-creating...", accountIdStr);
+                    java.util.List<String> usernames = iamContextFacade.getUsernamesByAccountId(accountId);
+                    String email = usernames.isEmpty() ? accountIdStr + "@example.com" : usernames.get(0);
+                    Account newAccount = Account.builder()
+                            .accountId(accountId)
+                            .email(email)
+                            .stripeCustomerId(null)
+                            .currentPlanId(null)
+                            .build();
+                    return accountRepository.save(newAccount);
+                });
 
         Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found with ID: " + planId));
@@ -101,10 +115,18 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
             accountRepository.save(account);
         }
 
-        log.info("Generating Stripe Checkout Session for account={}, plan={}", accountIdStr, planId);
+        // Dynamically verify or create Stripe Product and Price
+        String realStripePriceId = paymentService.getOrCreatePrice(plan.getName(), plan.getDescription(), plan.getPrice(), plan.getStripePriceId());
+        if (!realStripePriceId.equals(plan.getStripePriceId())) {
+            log.info("Updating Plan stripePriceId to: {}", realStripePriceId);
+            plan.setStripePriceId(realStripePriceId);
+            planRepository.save(plan);
+        }
+
+        log.info("Generating Stripe Checkout Session for account={}, plan={}, stripePriceId={}", accountIdStr, planId, realStripePriceId);
         return paymentService.createCheckoutSession(
                 account.getStripeCustomerId(),
-                plan.getStripePriceId(),
+                realStripePriceId,
                 accountIdStr,
                 planId,
                 successUrl,
@@ -145,7 +167,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     }
 
     private void handleCheckoutSessionCompleted(Event event) {
-        Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
+        Session session = deserializeEventObject(event, Session.class);
         if (session == null) {
             log.warn("Checkout Session object is null");
             return;
@@ -195,11 +217,12 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
 
         } catch (Exception e) {
             log.error("Error processing checkout session completion", e);
+            throw new RuntimeException("Error processing checkout session: " + e.getMessage(), e);
         }
     }
 
     private void handleSubscriptionUpdated(Event event) {
-        com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().orElse(null);
+        com.stripe.model.Subscription stripeSub = deserializeEventObject(event, com.stripe.model.Subscription.class);
         if (stripeSub == null) {
             log.warn("Subscription object is null");
             return;
@@ -227,7 +250,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     }
 
     private void handleSubscriptionDeleted(Event event) {
-        com.stripe.model.Subscription stripeSub = (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().orElse(null);
+        com.stripe.model.Subscription stripeSub = deserializeEventObject(event, com.stripe.model.Subscription.class);
         if (stripeSub == null) {
             log.warn("Subscription object is null");
             return;
@@ -262,6 +285,19 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
                 return AccountStatus.CANCELED;
             default:
                 return AccountStatus.INACTIVE;
+        }
+    }
+
+    private <T> T deserializeEventObject(Event event, Class<T> clazz) {
+        var deserializer = event.getDataObjectDeserializer();
+        if (deserializer.getObject().isPresent()) {
+            return clazz.cast(deserializer.getObject().get());
+        }
+        try {
+            return clazz.cast(deserializer.deserializeUnsafe());
+        } catch (Exception e) {
+            log.error("Failed to deserialize event object for type: " + event.getType(), e);
+            return null;
         }
     }
 }
