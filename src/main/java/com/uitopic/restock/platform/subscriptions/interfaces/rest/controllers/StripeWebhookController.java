@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/subscriptions/webhooks")
-@Tag(name = "Stripe Webhook", description = "Endpoint to capture Stripe posted events")
+@Tag(name = "Subscriptions", description = "Subscription management endpoints")
 public class StripeWebhookController {
 
     private final SubscriptionCommandService subscriptionCommandService;

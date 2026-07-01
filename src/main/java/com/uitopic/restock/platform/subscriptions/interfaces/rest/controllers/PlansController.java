@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/plans", produces = "application/json")
-@Tag(name = "Plans", description = "Subscription Plan management endpoints")
+@Tag(name = "Subscriptions", description = "Subscription management endpoints")
 public class PlansController {
 
     private final PlanQueryService planQueryService;
