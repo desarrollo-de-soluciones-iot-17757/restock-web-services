@@ -19,7 +19,6 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
     }
 
     @Override
-    @Transactional
     public String createProfile(String accountId, String userId, String businessName, String email) {
         log.info("Creating profile via ACL for userId='{}', accountId='{}', businessName='{}'", userId, accountId, businessName);
         try {

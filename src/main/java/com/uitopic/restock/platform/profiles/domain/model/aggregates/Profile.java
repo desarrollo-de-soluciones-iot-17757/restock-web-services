@@ -8,6 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 public class Profile extends AbstractDomainAggregateRoot<Profile> {
 
+    private static final String DEFAULT_AVATAR_URL =
+            "https://res.cloudinary.com/deuy1pr9e/image/upload/v1759710739/Default-profile_xbpv55.jpg";
+
+    private static final String DEFAULT_AVATAR_PUBLIC_ID =
+            "Default-profile_xbpv55";
+
     private String id;
     private String accountId;
     private String userId;
@@ -28,8 +34,7 @@ public class Profile extends AbstractDomainAggregateRoot<Profile> {
         this.name = name;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
-        this.avatarUrl = avatarUrl;
-        this.avatarPublicId = avatarPublicId;
+        applyAvatar(avatarUrl, avatarPublicId);
         this.gender = gender;
         this.birthDate = birthDate;
     }
@@ -43,6 +48,26 @@ public class Profile extends AbstractDomainAggregateRoot<Profile> {
         if (avatarPublicId != null) this.avatarPublicId = avatarPublicId;
         if (gender != null) this.gender = gender;
         if (birthDate != null) this.birthDate = birthDate;
+        applyAvatar(this.avatarUrl, this.avatarPublicId);
         return this;
+    }
+
+    public void normalizeAvatar() {
+        applyAvatar(this.avatarUrl, this.avatarPublicId);
+    }
+
+    public boolean hasDefaultAvatar() {
+        return DEFAULT_AVATAR_PUBLIC_ID.equals(this.avatarPublicId);
+    }
+
+    private void applyAvatar(String avatarUrl, String avatarPublicId) {
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            this.avatarUrl = DEFAULT_AVATAR_URL;
+            this.avatarPublicId = DEFAULT_AVATAR_PUBLIC_ID;
+            return;
+        }
+
+        this.avatarUrl = avatarUrl;
+        this.avatarPublicId = avatarPublicId;
     }
 }

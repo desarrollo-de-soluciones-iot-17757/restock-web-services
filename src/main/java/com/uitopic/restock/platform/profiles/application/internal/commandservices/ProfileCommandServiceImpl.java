@@ -11,7 +11,6 @@ import com.uitopic.restock.platform.shared.domain.exceptions.ImageUploadExceptio
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -29,7 +28,6 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
 
     @Override
-    @Transactional
     public Profile handle(CreateProfileCommand command) {
         log.info("Creating profile for userId='{}'", command.userId());
 
@@ -53,11 +51,12 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
 
     @Override
-    @Transactional
     public Optional<Profile> handle(UpdateProfileCommand command) {
         log.info("Updating profile id='{}'", command.id());
         return profileRepository.findById(command.id()).map(profile -> {
-            String previousPublicId = profile.getAvatarPublicId();
+            String previousPublicId = profile.hasDefaultAvatar()
+                    ? null
+                    : profile.getAvatarPublicId();
             String avatarUrl = profile.getAvatarUrl();
             String avatarPublicId = profile.getAvatarPublicId();
 
@@ -89,7 +88,6 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
 
     @Override
-    @Transactional
     public void handle(DeleteProfileCommand command) {
         log.info("Deleting profile id='{}'", command.id());
         profileRepository.findById(command.id()).orElseThrow(() ->
