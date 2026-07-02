@@ -20,6 +20,7 @@ public final class ProfilePersistenceAssembler {
         profile.setAvatarPublicId(entity.getAvatarPublicId());
         profile.setGender(entity.getGender());
         profile.setBirthDate(entity.getBirthDate());
+        profile.normalizeAvatar();
         return profile;
     }
 

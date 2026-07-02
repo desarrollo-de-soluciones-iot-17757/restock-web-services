@@ -25,25 +25,21 @@ public class ProfileQueryServiceImpl implements ProfileQueryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Profile> handle(GetAllProfilesQuery query) {
         return profileRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Profile> handle(GetProfileByIdQuery query) {
         return profileRepository.findById(query.id());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Profile> handle(GetProfileByUserIdQuery query) {
         return profileRepository.findByUserId(query.userId());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Profile> handle(GetProfileByAccountIdQuery query) {
         return profileRepository.findByAccountId(query.accountId().getAccountId());
     }

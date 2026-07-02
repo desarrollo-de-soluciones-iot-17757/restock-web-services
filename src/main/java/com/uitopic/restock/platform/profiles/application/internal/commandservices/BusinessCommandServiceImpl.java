@@ -11,7 +11,6 @@ import com.uitopic.restock.platform.shared.domain.exceptions.ImageUploadExceptio
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -29,7 +28,6 @@ public class BusinessCommandServiceImpl implements BusinessCommandService {
     }
 
     @Override
-    @Transactional
     public Business handle(CreateBusinessCommand command) {
         log.info("Creating business for userId='{}'", command.userId());
 
@@ -53,7 +51,6 @@ public class BusinessCommandServiceImpl implements BusinessCommandService {
     }
 
     @Override
-    @Transactional
     public Optional<Business> handle(UpdateBusinessCommand command) {
         log.info("Updating business id='{}'", command.id());
         return businessRepository.findById(command.id()).map(business -> {
@@ -89,7 +86,6 @@ public class BusinessCommandServiceImpl implements BusinessCommandService {
     }
 
     @Override
-    @Transactional
     public void handle(DeleteBusinessCommand command) {
         log.info("Deleting business id='{}'", command.id());
         businessRepository.findById(command.id()).orElseThrow(() ->

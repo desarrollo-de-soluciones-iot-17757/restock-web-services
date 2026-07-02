@@ -31,7 +31,9 @@ public class CollectionInitializer {
             "telemetry_readings",
             "stock_comparison_tasks",
             "push_subscriptions",
-            "device_thresholds"
+            "device_thresholds",
+            "profiles",
+            "businesses"
     );
 
     /**
