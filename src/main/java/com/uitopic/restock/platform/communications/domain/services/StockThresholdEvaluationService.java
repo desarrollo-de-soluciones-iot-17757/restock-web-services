@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.communications.domain.services;
 
 import com.uitopic.restock.platform.communications.interfaces.rest.resources.StockThresholdEvaluationResult;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import java.util.List;
 
 /**
@@ -16,6 +17,14 @@ public interface StockThresholdEvaluationService {
      * @return a list of evaluation results for all custom supplies checked.
      */
     List<StockThresholdEvaluationResult> evaluateStockThresholds();
+
+    /**
+     * Evaluates stock levels for custom supplies belonging to a specific account.
+     *
+     * @param accountId the account to evaluate stock thresholds for.
+     * @return a list of evaluation results for the account's custom supplies.
+     */
+    List<StockThresholdEvaluationResult> evaluateStockThresholds(AccountId accountId);
 
     /**
      * Checks if the evaluation service is active.
