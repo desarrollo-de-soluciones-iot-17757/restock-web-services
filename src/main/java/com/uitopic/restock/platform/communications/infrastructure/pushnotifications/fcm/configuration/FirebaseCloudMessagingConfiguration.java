@@ -37,13 +37,6 @@ public class FirebaseCloudMessagingConfiguration {
     private String credentialsBase64;
 
     /**
-     * The path to the Firebase service account credentials JSON file.
-     * This value is read from the application properties.
-     */
-    @Value("${firebase.credentials.path:}")
-    private String credentialsPath;
-
-    /**
      * Flag indicating whether FCM integration is enabled, read from the application properties.
      * If set to true, the FirebaseApp bean will be initialized. If false, it will not be created.
      */
@@ -55,11 +48,11 @@ public class FirebaseCloudMessagingConfiguration {
      * configuration properties required for FCM integration.
      *
      * @return a new instance of FirebaseCloudMessagingSettings with the configured
-     * project ID, Base64-encoded credentials, credentials path, and enabled flag
+     * project ID, Base64-encoded credentials, and enabled flag
      */
     @Bean
     FirebaseCloudMessagingSettings firebaseMessagingSettings() {
-        return new FirebaseCloudMessagingSettings(projectId, credentialsBase64, credentialsPath, enabled);
+        return new FirebaseCloudMessagingSettings(projectId, credentialsBase64, enabled);
     }
 
     /**
@@ -87,38 +80,10 @@ public class FirebaseCloudMessagingConfiguration {
             return FirebaseApp.getInstance();
         }
 
-        java.io.InputStream serviceAccount = null;
-        if (settings.credentialsBase64() != null && !settings.credentialsBase64().isBlank()) {
-            byte[] decodedCredentials = Base64.getDecoder()
-                    .decode(settings.credentialsBase64().replaceAll("\\s", ""));
-            serviceAccount = new ByteArrayInputStream(decodedCredentials);
-        } else if (settings.credentialsPath() != null && !settings.credentialsPath().isBlank()) {
-            String path = settings.credentialsPath();
-            if (path.startsWith("classpath:")) {
-                String resourcePath = path.substring("classpath:".length());
-                serviceAccount = FirebaseCloudMessagingConfiguration.class.getClassLoader().getResourceAsStream(resourcePath);
-                if (serviceAccount == null) {
-                    throw new IOException("Resource not found: " + path);
-                }
-            } else {
-                java.io.File file = new java.io.File(path);
-                if (!file.exists()) {
-                    // Try classpath as fallback
-                    serviceAccount = FirebaseCloudMessagingConfiguration.class.getClassLoader().getResourceAsStream(path);
-                    if (serviceAccount == null) {
-                        throw new IOException("Credentials file not found at path: " + path);
-                    }
-                } else {
-                    serviceAccount = new java.io.FileInputStream(file);
-                }
-            }
-        }
+        byte[] decodedCredentials = Base64.getDecoder()
+                .decode(settings.credentialsBase64().replaceAll("\\s", ""));
 
-        if (serviceAccount == null) {
-            throw new IllegalStateException("No Firebase credentials provided.");
-        }
-
-        try (java.io.InputStream stream = serviceAccount) {
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(decodedCredentials)) {
             var options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(stream))
                     .setProjectId(settings.projectId())
@@ -130,8 +95,8 @@ public class FirebaseCloudMessagingConfiguration {
 
     /**
      * Validates that the Firebase settings required to initialize FCM are present.
-     * When FCM integration is enabled, the Firebase project ID and either the
-     * Base64-encoded service account credentials or credentials path must be provided.
+     * When FCM integration is enabled, the Firebase project ID and the
+     * Base64-encoded service account credentials must be provided.
      *
      * @param settings the FirebaseCloudMessagingSettings to validate
      */
@@ -142,12 +107,9 @@ public class FirebaseCloudMessagingConfiguration {
             );
         }
 
-        boolean hasBase64 = settings.credentialsBase64() != null && !settings.credentialsBase64().isBlank();
-        boolean hasPath = settings.credentialsPath() != null && !settings.credentialsPath().isBlank();
-
-        if (!hasBase64 && !hasPath) {
+        if (settings.credentialsBase64() == null || settings.credentialsBase64().isBlank()) {
             throw new IllegalStateException(
-                    "Either firebase.credentials.base64 or firebase.credentials.path is required when integrations.fcm.enabled=true."
+                    "firebase.credentials.base64 is required when integrations.fcm.enabled=true."
             );
         }
     }
