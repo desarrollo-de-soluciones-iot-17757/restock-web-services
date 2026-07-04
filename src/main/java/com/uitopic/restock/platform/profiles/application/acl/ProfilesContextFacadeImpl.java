@@ -30,9 +30,9 @@ public class ProfilesContextFacadeImpl implements ProfilesContextFacade {
             var profile = profileCommandService.handle(command);
             log.info("Profile created via ACL: id='{}'", profile.getId());
 
-            var businessCommand = new CreateBusinessCommand(accountId, userId, null, null, null, businessName, null);
-            var business = businessCommandService.handle(businessCommand);
-            log.info("Business created via ACL: id='{}'", business.getId());
+            //var businessCommand = new CreateBusinessCommand(accountId, userId, null, null, null, businessName, null);
+            //var business = businessCommandService.handle(businessCommand);
+            //log.info("Business created via ACL: id='{}'", business.getId());
 
             return profile.getId();
         } catch (Exception e) {
