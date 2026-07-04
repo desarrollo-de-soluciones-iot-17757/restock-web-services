@@ -2,7 +2,7 @@ package com.uitopic.restock.platform.communications.infrastructure.pushnotificat
 
 /**
  * This record represents the settings required to configure Firebase Cloud Messaging (FCM) for push notifications.
- * It includes the project ID,  Base64-encoded credentials, and a flag indicating whether FCM is enabled.
+ * It includes the project ID, Base64-encoded credentials, and a flag indicating whether FCM is enabled.
  */
 public record FirebaseCloudMessagingSettings(
         String projectId,

@@ -1,4 +1,30 @@
 package com.uitopic.restock.platform.subscriptions.interfaces.rest.transform;
 
-public class SubscriptionResourceFromEntityAssembler {
+import com.uitopic.restock.platform.subscriptions.domain.model.aggregates.Subscription;
+import com.uitopic.restock.platform.subscriptions.domain.model.entities.Plan;
+import com.uitopic.restock.platform.subscriptions.interfaces.rest.resources.SubscriptionResource;
+
+public final class SubscriptionResourceFromEntityAssembler {
+
+    private SubscriptionResourceFromEntityAssembler() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
+    public static SubscriptionResource toResourceFromEntity(Subscription subscription, Plan plan) {
+        if (subscription == null) return null;
+        return new SubscriptionResource(
+                subscription.getId(),
+                subscription.getAccountId().getAccountId(),
+                subscription.getPlanId(),
+                plan != null ? plan.getName() : "None",
+                plan != null ? plan.getPrice() : java.math.BigDecimal.ZERO,
+                subscription.getStripeSubscriptionId(),
+                subscription.getStatus().name(),
+                subscription.getCurrentPeriodEnd(),
+                subscription.isCancelAtPeriodEnd(),
+                plan != null ? plan.getMaxRecipes() : 0,
+                plan != null ? plan.getMaxKits() : 0,
+                plan != null ? plan.getMaxDevices() : 0
+        );
+    }
 }
