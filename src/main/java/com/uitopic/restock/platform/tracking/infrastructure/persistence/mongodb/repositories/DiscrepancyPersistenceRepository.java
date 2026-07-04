@@ -1,8 +1,11 @@
 package com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.repositories;
 
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyStatus;
 import com.uitopic.restock.platform.tracking.infrastructure.persistence.mongodb.entities.DiscrepancyPersistenceEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repository interface for managing inventory discrepancy persistence entities in MongoDB.
@@ -10,4 +13,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DiscrepancyPersistenceRepository extends MongoRepository<DiscrepancyPersistenceEntity, String> {
+    /**
+     * Finds discrepancy persistence entities by status.
+     *
+     * @param status discrepancy status
+     * @return list of matching discrepancy persistence entities
+     */
+    List<DiscrepancyPersistenceEntity> findAllByStatus(DiscrepancyStatus status);
 }
