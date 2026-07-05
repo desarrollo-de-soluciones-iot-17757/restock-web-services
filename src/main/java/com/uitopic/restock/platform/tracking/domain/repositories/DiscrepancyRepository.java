@@ -1,7 +1,9 @@
 package com.uitopic.restock.platform.tracking.domain.repositories;
 
 import com.uitopic.restock.platform.tracking.domain.model.entities.Discrepancy;
+import com.uitopic.restock.platform.tracking.domain.model.valueobjects.DiscrepancyStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,4 +26,12 @@ public interface DiscrepancyRepository {
      * @return optional discrepancy if found
      */
     Optional<Discrepancy> findById(String id);
+
+    /**
+     * Finds discrepancies using optional filters.
+     *
+     * @param status optional discrepancy status filter
+     * @return list of matching discrepancies
+     */
+    List<Discrepancy> findAllByFilters(DiscrepancyStatus status);
 }

@@ -83,9 +83,9 @@ public class FirebaseCloudMessagingConfiguration {
         byte[] decodedCredentials = Base64.getDecoder()
                 .decode(settings.credentialsBase64().replaceAll("\\s", ""));
 
-        try (var serviceAccount = new ByteArrayInputStream(decodedCredentials)) {
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(decodedCredentials)) {
             var options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setCredentials(GoogleCredentials.fromStream(stream))
                     .setProjectId(settings.projectId())
                     .build();
 
@@ -95,7 +95,7 @@ public class FirebaseCloudMessagingConfiguration {
 
     /**
      * Validates that the Firebase settings required to initialize FCM are present.
-     * When FCM integration is enabled, both the Firebase project ID and the
+     * When FCM integration is enabled, the Firebase project ID and the
      * Base64-encoded service account credentials must be provided.
      *
      * @param settings the FirebaseCloudMessagingSettings to validate

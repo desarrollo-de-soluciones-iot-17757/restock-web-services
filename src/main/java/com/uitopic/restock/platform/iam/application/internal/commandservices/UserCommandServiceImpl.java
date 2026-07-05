@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.iam.application.internal.commandservices;
 
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.acl.ExternalProfilesService;
+import com.uitopic.restock.platform.iam.application.internal.outboundservices.acl.ExternalSubscriptionsService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.hashing.HashingService;
 import com.uitopic.restock.platform.iam.application.internal.outboundservices.tokens.TokenService;
 import com.uitopic.restock.platform.iam.domain.model.aggregates.User;
@@ -45,15 +46,20 @@ public class UserCommandServiceImpl implements UserCommandService {
     // The external profiles service is used to orchestrate profile creation in the Profiles bounded context via the ACL
     private final ExternalProfilesService externalProfilesService;
 
+    // The external subscriptions service is used to orchestrate account setup in Subscriptions bounded context
+    private final ExternalSubscriptionsService externalSubscriptionsService;
+
     // Constructor injection of dependencies
     public UserCommandServiceImpl(UserRepository userRepository,
                                   HashingService hashingService,
                                   TokenService tokenService,
-                                  ExternalProfilesService externalProfilesService) {
+                                  ExternalProfilesService externalProfilesService,
+                                  ExternalSubscriptionsService externalSubscriptionsService) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
         this.externalProfilesService = externalProfilesService;
+        this.externalSubscriptionsService = externalSubscriptionsService;
     }
 
     /**
@@ -133,6 +139,17 @@ public class UserCommandServiceImpl implements UserCommandService {
             log.info("Successfully created profile with ID: '{}' for user ID: {}", profileId, saved.getId());
         } catch (Exception e) {
             log.error("Failed to create profile for user ID: {}", saved.getId(), e);
+        }
+
+        log.info("Creating subscription account for account ID: {} via SubscriptionsContextFacade ACL", generatedAccountId);
+        try {
+            String subAccountId = externalSubscriptionsService.createAccountForNewUser(
+                    generatedAccountId,
+                    saved.getEmail().email()
+            );
+            log.info("Successfully created subscription account with ID: '{}'", subAccountId);
+        } catch (Exception e) {
+            log.error("Failed to create subscription account for account ID: {}", generatedAccountId, e);
         }
 
         return saved;

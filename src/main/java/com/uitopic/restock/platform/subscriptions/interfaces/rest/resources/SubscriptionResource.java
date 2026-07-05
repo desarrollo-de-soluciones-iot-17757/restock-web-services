@@ -1,17 +1,20 @@
 package com.uitopic.restock.platform.subscriptions.interfaces.rest.resources;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+import java.time.Instant;
 
-@Schema(
-        name = "SubscriptionResource",
-        description = "Represents a subscription resource in the REST API."
-)
-public record SubscriptionResource() {
-
-    /**
-     * Validates the subscription resource. This method can be used to ensure that the resource is in a valid state before processing it further.
-     */
-    public SubscriptionResource {
-
-    }
+public record SubscriptionResource(
+        String id,
+        String accountId,
+        String planId,
+        String planName,
+        BigDecimal planPrice,
+        String stripeSubscriptionId,
+        String status,
+        Instant currentPeriodEnd,
+        boolean cancelAtPeriodEnd,
+        int maxRecipes,
+        int maxKits,
+        int maxDevices
+) {
 }
