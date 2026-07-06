@@ -25,6 +25,7 @@ public final class DevicePersistenceAssembler {
         device.setWeightMeasurement(entity.getWeightMeasurement());
         device.setJustifiedWithdrawnStock(entity.getJustifiedWithdrawnStock());
         device.setStatus(entity.getStatus());
+        device.setDisplayMode(entity.getDisplayMode());
 
         return device;
     }
@@ -48,6 +49,7 @@ public final class DevicePersistenceAssembler {
         entity.setWeightMeasurement(device.getWeightMeasurement());
         entity.setJustifiedWithdrawnStock(device.getJustifiedWithdrawnStock());
         entity.setStatus(device.getStatus());
+        entity.setDisplayMode(device.getDisplayMode());
 
         return entity;
     }

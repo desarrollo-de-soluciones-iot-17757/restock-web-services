@@ -16,12 +16,16 @@ public class EdgeServiceConfiguration {
     @Value("${edge.service.device-thresholds.url}")
     private String deviceThresholdsEndpointUrl;
 
+    @Value("${edge.service.device-display-mode.url}")
+    private String deviceDisplayModeEndpointUrl;
+
     @Bean
     public EdgeServiceSettings edgeServiceSettings() {
         return new EdgeServiceSettings(
                 baseUrl,
                 iamDevicesEndpointUrl,
-                deviceThresholdsEndpointUrl
+                deviceThresholdsEndpointUrl,
+                deviceDisplayModeEndpointUrl
         );
     }
 }

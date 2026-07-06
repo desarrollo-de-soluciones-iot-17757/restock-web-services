@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshol
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceCalibratedEvent;
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceConfiguredEvent;
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceRegisteredEvent;
+import com.uitopic.restock.platform.devices.domain.model.events.UpdateDeviceDisplayModeEvent;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.*;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -32,6 +33,8 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
     private WeightMeasurement weightMeasurement;
     private Double justifiedWithdrawnStock;
     private DeviceStatus status;
+
+    private DisplayMode displayMode;
 
     @Builder
     public Device(String macAddress, String accountId, String description) {
@@ -121,6 +124,16 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
         if (amount == null || amount < 0)
             throw new IllegalArgumentException("Justified withdrawn stock cannot be null or negative");
         this.justifiedWithdrawnStock = amount;
+    }
+
+    public void updateDisplayMode(DisplayMode displayMode) {
+        if (displayMode == null)
+            throw new IllegalArgumentException("Display mode cannot be null");
+        this.displayMode = displayMode;
+        registerDomainEvent(new UpdateDeviceDisplayModeEvent(
+                this.macAddress.address(),
+                this.displayMode
+        ));
     }
 
     public boolean isOperational() {

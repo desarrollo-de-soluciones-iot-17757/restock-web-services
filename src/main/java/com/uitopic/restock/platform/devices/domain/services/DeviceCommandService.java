@@ -24,4 +24,6 @@ public interface DeviceCommandService {
     Optional<Device> handle(UpdateJustifiedWithdrawnStockCommand command);
 
     Optional<Device> handle(DeactivateDeviceCommand command);
+
+    Optional<Device> handle(UpdateDeviceDisplayModeCommand command);
 }

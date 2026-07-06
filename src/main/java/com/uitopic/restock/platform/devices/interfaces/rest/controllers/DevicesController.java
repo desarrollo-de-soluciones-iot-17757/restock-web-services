@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.devices.interfaces.rest.controllers;
 
 import com.uitopic.restock.platform.devices.domain.model.commands.*;
 import com.uitopic.restock.platform.devices.domain.model.queries.*;
+import com.uitopic.restock.platform.devices.domain.model.valueobjects.DisplayMode;
 import com.uitopic.restock.platform.devices.domain.services.DeviceCommandService;
 import com.uitopic.restock.platform.devices.domain.services.DeviceQueryService;
 import com.uitopic.restock.platform.devices.interfaces.rest.resources.*;
@@ -151,6 +152,18 @@ public class DevicesController {
             default -> throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                     "Unsupported status transition: " + resource.status());
         };
+        return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
+    }
+
+    @Operation(summary = "Update device display mode")
+    @PatchMapping(value = "/{deviceId}/display-mode", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeviceResource> updateDisplayMode(
+            @PathVariable String deviceId,
+            @Valid @RequestBody UpdateDisplayModeResource resource
+    ) {
+        var command = new UpdateDeviceDisplayModeCommand(deviceId, DisplayMode.valueOf(resource.displayMode()));
+        var device = deviceCommandService.handle(command)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found: " + deviceId));
         return ResponseEntity.ok(DeviceResourceFromEntityAssembler.toResourceFromEntity(device));
     }
 
