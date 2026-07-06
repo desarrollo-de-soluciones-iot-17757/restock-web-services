@@ -4,16 +4,21 @@ import com.uitopic.restock.platform.sales.domain.model.aggregates.SalesOrder;
 import com.uitopic.restock.platform.sales.domain.model.commands.CompleteSalesOrderCommand;
 import com.uitopic.restock.platform.sales.domain.model.commands.CreateSalesOrderCommand;
 import com.uitopic.restock.platform.sales.domain.model.queries.GetSalesOrderByIdQuery;
+import com.uitopic.restock.platform.sales.domain.model.queries.GetSalesOrdersByAccountIdQuery;
+import com.uitopic.restock.platform.sales.domain.model.queries.GetSalesOrdersByBranchIdQuery;
 import com.uitopic.restock.platform.sales.domain.services.SalesOrderCommandService;
 import com.uitopic.restock.platform.sales.domain.services.SalesOrderQueryService;
 import com.uitopic.restock.platform.sales.interfaces.rest.resources.*;
 import com.uitopic.restock.platform.sales.interfaces.rest.transform.*;
+import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -68,18 +73,33 @@ public class SalesOrderController {
     }
 
     /**
+     * Removes a product item from an existing sales order.
+     *
+     * @param orderId the identifier of the sales order
+     * @param itemId  the identifier of the item to remove
+     * @return the updated sales order resource without the removed item
+     */
+    @DeleteMapping("/{orderId}/items/{itemId}")
+    @Operation(summary = "Remove a product from the sales order")
+    public ResponseEntity<SalesOrderResource> removeProduct(@PathVariable String orderId, @PathVariable String itemId) {
+        var command = RemoveProductFromOrderCommandFromResourceAssembler.toCommandFromResource(orderId, itemId);
+        var salesOrder = commandService.handle(command);
+        return ResponseEntity.ok(SalesOrderResourceFromEntityAssembler.toResourceFromEntity(salesOrder));
+    }
+
+    /**
      * Completes a sales order processing.
      *
      * @param orderId the identifier of the sales order to complete
-     * @return a success message confirmation
+     * @return the completed sales order resource
      */
     @PatchMapping("/{orderId}/complete")
     @Operation(summary = "Complete a sales order")
-    public ResponseEntity<String> complete(@PathVariable String orderId) {
+    public ResponseEntity<SalesOrderResource> complete(@PathVariable String orderId) {
         var command = new CompleteSalesOrderCommand(orderId);
-        commandService.handle(command);
+        var salesOrder = commandService.handle(command);
 
-        return ResponseEntity.ok("Sales order completed successfully");
+        return ResponseEntity.ok(SalesOrderResourceFromEntityAssembler.toResourceFromEntity(salesOrder));
     }
 
     /**
@@ -94,6 +114,37 @@ public class SalesOrderController {
         var command = CancelSalesOrderCommandFromResourceAssembler.toCommandFromResource(orderId);
         commandService.handle(command);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Retrieves sales orders, optionally filtered by account or branch.
+     * Exactly one of {@code accountId} or {@code branchId} is expected per call
+     * (the Angular Sales Overview screen calls this with {@code accountId}).
+     *
+     * @param accountId the identifier of the account whose orders should be listed
+     * @param branchId  the identifier of the branch whose orders should be listed
+     * @return the list of matching sales order resources
+     */
+    @GetMapping
+    @Operation(summary = "List sales orders by account or branch")
+    public ResponseEntity<List<SalesOrderResource>> getOrders(
+            @RequestParam(required = false) String accountId,
+            @RequestParam(required = false) String branchId) {
+
+        List<SalesOrder> orders;
+        if (accountId != null && !accountId.isBlank()) {
+            orders = queryService.handle(new GetSalesOrdersByAccountIdQuery(new AccountId(accountId)));
+        } else if (branchId != null && !branchId.isBlank()) {
+            orders = queryService.handle(new GetSalesOrdersByBranchIdQuery(branchId));
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var response = orders.stream()
+                .map(SalesOrderResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     /**

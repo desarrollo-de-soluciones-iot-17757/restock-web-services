@@ -39,7 +39,7 @@ public interface SalesOrderCommandService {
      *
      * @param command command with the sales order identifier to complete
      */
-    void handle(CompleteSalesOrderCommand command);
+    SalesOrder handle(CompleteSalesOrderCommand command);
 
     /**
      * Cancels an existing sales order.
