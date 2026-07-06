@@ -157,6 +157,18 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
     }
 
     @Override
+    public Optional<Device> handle(UpdateDeviceDisplayModeCommand command) {
+        log.info("Updating display mode for device id='{}'", command.deviceId());
+
+        return deviceRepository.findById(command.deviceId()).map(device -> {
+            device.updateDisplayMode(command.displayMode());
+            var saved = deviceRepository.save(device);
+            log.info("Display mode updated for device id='{}'", saved.getId());
+            return saved;
+        });
+    }
+
+    @Override
     public Optional<Device> handle(DeactivateDeviceCommand command) {
         log.info("Deactivating device id='{}'", command.deviceId());
 

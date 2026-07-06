@@ -33,6 +33,8 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
     private Double justifiedWithdrawnStock;
     private DeviceStatus status;
 
+    private DisplayMode displayMode;
+
     @Builder
     public Device(String macAddress, String accountId, String description) {
         validateText(macAddress, "MAC address");
@@ -121,6 +123,12 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
         if (amount == null || amount < 0)
             throw new IllegalArgumentException("Justified withdrawn stock cannot be null or negative");
         this.justifiedWithdrawnStock = amount;
+    }
+
+    public void updateDisplayMode(DisplayMode displayMode) {
+        if (displayMode == null)
+            throw new IllegalArgumentException("Display mode cannot be null");
+        this.displayMode = displayMode;
     }
 
     public boolean isOperational() {
