@@ -37,7 +37,7 @@ public class TelemetriesController {
      *
      * @param resource the telemetry reading resource containing the data sent by the edge service
      */
-    @PostMapping("/telemetries")
+    @PostMapping({"/telemetries", "/tracking/metrics"})
     @Operation(
             summary = "Receive telemetry reading",
             description = "Endpoint for receiving telemetry readings from edge services. The telemetry data, specially the physical stock, is used for compare with system data and evaluate difference thresholds."
@@ -45,7 +45,7 @@ public class TelemetriesController {
     public void receiveTelemetry(
             @RequestBody TelemetryReadingResource resource
     ) {
-        log.info("POST /api/v1/telemetries - Received telemetry reading: {}", resource);
+        log.info("POST /api/v1/telemetries or /api/v1/tracking/metrics - Received telemetry reading: {}", resource);
 
         try {
             var receiveTelemetryCommand = ReceiveTelemetryReadingCommandFromResourceAssembler.toCommandFromResource(resource);

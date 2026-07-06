@@ -21,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/v1/anomalies", produces = APPLICATION_JSON_VALUE)
+@RequestMapping(value = {"/api/v1/anomalies", "/api/v1/tracking/anomalies"}, produces = APPLICATION_JSON_VALUE)
 @Tag(name = "Anomalies Receiver", description = "Endpoints for receiving physical scale anomaly reports from edge services.")
 @RequiredArgsConstructor
 public class AnomaliesController {
