@@ -1,4 +1,5 @@
 package com.uitopic.restock.platform.sales.domain.model.entities;
+
 import com.uitopic.restock.platform.sales.domain.model.commands.CreateSalesOrderItemCommand;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.BatchConsumption;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.ProductType;
@@ -58,10 +59,12 @@ public class SalesOrderItem {
 
     /**
      * Creates a new SalesOrderItem from an AddProductToOrderCommand.
-     * The ID is auto-generated and consumed batches are initialized as an empty list.
+     * The ID is auto-generated and consumed batches are initialized as an empty
+     * list.
      *
      */
-    public SalesOrderItem(String productId, ProductType productType, String nameSnapshot, Money unitPrice, int quantity) {
+    public SalesOrderItem(String productId, ProductType productType, String nameSnapshot, Money unitPrice,
+                          int quantity) {
         this.id = UUID.randomUUID().toString();
         this.productId = productId;
         this.productType = productType;
@@ -71,6 +74,7 @@ public class SalesOrderItem {
     }
 
     public SalesOrderItem(CreateSalesOrderItemCommand command) {
+        this.id = UUID.randomUUID().toString();
         this.productId = command.productId();
         this.productType = ProductType.valueOf(command.productType().toUpperCase());
         this.nameSnapshot = command.nameSnapshot();

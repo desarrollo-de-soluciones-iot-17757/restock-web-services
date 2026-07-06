@@ -52,18 +52,31 @@ public class SalesOrderResourceFromEntityAssembler {
                     });
 
                     return new SalesOrderItemResource(
+                            item.getId(),
                             item.getProductId(),
+                            item.getProductType() != null ? item.getProductType().name() : null,
+                            item.getNameSnapshot(),
+                            item.getUnitPrice() != null ? item.getUnitPrice().getAmount().doubleValue() : 0.0,
                             item.getQuantity(),
                             ingredientsResolved
                     );
                 }).toList();
+
+        Double subtotalAmount = entity.getPricing() != null ? entity.getPricing().subtotal().getAmount().doubleValue() : 0.0;
+        Double taxAmount = entity.getPricing() != null ? entity.getPricing().taxes().getAmount().doubleValue() : 0.0;
         Double totalAmount = entity.getPricing() != null ? entity.getPricing().total().getAmount().doubleValue() : 0.0;
+        String currency = entity.getPricing() != null ? entity.getPricing().total().getCurrencyCode() : null;
 
         return new SalesOrderResource(
                 entity.getId(),
+                entity.getBranchId(),
                 entity.getStatus() != null ? entity.getStatus().name() : "PENDING",
                 itemResources,
-                totalAmount
+                subtotalAmount,
+                taxAmount,
+                totalAmount,
+                currency,
+                entity.getCreatedAt()
         );
     }
 }

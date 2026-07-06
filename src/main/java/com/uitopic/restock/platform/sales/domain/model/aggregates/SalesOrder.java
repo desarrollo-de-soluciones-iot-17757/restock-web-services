@@ -97,12 +97,14 @@ public class SalesOrder extends AbstractDomainAggregateRoot<SalesOrder> {
 
     /**
      * Completes the order (confirms the sale).
-     * Validates that the order is PENDING, not empty, and all items have batches assigned.
+     * Validates that the order is PENDING and not empty. Items that have no
+     * registered recipe (e.g. ad-hoc "custom" items added at the POS) are not
+     * required to have batch consumptions, since there is no physical stock
+     * to deduct for them.
      */
     public void complete() {
         validateIsPending();
         if (items.isEmpty()) throw new IllegalStateException("Cannot confirm an empty order");
-        validateAllItemsHaveBatches();
         this.status = SalesOrderStatus.COMPLETED;
         registerDomainEvent(new SalesOrderCompletedEvent(
                 this.id,
@@ -165,14 +167,6 @@ public class SalesOrder extends AbstractDomainAggregateRoot<SalesOrder> {
             throw new SalesDomainException(
                     "Order must be in PENDING status to perform this operation. Current status: " + this.status
             );
-        }
-    }
-
-    private void validateAllItemsHaveBatches() {
-        boolean missingBatches = items.stream()
-                .anyMatch(i -> i.getConsumedBatches() == null || i.getConsumedBatches().isEmpty());
-        if (missingBatches) {
-            throw new IllegalStateException("All items must have batch consumptions resolved before completing the order");
         }
     }
 
