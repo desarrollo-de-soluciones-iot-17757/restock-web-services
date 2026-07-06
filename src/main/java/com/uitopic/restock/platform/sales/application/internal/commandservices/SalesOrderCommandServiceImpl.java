@@ -7,6 +7,7 @@ import com.uitopic.restock.platform.sales.domain.model.aggregates.SalesOrder;
 import com.uitopic.restock.platform.sales.domain.model.commands.*;
 import com.uitopic.restock.platform.sales.domain.model.entities.SalesOrderItem;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.BatchConsumption;
+import com.uitopic.restock.platform.sales.domain.model.valueobjects.ProductType;
 import com.uitopic.restock.platform.sales.domain.repositories.SalesOrderRepository;
 import com.uitopic.restock.platform.sales.domain.services.SalesOrderCommandService;
 import lombok.extern.slf4j.Slf4j;
@@ -87,33 +88,52 @@ public class SalesOrderCommandServiceImpl implements SalesOrderCommandService {
     }
 
     @Override
-    public void handle(CompleteSalesOrderCommand command) {
+    public SalesOrder handle(CompleteSalesOrderCommand command) {
         SalesOrder salesOrder = salesOrderRepository.findById(command.salesOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("..."));
 
         String branchId = salesOrder.getBranchId();
 
         for (SalesOrderItem item : salesOrder.getItems()) {
-            List<ExternalPlanningService.IngredientRequirement> ingredients =
-                    externalPlanningService.getProductIngredients(item.getProductId());
-
             List<BatchConsumption> consumptions = new ArrayList<>();
 
-            for (ExternalPlanningService.IngredientRequirement ingredient : ingredients) {
-                Double totalQuantityNeeded = ingredient.quantityPerUnit() * item.getQuantity();
+            if (item.getProductType() == ProductType.SUPPLY) {
+                // A SUPPLY item is a custom supply sold directly (not part of a
+                // kit/recipe "bill of materials"), so productId IS the
+                // customSupplyId itself — there's no ingredients list to look up.
+                Double totalQuantityNeeded = (double) item.getQuantity();
                 BatchConsumption batchConsumption = externalResourcesService.resolveBatchConsumption(
                         branchId,
-                        ingredient.customSupplyId(),
+                        item.getProductId(),
                         totalQuantityNeeded
                 );
 
                 externalResourcesService.subtractBatchStock(branchId, batchConsumption.batchId(), totalQuantityNeeded);
 
                 consumptions.add(batchConsumption);
+            } else {
+                List<ExternalPlanningService.IngredientRequirement> ingredients =
+                        externalPlanningService.getProductIngredients(item.getProductId());
+
+                for (ExternalPlanningService.IngredientRequirement ingredient : ingredients) {
+                    Double totalQuantityNeeded = ingredient.quantityPerUnit() * item.getQuantity();
+                    BatchConsumption batchConsumption = externalResourcesService.resolveBatchConsumption(
+                            branchId,
+                            ingredient.customSupplyId(),
+                            totalQuantityNeeded
+                    );
+
+                    externalResourcesService.subtractBatchStock(branchId, batchConsumption.batchId(), totalQuantityNeeded);
+
+                    consumptions.add(batchConsumption);
+                }
             }
-            salesOrder.assignBatchConsumptions(item.getId(), consumptions);
+
+            if (!consumptions.isEmpty()) {
+                salesOrder.assignBatchConsumptions(item.getId(), consumptions);
+            }
         }
         salesOrder.complete();
-        salesOrderRepository.save(salesOrder);
+        return salesOrderRepository.save(salesOrder);
     }
 }
