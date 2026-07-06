@@ -45,6 +45,12 @@ public record TelemetryReadingResource(
                 description = "Unique identifier of the device that provided the telemetry reading, provided by the request",
                 example = "device-001"
         )
-        String deviceId
+        String deviceId,
+
+        @Schema(
+                description = "Timestamp of the telemetry reading, provided by the request",
+                example = "2024-06-15T14:30:00Z"
+        )
+        String timestamp
 ) {
 }
