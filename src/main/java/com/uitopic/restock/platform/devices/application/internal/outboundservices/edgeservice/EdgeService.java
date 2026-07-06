@@ -1,5 +1,6 @@
 package com.uitopic.restock.platform.devices.application.internal.outboundservices.edgeservice;
 
+import com.uitopic.restock.platform.devices.domain.model.valueobjects.DisplayMode;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.WeightMeasurement;
 
 /**
@@ -32,5 +33,10 @@ public interface EdgeService {
             Double maxHumidityPercentage,
             Double anomalyThreshold,
             WeightMeasurement weightMeasurement
+    );
+
+    void changeDisplayMode(
+            String macAddress,
+            DisplayMode displayMode
     );
 }

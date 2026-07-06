@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.devices.infrastructure.services.edge.services;
 
 import com.uitopic.restock.platform.devices.application.internal.outboundservices.edgeservice.EdgeService;
+import com.uitopic.restock.platform.devices.domain.model.valueobjects.DisplayMode;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.WeightMeasurement;
 import com.uitopic.restock.platform.devices.infrastructure.services.edge.configuration.EdgeServiceSettings;
 import lombok.extern.slf4j.Slf4j;
@@ -157,6 +158,37 @@ public class EdgeServiceImpl implements EdgeService {
                     macAddress,
                     settings.baseUrl(),
                     settings.deviceThresholdsUrl(),
+                    e.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public void changeDisplayMode(String macAddress, DisplayMode displayMode) {
+        try {
+            var displayModePayload = displayMode.name();
+
+            log.info(
+                    "Changing display mode for device '{}' with edge service. baseUrl={}, endpoint={}",
+                    macAddress,
+                    settings.baseUrl(),
+                    settings.deviceDisplayModeUrl()
+            );
+
+            restClient.patch()
+                    .uri(settings.deviceDisplayModeUrl(), Map.of("device_id", macAddress))
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(Map.of("display_mode", displayModePayload))
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Display mode for device '{}' changed to '{}' with edge service", macAddress, displayModePayload);
+        } catch (Exception e) {
+            log.error(
+                    "Failed to change display mode for device '{}' with edge service. baseUrl={}, endpoint={}, error={}",
+                    macAddress,
+                    settings.baseUrl(),
+                    settings.deviceDisplayModeUrl(),
                     e.getMessage()
             );
         }

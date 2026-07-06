@@ -2,6 +2,7 @@ package com.uitopic.restock.platform.devices.infrastructure.persistence.mongodb.
 
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.DeviceSpecificationsInfo;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.DeviceStatus;
+import com.uitopic.restock.platform.devices.domain.model.valueobjects.DisplayMode;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.MacAddress;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.WeightMeasurement;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -40,4 +42,7 @@ public class DevicePersistenceEntity extends AuditableAbstractPersistenceEntity 
     private Double justifiedWithdrawnStock;
 
     private DeviceStatus status;
+
+    @Field(write = Field.Write.ALWAYS)
+    private DisplayMode displayMode;
 }

@@ -31,7 +31,8 @@ public class DeviceResourceFromEntityAssembler {
                 weight != null && weight.weightUnit() != null ? weight.weightUnit().unitName() : null,
                 weight != null && weight.weightUnit() != null ? weight.weightUnit().abbreviation() : null,
                 device.getJustifiedWithdrawnStock(),
-                device.getStatus() != null ? device.getStatus().name() : null
+                device.getStatus() != null ? device.getStatus().name() : null,
+                device.getDisplayMode() != null ? device.getDisplayMode().name() : null
         );
     }
 }

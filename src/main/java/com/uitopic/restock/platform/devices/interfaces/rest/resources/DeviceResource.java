@@ -57,6 +57,9 @@ public record DeviceResource(
         Double justifiedWithdrawnStock,
 
         @Schema(description = "Device lifecycle status")
-        String status
+        String status,
+
+        @Schema(description = "Device display mode")
+        String displayMode
 ) {
 }
