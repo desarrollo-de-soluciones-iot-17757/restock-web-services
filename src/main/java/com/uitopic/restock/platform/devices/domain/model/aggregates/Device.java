@@ -4,6 +4,7 @@ import com.uitopic.restock.platform.devices.domain.model.entities.DeviceThreshol
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceCalibratedEvent;
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceConfiguredEvent;
 import com.uitopic.restock.platform.devices.domain.model.events.DeviceRegisteredEvent;
+import com.uitopic.restock.platform.devices.domain.model.events.UpdateDeviceDisplayModeEvent;
 import com.uitopic.restock.platform.devices.domain.model.valueobjects.*;
 import com.uitopic.restock.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.uitopic.restock.platform.shared.domain.model.valueobjects.AccountId;
@@ -129,6 +130,10 @@ public class Device extends AbstractDomainAggregateRoot<Device> {
         if (displayMode == null)
             throw new IllegalArgumentException("Display mode cannot be null");
         this.displayMode = displayMode;
+        registerDomainEvent(new UpdateDeviceDisplayModeEvent(
+                this.macAddress.address(),
+                this.displayMode
+        ));
     }
 
     public boolean isOperational() {

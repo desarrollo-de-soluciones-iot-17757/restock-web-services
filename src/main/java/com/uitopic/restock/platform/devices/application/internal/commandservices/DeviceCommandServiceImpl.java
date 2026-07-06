@@ -163,6 +163,7 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
         return deviceRepository.findById(command.deviceId()).map(device -> {
             device.updateDisplayMode(command.displayMode());
             var saved = deviceRepository.save(device);
+            publishDeviceEvents(device);
             log.info("Display mode updated for device id='{}'", saved.getId());
             return saved;
         });
