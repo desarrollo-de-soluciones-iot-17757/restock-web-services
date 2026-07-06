@@ -37,7 +37,8 @@ public class DeviceConfiguredEventHandler {
                 temperature != null ? temperature.minCelsius() : null,
                 temperature != null ? temperature.maxCelsius() : null,
                 humidity != null ? humidity.minPercentage() : null,
-                humidity != null ? humidity.maxPercentage() : null
+                humidity != null ? humidity.maxPercentage() : null,
+                threshold.getAnomalyThreshold()
         );
         externalCommunicationsService.createNotification(event, new AccountId(event.getAccountId()));
     }

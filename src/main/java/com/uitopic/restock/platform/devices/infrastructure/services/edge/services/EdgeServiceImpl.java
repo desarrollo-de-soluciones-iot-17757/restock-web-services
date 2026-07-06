@@ -59,7 +59,8 @@ public class EdgeServiceImpl implements EdgeService {
             Double minTemperatureCelsius,
             Double maxTemperatureCelsius,
             Double minHumidityPercentage,
-            Double maxHumidityPercentage
+            Double maxHumidityPercentage,
+            Double anomalyThreshold
     ) {
         try {
             var body = buildThresholdBody(
@@ -69,7 +70,8 @@ public class EdgeServiceImpl implements EdgeService {
                     minTemperatureCelsius,
                     maxTemperatureCelsius,
                     minHumidityPercentage,
-                    maxHumidityPercentage
+                    maxHumidityPercentage,
+                    anomalyThreshold
             );
 
             log.info(
@@ -108,6 +110,7 @@ public class EdgeServiceImpl implements EdgeService {
             Double maxTemperatureCelsius,
             Double minHumidityPercentage,
             Double maxHumidityPercentage,
+            Double anomalyThreshold,
             WeightMeasurement weightMeasurement
     ) {
         try {
@@ -118,7 +121,8 @@ public class EdgeServiceImpl implements EdgeService {
                     minTemperatureCelsius,
                     maxTemperatureCelsius,
                     minHumidityPercentage,
-                    maxHumidityPercentage
+                    maxHumidityPercentage,
+                    anomalyThreshold
             );
             if (weightMeasurement != null) {
                 body.put("custom_supply_unit_measurement", weightMeasurement.unitStockWeight());
@@ -165,7 +169,8 @@ public class EdgeServiceImpl implements EdgeService {
             Double minTemperatureCelsius,
             Double maxTemperatureCelsius,
             Double minHumidityPercentage,
-            Double maxHumidityPercentage
+            Double maxHumidityPercentage,
+            Double anomalyThreshold
     ) {
         var body = new HashMap<String, Object>();
         body.put("assigned_batch_id", assignedBatchId);
@@ -176,6 +181,7 @@ public class EdgeServiceImpl implements EdgeService {
         putIfPresent(body, "maximum_temperature_in_celsius", maxTemperatureCelsius);
         putIfPresent(body, "minimum_humidity_percentage", minHumidityPercentage);
         putIfPresent(body, "maximum_humidity_percentage", maxHumidityPercentage);
+        putIfPresent(body, "anomaly_threshold", anomalyThreshold);
         return body;
     }
 
