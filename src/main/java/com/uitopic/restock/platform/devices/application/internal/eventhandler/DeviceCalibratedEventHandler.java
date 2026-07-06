@@ -38,6 +38,7 @@ public class DeviceCalibratedEventHandler {
                 temperature != null ? temperature.maxCelsius() : null,
                 humidity != null ? humidity.minPercentage() : null,
                 humidity != null ? humidity.maxPercentage() : null,
+                threshold.getAnomalyThreshold(),
                 event.getWeightMeasurement()
         );
         externalCommunicationsService.createNotification(event, new AccountId(event.getAccountId()));

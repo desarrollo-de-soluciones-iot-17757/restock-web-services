@@ -1,6 +1,8 @@
 package com.uitopic.restock.platform.devices.interfaces.rest.controllers;
 
 import com.uitopic.restock.platform.devices.application.internal.commandservices.DeviceHealthCommandService;
+import com.uitopic.restock.platform.devices.domain.model.queries.GetDeviceHealthLogsByDeviceIdQuery;
+import com.uitopic.restock.platform.devices.domain.services.DeviceHealthQueryService;
 import com.uitopic.restock.platform.devices.interfaces.rest.resources.CreateDeviceHealthResource;
 import com.uitopic.restock.platform.devices.interfaces.rest.resources.DeviceHealthResource;
 import com.uitopic.restock.platform.devices.interfaces.rest.transform.CreateDeviceHealthCommandFromResourceAssembler;
@@ -12,10 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -30,6 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class DeviceHealthController {
 
     private final DeviceHealthCommandService deviceHealthCommandService;
+    private final DeviceHealthQueryService deviceHealthQueryService;
 
     @PostMapping({"/devices-health", "/devices/status"})
     @Operation(
@@ -46,5 +48,22 @@ public class DeviceHealthController {
         var responseResource = DeviceHealthResourceFromEntityAssembler.toResourceFromEntity(deviceHealth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseResource);
+    }
+
+    @GetMapping("/devices-health")
+    @Operation(
+            summary = "Get device health metrics history",
+            description = "Retrieves a history of device health status metrics (CPU, RAM, Voltage, Temperature) for a specific device."
+    )
+    public ResponseEntity<List<DeviceHealthResource>> getDeviceHealthLogs(
+            @RequestParam String deviceId
+    ) {
+        log.info("GET /api/v1/devices-health - Fetching health logs for device: {}", deviceId);
+        var query = new GetDeviceHealthLogsByDeviceIdQuery(deviceId);
+        var logs = deviceHealthQueryService.handle(query);
+        var resources = logs.stream()
+                .map(DeviceHealthResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(resources);
     }
 }

@@ -17,7 +17,8 @@ public interface EdgeService {
             Double minTemperatureCelsius,
             Double maxTemperatureCelsius,
             Double minHumidityPercentage,
-            Double maxHumidityPercentage
+            Double maxHumidityPercentage,
+            Double anomalyThreshold
     );
 
     void calibrateDevice(
@@ -29,6 +30,7 @@ public interface EdgeService {
             Double maxTemperatureCelsius,
             Double minHumidityPercentage,
             Double maxHumidityPercentage,
+            Double anomalyThreshold,
             WeightMeasurement weightMeasurement
     );
 }
