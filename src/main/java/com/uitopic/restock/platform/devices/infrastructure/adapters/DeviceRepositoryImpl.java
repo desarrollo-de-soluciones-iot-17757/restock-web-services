@@ -81,6 +81,16 @@ public class DeviceRepositoryImpl implements DeviceRepository {
      */
     @Override
     public Boolean existsByDeviceId(String deviceId) {
-        return deviceMongoRepository.existsById(deviceId);
+        if (deviceId == null || deviceId.isBlank()) {
+            return false;
+        }
+        if (deviceMongoRepository.existsById(deviceId)) {
+            return true;
+        }
+        try {
+            return deviceMongoRepository.existsByMacAddress(new MacAddress(deviceId));
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

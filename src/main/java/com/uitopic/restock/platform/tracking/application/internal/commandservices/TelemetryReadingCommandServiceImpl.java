@@ -62,8 +62,11 @@ public class TelemetryReadingCommandServiceImpl implements TelemetryReadingComma
             throw new TelemetryValuesException("Failed to save telemetry reading for device ID " + command.deviceId());
         }
 
-        // Perform a stock comparison based on the saved telemetry reading. This involves retrieving the physical stock from the telemetry reading and the system stock from the external resources service, and then comparing the two values to check for any discrepancies. If any exception occurs during this process, it will be handled within the performStockComparison method.
-        performStockComparison(command);
+        try {
+            performStockComparison(command);
+        } catch (Exception e) {
+            log.warn("Telemetry saved, but stock comparison was skipped for device {}: {}", command.deviceId(), e.getMessage());
+        }
     }
 
     /**

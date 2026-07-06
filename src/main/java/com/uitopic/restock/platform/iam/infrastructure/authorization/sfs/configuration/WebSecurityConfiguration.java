@@ -62,7 +62,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/anomalies/**", "/api/v1/telemetries/**", "/api/v1/devices-health/**").permitAll()
+                        .requestMatchers("/api/v1/anomalies/**", "/api/v1/telemetries/**", "/api/v1/devices-health/**", "/api/v1/tracking/metrics/**", "/api/v1/tracking/anomalies/**", "/api/v1/devices/status/**").permitAll()
                         .requestMatchers("/api/v1/plans", "/api/v1/plans/**").permitAll()
                         .requestMatchers("/api/v1/subscriptions/webhooks/stripe").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
