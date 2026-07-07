@@ -61,7 +61,8 @@ class TelemetriesControllerIntegrationTest {
                 23.5,
                 55.0,
                 "batch-123",
-                "device-123"
+                "device-123",
+                "2024-06-15T14:30:00Z"
         );
 
         doNothing().when(telemetryReadingCommandService).handle(any());
