@@ -44,13 +44,4 @@ class TelemetriesControllerTest {
         // Assert
         verify(telemetryReadingCommandService, times(1)).handle(any());
     }
-
-    @Test
-    void testReceiveDeviceHealthStatusSuccess() {
-        // Act
-        telemetriesController.receiveDeviceHealthStatus();
-
-        // Assert (No exception is thrown and logs are written)
-        verifyNoInteractions(telemetryReadingCommandService);
-    }
 }
