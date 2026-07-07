@@ -82,9 +82,4 @@ public class TelemetriesController {
                 ))
                 .toList();
     }
-
-    @PostMapping("/devices-health")
-    public void receiveDeviceHealthStatus() {
-        log.info("POST /api/v1/devices-health - Received device health status");
-    }
 }

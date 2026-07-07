@@ -20,8 +20,6 @@ import java.util.Map;
 @Slf4j
 public class EdgeServiceImpl implements EdgeService {
 
-    private static final double CONFIGURATION_PLACEHOLDER_UNIT_MEASUREMENT = 1.0;
-
     private final RestClient restClient;
     private final EdgeServiceSettings settings;
 
@@ -126,7 +124,8 @@ public class EdgeServiceImpl implements EdgeService {
                     anomalyThreshold
             );
             if (weightMeasurement != null) {
-                body.put("custom_supply_unit_measurement", weightMeasurement.unitStockWeight());
+                body.put("custom_supply_weight", weightMeasurement.unitStockWeight());
+                body.put("custom_supply_unit_measurement", weightMeasurement.weightUnit().abbreviation());
                 body.put("unit_stock_weight", weightMeasurement.unitStockWeight());
                 body.put("tare_weight", weightMeasurement.tareWeight());
                 putIfPresent(body, "gross_weight", weightMeasurement.grossWeight());
@@ -206,7 +205,6 @@ public class EdgeServiceImpl implements EdgeService {
     ) {
         var body = new HashMap<String, Object>();
         body.put("assigned_batch_id", assignedBatchId);
-        body.put("custom_supply_unit_measurement", CONFIGURATION_PLACEHOLDER_UNIT_MEASUREMENT);
         body.put("minimum_stock", minStock);
         body.put("maximum_stock", maxStock);
         putIfPresent(body, "minimum_temperature_in_celsius", minTemperatureCelsius);
