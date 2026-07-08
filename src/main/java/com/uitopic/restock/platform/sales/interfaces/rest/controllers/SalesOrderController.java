@@ -64,7 +64,7 @@ public class SalesOrderController {
      * @param resource the resource containing product data and quantity to add
      * @return the updated sales order resource with the added product
      */
-    @PostMapping(value = "/{orderId}/items/add", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{orderId}/items", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Add a product to the sales order")
     public ResponseEntity<SalesOrderResource> addProduct(@PathVariable String orderId, @Valid @RequestBody AddProductToOrderResource resource) {
         var command = AddProductToOrderCommandFromResourceAssembler.toCommandFromResource(orderId, resource);
@@ -88,32 +88,33 @@ public class SalesOrderController {
     }
 
     /**
-     * Completes a sales order processing.
+     * Updates the status of a sales order.
+     * <p>
+     * Only {@code COMPLETED} and {@code CANCELLED} are accepted transitions;
+     * each dispatches to its own domain command under the hood (completing
+     * consumes physical stock, cancelling does not).
      *
-     * @param orderId the identifier of the sales order to complete
-     * @return the completed sales order resource
+     * @param orderId  the identifier of the sales order
+     * @param resource request body with the target status
+     * @return the updated sales order resource
      */
-    @PatchMapping("/{orderId}/complete")
-    @Operation(summary = "Complete a sales order")
-    public ResponseEntity<SalesOrderResource> complete(@PathVariable String orderId) {
-        var command = new CompleteSalesOrderCommand(orderId);
-        var salesOrder = commandService.handle(command);
+    @PatchMapping(value = "/{orderId}/status", consumes = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update sales order status")
+    public ResponseEntity<SalesOrderResource> updateStatus(
+            @PathVariable String orderId,
+            @Valid @RequestBody UpdateSalesOrderStatusResource resource) {
+
+        SalesOrder salesOrder = switch (resource.status()) {
+            case COMPLETED -> commandService.handle(new CompleteSalesOrderCommand(orderId));
+            case CANCELLED -> {
+                commandService.handle(CancelSalesOrderCommandFromResourceAssembler.toCommandFromResource(orderId));
+                yield queryService.handle(new GetSalesOrderByIdQuery(orderId))
+                        .orElseThrow(() -> new IllegalStateException("Sales order not found after cancellation: " + orderId));
+            }
+            default -> throw new IllegalArgumentException("Unsupported status transition: " + resource.status());
+        };
 
         return ResponseEntity.ok(SalesOrderResourceFromEntityAssembler.toResourceFromEntity(salesOrder));
-    }
-
-    /**
-     * Cancels an existing sales order.
-     *
-     * @param orderId the identifier of the sales order to cancel
-     * @return a NO CONTENT status upon successful cancellation
-     */
-    @PatchMapping("/{orderId}/cancel")
-    @Operation(summary = "Cancel a sales order")
-    public ResponseEntity<Void> cancel(@PathVariable String orderId) {
-        var command = CancelSalesOrderCommandFromResourceAssembler.toCommandFromResource(orderId);
-        commandService.handle(command);
-        return ResponseEntity.noContent().build();
     }
 
     /**
