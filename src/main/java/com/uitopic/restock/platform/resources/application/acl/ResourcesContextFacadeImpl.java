@@ -104,6 +104,13 @@ public class ResourcesContextFacadeImpl implements ResourcesContextFacade {
     }
 
     @Override
+    public String getCustomSupplyName(String customSupplyId) {
+        return customSupplyRepository.findById(customSupplyId)
+                .map(com.uitopic.restock.platform.resources.domain.model.aggregates.CustomSupply::getName)
+                .orElse(customSupplyId);
+    }
+
+    @Override
     public void adjustStock(String branchId, String supplyId, Double adjustedQuantity, String unit) {
 
     }

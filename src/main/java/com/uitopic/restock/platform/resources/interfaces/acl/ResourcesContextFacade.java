@@ -31,4 +31,12 @@ public interface ResourcesContextFacade {
      * @return total stock available (sum of all batch quantities), or 0.0 if none found
      */
     double getTotalStockByCustomSupplyIdAndBranchId(String customSupplyId, String branchId);
+
+    /**
+     * Retrieves the display name of a custom supply by its identifier.
+     *
+     * @param customSupplyId the custom supply identifier
+     * @return the custom supply name, or the identifier itself if it can't be resolved
+     */
+    String getCustomSupplyName(String customSupplyId);
 }
