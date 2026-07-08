@@ -318,8 +318,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles insufficient physical stock while completing a sales order.
-     * Returns 422 with the structured needed/available payload the Angular
-     * "Action Blocked: Insufficient Physical Inventory" dialog renders.
      *
      * @param ex insufficient stock exception
      * @param request HTTP request
