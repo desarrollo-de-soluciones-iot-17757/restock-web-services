@@ -1,6 +1,7 @@
 package com.uitopic.restock.platform.sales.application.internal.outboundservices.acl;
 
 import com.uitopic.restock.platform.resources.interfaces.acl.ResourcesContextFacade;
+import com.uitopic.restock.platform.sales.domain.exceptions.InsufficientStockException;
 import com.uitopic.restock.platform.sales.domain.model.valueobjects.BatchConsumption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,19 @@ public class ExternalResourcesService {
      * @param supplyId       the custom supply identifier required
      * @param quantityNeeded the total decimal quantity required by the order item
      * @return a BatchConsumption value object ready to be attached to the Sales Order Item
+     * @throws InsufficientStockException if the total physical stock available for the
+     *                                    supply in the branch is lower than the quantity needed
      */
     public BatchConsumption resolveBatchConsumption(String branchId, String supplyId, Double quantityNeeded) {
+        double totalAvailable = resourcesContextFacade.getTotalStockByCustomSupplyIdAndBranchId(supplyId, branchId);
+
+        if (totalAvailable < quantityNeeded) {
+            String supplyName = resourcesContextFacade.getCustomSupplyName(supplyId);
+            log.warn("ACL: Insufficient stock for supply {} in branch {}. Needed={}, Available={}",
+                    supplyId, branchId, quantityNeeded, totalAvailable);
+            throw new InsufficientStockException(supplyId, supplyName, quantityNeeded, totalAvailable);
+        }
+
         String batchId = resourcesContextFacade.resolveAvailableBatchId(branchId, supplyId, quantityNeeded);
 
         return new BatchConsumption(

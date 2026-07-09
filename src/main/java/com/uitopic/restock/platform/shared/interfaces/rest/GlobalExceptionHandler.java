@@ -22,6 +22,7 @@ import com.uitopic.restock.platform.planning.domain.exception.InvalidProductType
 import com.uitopic.restock.platform.planning.domain.exception.ProductAlreadyExistsException;
 import com.uitopic.restock.platform.planning.domain.exception.ProductNotFoundException;
 import com.uitopic.restock.platform.resources.domain.exception.CustomSupplyNotFoundException;
+import com.uitopic.restock.platform.sales.domain.exceptions.InsufficientStockException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -313,6 +314,30 @@ public class GlobalExceptionHandler {
             CustomSupplyNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorBody(
                 HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request.getRequestURI()));
+    }
+
+    /**
+     * Handles insufficient physical stock while completing a sales order.
+     *
+     * @param ex insufficient stock exception
+     * @param request HTTP request
+     * @return structured error response with stock details
+     */
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientStockException(
+            InsufficientStockException ex, HttpServletRequest request) {
+        Map<String, Object> body = errorBody(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        body.put("customSupplyId", ex.getCustomSupplyId());
+        body.put("supplyName", ex.getSupplyName());
+        body.put("quantityNeeded", ex.getQuantityNeeded());
+        body.put("quantityAvailable", ex.getQuantityAvailable());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
     @ExceptionHandler(IngredientAdditionConflictException.class)
